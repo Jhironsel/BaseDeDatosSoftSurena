@@ -457,13 +457,9 @@ CREATE PROCEDURE SP_INSERT_USUARIOS (
     I_PNOMBRE D_NOMBRES,
     I_SNOMBRE D_NOMBRES,
     I_APELLIDOS D_APELLIDOS,
-    I_ROL D_ROL,
-    I_COD_EXEQUATUR D_VARCHAR_70,
-    I_ESPECIALIDAD D_VARCHAR_70,
     I_ESTADO D_BOOLEAN_T,
-    I_ADMINISTRADOR D_BOOLEAN_F )
-RETURNS (
-    O_SQL D_BLOB_TEXTO )
+    I_ADMINISTRADOR D_BOOLEAN_F,
+    I_DESCRIPCION D_BLOB_TEXTO )
 SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
@@ -503,7 +499,7 @@ RETURNS (
     O_ADMINISTRADOR D_BOOLEAN_T,
     O_TAG_NOMBRE D_VARCHAR_255,
     O_TAG_VALOR D_VARCHAR_255 )
-SQL SECURITY DEFINER
+SQL SECURITY INVOKER
 AS 
 BEGIN SUSPEND; 
 END^
@@ -597,11 +593,9 @@ CREATE PROCEDURE SP_UPDATE_USUARIOS (
     I_PNOMBRE D_NOMBRES,
     I_SNOMBRE D_NOMBRES,
     I_APELLIDOS D_APELLIDOS,
-    I_ROL D_ROL,
-    I_COD_EXEQUATUR D_VARCHAR_70,
-    I_ESPECIALIDAD D_VARCHAR_70,
     I_ESTADO D_BOOLEAN_T,
-    I_ADMINISTRADOR D_BOOLEAN_F )
+    I_ADMINISTRADOR D_BOOLEAN_F,
+    I_DESCRIPCION D_BLOB_TEXTO )
 SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
@@ -943,6 +937,7 @@ CREATE TABLE E_S_SYS
   FCHA D_VARCHAR_25 NOT NULL,
   FCHV D_VARCHAR_25 NOT NULL,
   IDMAC D_VARCHAR_70 NOT NULL,
+  LOGO D_BLOB_TEXTO,
   CONSTRAINT INTEG_1405 PRIMARY KEY (ID_E_S_SYS)
 );
 CREATE TABLE FACTURAS
@@ -965,8 +960,7 @@ CREATE TABLE GENERALES
   CEDULA D_CEDULA NOT NULL,
   ID_TIPO_SANGRE D_ID,
   ESTADO_CIVIL D_ESTADO_CIVIL,
-  CONSTRAINT PK_GENERALES_0 PRIMARY KEY (ID_PERSONA),
-  CONSTRAINT UNQ_GENERALES_0 UNIQUE (CEDULA)
+  CONSTRAINT PK_GENERALES_0 PRIMARY KEY (ID_PERSONA)
 );
 CREATE TABLE GUIA_VIGILANCIA_DESARROLLO
 (
@@ -1304,10 +1298,11 @@ INNER JOIN V_CATEGORIAS c ON r.IDCATEGORIA = c.ID;
 CREATE VIEW GET_ROL (USER_NAME, ROL)
 AS SELECT UPPER(TRIM(p.RDB$USER)) AS USER_NAME, TRIM(p.RDB$RELATION_NAME) AS ROL
 FROM RDB$USER_PRIVILEGES p
-WHERE p.RDB$RELATION_NAME STARTING 'RRR_';
+WHERE p.RDB$PRIVILEGE = 'M';
 CREATE VIEW GET_ROLES (ROL)
-AS select iif(RDB$ROLE_NAME = 'RDB$ADMIN', 'RRR_ADMINISTRADOR', RDB$ROLE_NAME)
+AS select RDB$ROLE_NAME
 from RDB$ROLES r
+--iif(RDB$ROLE_NAME = 'RDB$ADMIN', 'RRR_ADMINISTRADOR', RDB$ROLE_NAME)
 where trim(r.rdb$role_name) not like 'RRR_SOFTSURENA';
 CREATE VIEW GET_TEMPORALES (ID_FACTURA, NOMBRE_TEMP, PNOMBRE, SNOMBRE, 
      APELLIDOS, FECHA, IDUSUARIO, HORA, ID_TURNO, EFECTIVO, CAMBIO, 
@@ -1445,8 +1440,8 @@ CREATE VIEW V_ESTUDIANTES (ID, MATRICULA, ID_PADRE, ID_MADRE, ID_TUTOR,
      JCB_PARENTESCO)
 AS SELECT r.ID, r.MATRICULA, r.ID_PADRE, r.ID_MADRE, r.ID_TUTOR, r.JCB_PARENTESCO
 FROM ESTUDIANTE r;
-CREATE VIEW V_E_S_SYS (ID_E_S_SYS, FCHI, FCHA, FCHV, IDMAC)
-AS SELECT r.ID_E_S_SYS, r.FCHI, r.FCHA, r.FCHV, r.IDMAC
+CREATE VIEW V_E_S_SYS (ID_E_S_SYS, FCHI, FCHA, FCHV, IDMAC, LOGO)
+AS SELECT r.ID_E_S_SYS, r.FCHI, r.FCHA, r.FCHV, r.IDMAC, r.LOGO
 FROM E_S_SYS r;
 CREATE VIEW V_FACTURAS (ID, ID_CLIENTE, ID_TURNO, EFECTIVO, CAMBIO, FECHA, 
      HORA, ESTADO_FACTURA, IDUSUARIO, NOMBRE_TEMP)
@@ -1675,26 +1670,6 @@ END
 ^
 SET TERM ; ^
 SET TERM ^ ;
-CREATE TRIGGER CLIENTES_AD FOR CLIENTES ACTIVE
-AFTER DELETE POSITION 1
-
-AS
-BEGIN
-     POST_EVENT 'del_client';
-END
-^
-SET TERM ; ^
-SET TERM ^ ;
-CREATE TRIGGER CLIENTES_AI FOR CLIENTES ACTIVE
-AFTER INSERT POSITION 0
-
-AS
-BEGIN
-     POST_EVENT 'new_client';
-END
-^
-SET TERM ; ^
-SET TERM ^ ;
 CREATE TRIGGER FACTURAS_BD FOR FACTURAS ACTIVE
 BEFORE DELETE POSITION 0
 
@@ -1766,6 +1741,21 @@ BEGIN
     if (tmp < new.ID) then
       tmp = GEN_ID(G_ID_PERSONA, new.ID-tmp);
   END
+END
+^
+SET TERM ; ^
+SET TERM ^ ;
+CREATE TRIGGER V_PERSONAS_AIUD FOR V_PERSONAS ACTIVE
+AFTER INSERT OR UPDATE OR DELETE POSITION 0
+
+AS
+BEGIN
+     if(DELETING)THEN
+          POST_EVENT 'del_persona';
+     if(UPDATING)THEN
+          POST_EVENT 'upd_persona';
+     if(INSERTING)THEN
+          POST_EVENT 'ins_persona';
 END
 ^
 SET TERM ; ^
@@ -2584,44 +2574,31 @@ ALTER PROCEDURE SP_INSERT_USUARIOS (
     I_PNOMBRE D_NOMBRES,
     I_SNOMBRE D_NOMBRES,
     I_APELLIDOS D_APELLIDOS,
-    I_ROL D_ROL,
-    I_COD_EXEQUATUR D_VARCHAR_70,
-    I_ESPECIALIDAD D_VARCHAR_70,
     I_ESTADO D_BOOLEAN_T,
-    I_ADMINISTRADOR D_BOOLEAN_F )
-RETURNS (
-    O_SQL D_BLOB_TEXTO )
+    I_ADMINISTRADOR D_BOOLEAN_F,
+    I_DESCRIPCION D_BLOB_TEXTO )
 SQL SECURITY DEFINER
 
 AS
-DECLARE VARIABLE V_ID D_ID; 
 DECLARE VARIABLE V_SQL D_VARCHAR_255;
 BEGIN
-     IF((SELECT DISTINCT (1) FROM SP_SELECT_USUARIOS_TAGS (TRIM(:I_IDUSUARIO))) = 1)THEN
+     IF((SELECT (1) FROM SEC$USERS r WHERE TRIM(r.SEC$USER_NAME) LIKE TRIM(:I_IDUSUARIO)) = 1)THEN
           EXCEPTION ERROR 'Usuario registrado!';
      
-     IF((SELECT r.ROL FROM GET_ROLES r WHERE TRIM(r.ROL) like TRIM(:i_rol)) IS NULL)THEN
-          EXCEPTION ERROR 'Rol no encontrado';
-     
-     V_ID = GEN_ID(G_ID_PERSONA, 1);
           
-     V_SQL = 'CREATE USER '||:i_idusuario||' PASSWORD '''||i_clave
-          ||''' FIRSTNAME '''||i_pnombre
-          ||''' MIDDLENAME '''||i_snombre
-          ||''' LASTNAME '''||i_apellidos||''''||
-     iif(i_estado, ' ACTIVE',' INACTIVE') ||
-     iif(i_administrador, ' GRANT ',' REVOKE ') || 
-     ' ADMIN ROLE USING PLUGIN Srp '||
-     'TAGS(id='''||v_id||''', gui=''0'', uid=''0'', rol='''||TRIM(i_rol)
-     ||''', exe='''||i_cod_exequatur||''', esp='''||i_especialidad||''');';
-     
+     V_SQL = 'CREATE USER '||:i_idusuario 
+          ||' PASSWORD '''||:i_clave
+          ||''' FIRSTNAME '''||:i_pnombre
+          ||''' MIDDLENAME '''||:i_snombre
+          ||''' LASTNAME '''||:i_apellidos
+          ||''''|| iif(:i_estado, ' ACTIVE ',' INACTIVE ') 
+          || iif(:i_administrador, ' GRANT ',' REVOKE ') 
+          || ' ADMIN ROLE USING PLUGIN Srp;';
+          
      
      EXECUTE STATEMENT V_SQL;
      
-     EXECUTE STATEMENT 'GRANT '||:i_rol|| ' TO '|| :i_idusuario;
-     
-     O_SQL = :V_ID;
-     SUSPEND;
+     EXECUTE STATEMENT 'COMMENT ON USER '||:i_idusuario||' is '''||:I_DESCRIPCION||'''';
 END
 ^
 SET TERM ; ^
@@ -2713,71 +2690,67 @@ RETURNS (
     O_ADMINISTRADOR D_BOOLEAN_T,
     O_TAG_NOMBRE D_VARCHAR_255,
     O_TAG_VALOR D_VARCHAR_255 )
-SQL SECURITY DEFINER
+SQL SECURITY INVOKER
 
 AS
-DECLARE VARIABLE V_USER_NAME D_IDUSUARIO;
-     DECLARE VARIABLE V_PRIMER_NOMBRE D_NOMBRES;
-     DECLARE VARIABLE V_SEGUNDO_NOMBRE D_NOMBRES;
-     DECLARE VARIABLE V_APELLIDOS D_APELLIDOS;
-     DECLARE VARIABLE V_ESTADO_ACTIVO D_BOOLEAN_T;
-     DECLARE VARIABLE V_ADMINISTRADOR D_BOOLEAN_T;
-     DECLARE VARIABLE V_TAG_NOMBRE D_VARCHAR_255;
-     DECLARE VARIABLE V_TAG_VALOR D_VARCHAR_255;
+DECLARE VARIABLE V_USER_NAME       D_IDUSUARIO;
+     DECLARE VARIABLE V_PRIMER_NOMBRE   D_NOMBRES;
+     DECLARE VARIABLE V_SEGUNDO_NOMBRE  D_NOMBRES;
+     DECLARE VARIABLE V_APELLIDOS       D_APELLIDOS;
+     DECLARE VARIABLE V_ESTADO_ACTIVO   D_BOOLEAN_T;
+     DECLARE VARIABLE V_ADMINISTRADOR   D_BOOLEAN_T;
+     DECLARE VARIABLE V_TAG_NOMBRE      D_VARCHAR_255;
+     DECLARE VARIABLE V_TAG_VALOR       D_VARCHAR_255;
 BEGIN
      /*Validacion no está funcionando. Debeido al Dominio del campo no permite 
      Nulos.*/
      if(I_USER_NAME IS NULL) THEN I_USER_NAME = 'all';
      
      FOR SELECT 
-       CAST(U.SEC$USER_NAME AS D_IDUSUARIO) AS USUARIO,
-       U.SEC$FIRST_NAME                  AS PRIMER_NOMBRE,
-       U.SEC$MIDDLE_NAME                 AS SEGUNDO_NOMBRE,
-       U.SEC$LAST_NAME                   AS APELLIDO,
-       U.SEC$ACTIVE                      AS ESTA_ACTIVO,
-       U.SEC$ADMIN                       AS ES_ADMIN,
-       '-' AS NoValor1, '-' AS NoValor2
-     FROM 
-       SEC$USERS U --Tabla que nos permite obtener los usuarios del sistema.
-     
-     WHERE TRIM(U.SEC$USER_NAME) = TRIM(UPPER(:i_user_name)) OR 
-           TRIM(:i_user_name) like 'all'
-           
-     INTO o_user_name, o_primer_nombre, o_segundo_nombre, o_apellidos, 
-          o_estado_activo, o_administrador, o_tag_nombre, o_tag_valor
-          
-     DO BEGIN
-          SUSPEND;
-                    
-          FOR SELECT r.SEC$USER_NAME,  r.SEC$KEY AS TAG_NOMBRE, r.SEC$VALUE AS TAG_VALOR
-          
-          FROM SEC$USER_ATTRIBUTES r /*Tabla que nos brinda la informacion o
-          Atributos de los usuarios.*/
-          
-          WHERE TRIM(r.SEC$USER_NAME) = TRIM(:o_user_name)
-          INTO v_user_name, v_tag_nombre, v_tag_valor
+            CAST(U.SEC$USER_NAME AS D_IDUSUARIO) AS USUARIO,
+            U.SEC$FIRST_NAME                  AS PRIMER_NOMBRE,
+            U.SEC$MIDDLE_NAME                 AS SEGUNDO_NOMBRE,
+            U.SEC$LAST_NAME                   AS APELLIDO,
+            U.SEC$ACTIVE                      AS ESTA_ACTIVO,
+            U.SEC$ADMIN                       AS ES_ADMIN,
+            '-' AS NoValor1, '-' AS NoValor2
+          FROM 
+            SEC$USERS U --Tabla que nos permite obtener los usuarios del sistema.
+          WHERE TRIM(U.SEC$USER_NAME) = TRIM(UPPER(:i_user_name)) OR 
+                TRIM(:i_user_name) = 'all'
+          INTO o_user_name, o_primer_nombre, o_segundo_nombre, o_apellidos, 
+               o_estado_activo, o_administrador, o_tag_nombre, o_tag_valor
+               
           DO BEGIN
-               o_user_name = v_user_name;
-               o_primer_nombre = 'TAGS';
-               o_segundo_nombre = 'TAGS';
-               o_apellidos = 'TAGS';
-               o_estado_activo = FALSE;
-               o_administrador = FALSE;
-               o_tag_nombre = v_tag_nombre;
-               o_tag_valor = v_tag_valor;
+               SUSPEND;
+                         
+               FOR SELECT r.SEC$USER_NAME,  r.SEC$KEY AS TAG_NOMBRE, 
+                         r.SEC$VALUE AS TAG_VALOR
+                    FROM SEC$USER_ATTRIBUTES r /*Tabla que nos brinda la informacion o
+                    Atributos de los usuarios.*/
+                    WHERE TRIM(r.SEC$USER_NAME) = TRIM(:o_user_name)
+                    INTO v_user_name, v_tag_nombre, v_tag_valor
+                    DO BEGIN
+                         o_user_name         = v_user_name;
+                         o_primer_nombre     = 'TAGS';
+                         o_segundo_nombre    = 'TAGS';
+                         o_apellidos         = 'TAGS';
+                         o_estado_activo     = FALSE;
+                         o_administrador     = FALSE;
+                         o_tag_nombre        = v_tag_nombre;
+                         o_tag_valor         = v_tag_valor;
+                         SUSPEND;
+                    END
+               o_user_name         = '';
+               o_primer_nombre     = '';
+               o_segundo_nombre    = '';
+               o_apellidos         = '';
+               o_estado_activo     = NULL;
+               o_administrador     = NULL;
+               o_tag_nombre        = '';
+               o_tag_valor         = '';
                SUSPEND;
           END
-          
-          o_user_name = '';
-          o_primer_nombre = '';
-          o_segundo_nombre = '';
-          o_apellidos = '';
-          o_estado_activo = NULL;
-          o_administrador = NULL;
-          o_tag_nombre = '';
-          o_tag_valor = '';
-          SUSPEND;
-     END
 
 END
 ^
@@ -2848,9 +2821,10 @@ BEGIN
           a.ID = :I_ID;
      
      --Atributo GENERALES
-     UPDATE V_GENERALES a SET
-          a.CEDULA = :I_CEDULA,
-          a.ESTADO_CIVIL = ESTADO_CIVIL
+     UPDATE V_GENERALES a SET 
+          a.CEDULA = :I_CEDULA, 
+          a.ID_TIPO_SANGRE = 0, 
+          a.ESTADO_CIVIL = :I_ESTADO_CIVIL 
      WHERE
           a.ID_PERSONA = :I_ID;
      
@@ -3027,11 +3001,9 @@ ALTER PROCEDURE SP_UPDATE_USUARIOS (
     I_PNOMBRE D_NOMBRES,
     I_SNOMBRE D_NOMBRES,
     I_APELLIDOS D_APELLIDOS,
-    I_ROL D_ROL,
-    I_COD_EXEQUATUR D_VARCHAR_70,
-    I_ESPECIALIDAD D_VARCHAR_70,
     I_ESTADO D_BOOLEAN_T,
-    I_ADMINISTRADOR D_BOOLEAN_F )
+    I_ADMINISTRADOR D_BOOLEAN_F,
+    I_DESCRIPCION D_BLOB_TEXTO )
 SQL SECURITY DEFINER
 
 AS
@@ -3039,12 +3011,8 @@ DECLARE VARIABLE V_ID D_ID;
 DECLARE VARIABLE V_SQL D_VARCHAR_255;
 BEGIN
      /*Validando que el usuario este registrado en la app*/
-     IF((SELECT DISTINCT (1) FROM SP_SELECT_USUARIOS_TAGS (TRIM(:I_IDUSUARIO))) IS NULL)THEN
-          EXCEPTION ERROR 'Usuario no registrado!';
-     
-     /*Verificando que el rol exista.*/
-     IF((SELECT r.ROL FROM GET_ROLES r WHERE TRIM(r.ROL) like TRIM(:i_rol)) IS NULL)THEN
-          EXCEPTION ERROR 'Rol no encontrado';
+     IF((SELECT (1) FROM SEC$USERS r WHERE TRIM(r.SEC$USER_NAME) LIKE (TRIM(:I_IDUSUARIO))) IS NULL)THEN
+          EXCEPTION ERROR 'Usuario NO registrado!';
      
           
      V_SQL = 'ALTER USER '||:I_IDUSUARIO||
@@ -3053,9 +3021,7 @@ BEGIN
      ''' LASTNAME '''||i_apellidos||
      ''''||iif(i_estado, ' ACTIVE ',' INACTIVE ') ||
      iif(i_administrador, ' GRANT ',' REVOKE ') || 
-     ' ADMIN ROLE USING PLUGIN Srp '||
-     'TAGS(rol='''||TRIM(i_rol)||''', exe='''||i_cod_exequatur||
-     ''', esp='''||i_especialidad||''');';
+     ' ADMIN ROLE USING PLUGIN Srp ';
      
      EXECUTE STATEMENT V_SQL;
      
@@ -3065,6 +3031,7 @@ BEGIN
           EXECUTE STATEMENT V_SQL;
      END
      
+     EXECUTE STATEMENT 'COMMENT ON USER '||:i_idusuario||' is '''||:I_DESCRIPCION||'''';
      /*
      Se actualizo el dia 19 05 2022, Nota: se quito el atributo PASSWORD de el 
      V_SQL porque modificaba el PASSWORD del usuario si venia, la linea 39 se 
@@ -3327,19 +3294,14 @@ ALTER TABLE RECETAS ADD CONSTRAINT FK_RECETAS_1
   FOREIGN KEY (IDCONSULTA) REFERENCES CONSULTAS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE SINTOMAS ADD CONSTRAINT SINTOMAS_FK
   FOREIGN KEY (ID_PACIENTE) REFERENCES PACIENTES (ID);
-GRANT RRR_CAJERO TO JHIRONSEL;
 GRANT RRR_CAJERO TO SYSDBA WITH ADMIN OPTION;
-GRANT RRR_DOCTOR TO JHADIEL;
 GRANT RRR_DOCTOR TO SYSDBA WITH ADMIN OPTION;
-GRANT RRR_GERENTE TO JHASLINNE;
 GRANT RRR_GERENTE TO SYSDBA WITH ADMIN OPTION;
-GRANT RRR_PADRE TO JHIRONSEL;
 GRANT RRR_PADRE TO SYSDBA WITH ADMIN OPTION;
 GRANT RRR_RRHH TO SYSDBA WITH ADMIN OPTION;
 GRANT RRR_SECRETARIA TO JHIRONSEL WITH ADMIN OPTION;
 GRANT RRR_SECRETARIA TO SYSDBA WITH ADMIN OPTION;
 GRANT RRR_SOFTSURENA TO SYSDBA WITH ADMIN OPTION;
-GRANT RRR_VENDEDOR TO Jhironsel;
 GRANT RRR_VENDEDOR TO SYSDBA WITH ADMIN OPTION;
 GRANT EXECUTE
  ON PROCEDURE ADMIN_HABILITAR_TURNO TO  SYSDBA WITH GRANT OPTION;
@@ -3432,9 +3394,6 @@ GRANT EXECUTE
  ON PROCEDURE SYSTEM_SET_LICENCIA TO  SYSDBA WITH GRANT OPTION;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
- ON ANALISIS TO ROLE RRR_DOCTOR;
-
-GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON ANALISIS TO  SYSDBA WITH GRANT OPTION;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
@@ -3448,9 +3407,6 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON CATEGORIAS TO  SYSDBA WITH GRANT OPTION;
-
-GRANT SELECT
- ON CLIENTES TO ROLE RRR_CAJERO;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON CLIENTES TO  SYSDBA WITH GRANT OPTION;
@@ -3553,9 +3509,6 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON PERFILES TO  SYSDBA WITH GRANT OPTION;
-
-GRANT SELECT
- ON PERSONAS TO ROLE RRR_CAJERO;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON PERSONAS TO  SYSDBA WITH GRANT OPTION;
@@ -3660,9 +3613,6 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_ANTECEDENTES TO  SYSDBA WITH GRANT OPTION;
 
 GRANT SELECT
- ON V_ARS TO  JHIRONSEL;
-
-GRANT SELECT
  ON V_ARS TO ROLE RRR_DOCTOR;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
@@ -3695,7 +3645,7 @@ GRANT REFERENCES(ID,ID_PERSONA), SELECT
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_CONTACTS_EMAIL TO  SYSDBA WITH GRANT OPTION;
 
-GRANT REFERENCES(ID,ID_PERSONA), SELECT
+GRANT SELECT
  ON V_CONTACTS_TEL TO ROLE RRR_SECRETARIA;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
@@ -3709,6 +3659,9 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_DEUDAS TO  SYSDBA WITH GRANT OPTION;
+
+GRANT SELECT
+ ON V_DIRECCIONES TO ROLE RRR_SECRETARIA;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_DIRECCIONES TO  SYSDBA WITH GRANT OPTION;
@@ -3740,6 +3693,9 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_ESTUDIANTES TO  SYSDBA WITH GRANT OPTION;
 
+GRANT SELECT
+ ON V_E_S_SYS TO  "PUBLIC";
+
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_E_S_SYS TO  SYSDBA WITH GRANT OPTION;
 
@@ -3755,8 +3711,8 @@ GRANT SELECT
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_FCH_LC TO  SYSDBA WITH GRANT OPTION;
 
-GRANT UPDATE(CEDULA)
- ON V_GENERALES TO  JHIRONSEL;
+GRANT SELECT
+ ON V_GENERALES TO ROLE RRR_SECRETARIA;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_GENERALES TO  SYSDBA WITH GRANT OPTION;
@@ -3799,6 +3755,9 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
 
 GRANT SELECT
  ON V_PERSONAS TO ROLE RRR_CAJERO;
+
+GRANT SELECT
+ ON V_PERSONAS TO ROLE RRR_SECRETARIA;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_PERSONAS TO  SYSDBA WITH GRANT OPTION;
