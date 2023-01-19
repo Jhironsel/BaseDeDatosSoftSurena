@@ -12,22 +12,6 @@ CREATE ROLE RRR_VENDEDOR;
 
 /********************* FUNCTIONS ***********************/
 
-SET TERM ^ ;
-CREATE FUNCTION F_INSERT_CLIENTE_SB (
-    I_PERSONA D_PERSONA,
-    I_CEDULA D_CEDULA,
-    I_PNOMBRE D_NOMBRES,
-    I_SNOMBRE D_NOMBRES,
-    I_APELLIDOS D_APELLIDOS,
-    I_SEXO D_SEXO,
-    I_FECHA_NACIMIENTO D_FECHA,
-    I_ESTADO D_BOOLEAN_T,
-    I_ESTADO_CIVIL D_ESTADO_CIVIL )
-RETURNS D_ID
-
-BEGIN SUSPEND; END^
-SET TERM ; ^
-
 /****************** SEQUENCES ********************/
 
 CREATE SEQUENCE GEN_FACTURAS_ID ;
@@ -1441,12 +1425,17 @@ CREATE VIEW GET_PRIVILEGIOS (USER_NAME, CEDENTE, PRIVILEGIO, OPCION_PERMISO, NOM
 AS SELECT r.RDB$USER, r.RDB$GRANTOR, r.RDB$PRIVILEGE, r.RDB$GRANT_OPTION, 
        r.RDB$RELATION_NAME, r.RDB$FIELD_NAME, r.RDB$USER_TYPE, r.RDB$OBJECT_TYPE
 FROM RDB$USER_PRIVILEGES r;
-CREATE VIEW GET_PRODUCTOS (ID, ID_CATEGORIA, DESC_CATEGORIA, IMAGEN_CATEGORIA, CODIGO, DESCRIPCION, IMAGEN_TEXTO, NOTA, 
-     FECHA_CREACION, ESTADO)
-AS SELECT r.ID, r.ID_CATEGORIA, c.DESCRIPCION, c.IMAGEN_TEXTO, r.CODIGO, 
+CREATE VIEW GET_PRODUCTOS (ID, ID_CATEGORIA, DESC_CATEGORIA, IMAGEN_CATEGORIA, CODIGO, DESCRIPCION, IMAGEN_PRODUCTO, 
+     NOTA, FECHA_CREACION, ESTADO)
+AS /*
+     Esta consulta nos permite obtener un listado de producto, del cual al unirla con la tabla de categoria podemos
+     obtener el nombre o descripcion de la categoria y la imagen de la categoria, ademas de los atributos del 
+     producto como identificador, codigo, descripcion, imagen del producto, nota, fecha de creacion y estado.
+*/
+SELECT r.ID, r.ID_CATEGORIA, c.DESCRIPCION, c.IMAGEN_TEXTO, r.CODIGO, 
        r.DESCRIPCION, r.IMAGEN_TEXTO, r.NOTA, r.FECHA_CREACION, r.ESTADO
 FROM V_PRODUCTOS r
-INNER JOIN V_CATEGORIAS c ON r.ID_CATEGORIA = c.ID;
+INNER JOIN V_CATEGORIAS c ON c.ID = r.ID_CATEGORIA;
 CREATE VIEW GET_ROL (USER_NAME, ROL)
 AS SELECT UPPER(TRIM(p.RDB$USER)) AS USER_NAME, TRIM(p.RDB$RELATION_NAME) AS ROL
 FROM RDB$USER_PRIVILEGES p
@@ -1919,60 +1908,6 @@ COMMENT ON ROLE RRR_CAJERO IS 'El rol de cajero es solo para uso de manejo de cr
 COMMENT ON ROLE RRR_SECRETARIA IS 'La secretaria es un rol que permite ingresar clientes al sistema de bebidas.';
 COMMENT ON ROLE RRR_SOFTSURENA IS 'Es un rol que puede ser usado para hacer ajuste importante del sistema.';
 COMMENT ON ROLE RRR_VENDEDOR IS 'El vendedor podrá hacer consultas a las tablas de productos para conocer las existencia de los productos que el surta a la empresa.';
-SET TERM ^ ;
-ALTER FUNCTION F_INSERT_CLIENTE_SB (
-    I_PERSONA D_PERSONA,
-    I_CEDULA D_CEDULA,
-    I_PNOMBRE D_NOMBRES,
-    I_SNOMBRE D_NOMBRES,
-    I_APELLIDOS D_APELLIDOS,
-    I_SEXO D_SEXO,
-    I_FECHA_NACIMIENTO D_FECHA,
-    I_ESTADO D_BOOLEAN_T,
-    I_ESTADO_CIVIL D_ESTADO_CIVIL )
-RETURNS D_ID
-
-
-AS
-DECLARE VARIABLE V_ID D_ID; 
-BEGIN
-     V_ID = GEN_ID(G_ID_PERSONA, 1);
-     /*Validaciones de insercion*/
-     INSERT INTO V_PERSONAS (ID, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, 
-     FECHA_NACIMIENTO, ESTADO)
-     VALUES (
-       :V_ID,
-       :I_PERSONA,
-       :I_PNOMBRE,
-       :I_SNOMBRE,
-       :I_APELLIDOS,
-       :I_SEXO,
-       :I_FECHA_NACIMIENTO,
-       :I_ESTADO);
-     /*Guardamos cantidad de registros por estado*/
-     EXECUTE PROCEDURE SP_RECCOUNT_ESTADO('I', 'V_PERSONAS', :I_ESTADO);   
-     EXECUTE PROCEDURE SP_RECCOUNT('I', 'V_PERSONAS');
-     --Ingresando el cliente
-     INSERT INTO V_CLIENTES(ID) VALUES(:V_ID);
-     --Guardamos cantidad de registros por estado
-     EXECUTE PROCEDURE SP_RECCOUNT('I', 'V_CLIENTES');
-     --Ingresando el cliente
-     INSERT INTO V_GENERALES(ID_PERSONA, CEDULA, ID_TIPO_SANGRE, ESTADO_CIVIL) 
-     VALUES(
-          :V_ID,
-          :I_CEDULA,
-          0,
-          :I_ESTADO_CIVIL
-     );
-     --Guardamos cantidad de registros por estado
-     EXECUTE PROCEDURE SP_RECCOUNT('I', 'V_GENERALES');
-     
-     RETURN V_ID;
-END
-^
-SET TERM ; ^
-
-
 COMMENT ON DOMAIN D_CEDULA IS 'Esto es una cedula por ejemplo: 000-0012345-2';
 COMMENT ON DOMAIN D_ESTADO_CIVIL IS 'El dominio D_ESTADO_CIVIL admitirá una sola letra mayúscula la cual puede ser:
 S(soltero)
@@ -2491,6 +2426,7 @@ END
 SET TERM ; ^
 
 
+COMMENT ON PROCEDURE SP_INSERT_CLIENTE_SB IS 'Es el procedimiento utilizado para almacenar un cliente en el sb.';
 SET TERM ^ ;
 ALTER PROCEDURE SP_INSERT_CLIENTE_SB (
     I_PERSONA D_PERSONA,
@@ -2754,6 +2690,10 @@ BEGIN
           2) Que el numero telefonico este asignado al cliente de la factura.
           3) Que el correo electronico este asignado al cliente de la factura.
           4) Que la direccion sea valida para dicho cliente.
+          
+          Nota: Cuando se registra una factura debe de llevarse un control de la facturas que se van guardando 
+          en el sistema. Por ejemplo, Cantidad de total facturas, las cantidades de la facturas que se realizan en
+          un dia, en una semana, en un mes y en un año para el sistema analitico, cantidad de facturas por estado.
      */
      IF(( SELECT (1) 
           FROM V_TURNOS t 
@@ -3864,8 +3804,8 @@ ALTER TABLE CONTACTOS_TEL ADD CONSTRAINT FK_CONTACTOS_TEL_1
 COMMENT ON COLUMN CONTROL_CONSULTA.USER_NAME IS 'Este campo es utilizando para guardar el usuario que va a tener consultas programadas cierto dias.';
 COMMENT ON COLUMN CONTROL_CONSULTA.USER_NAME_ IS 'Este campo guarda el usuario que realizó el registro. ';
 ALTER TABLE DATOS_NACIMIENTO ADD MC COMPUTED BY (CAST(pesoNacimientoKG/(altura*altura) as d_Medida));
-ALTER TABLE DATOS_NACIMIENTO ADD CONSTRAINT FK_DATOSNACIMIENTO_1
-  FOREIGN KEY (ID) REFERENCES PERSONAS (ID);
+ALTER TABLE DATOS_NACIMIENTO ADD CONSTRAINT FK_DATOS_NACIMIENTO_0
+  FOREIGN KEY (ID) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE CASCADE;
 COMMENT ON COLUMN DEUDAS.ID IS 'Identificador de la deuda.';
 COMMENT ON COLUMN DEUDAS.ID_CLIENTE IS 'Identificador del Cliente';
 COMMENT ON COLUMN DEUDAS.ID_FACTURA IS 'Factura la cual se le asocia una factura a credito, 
@@ -3916,8 +3856,8 @@ ALTER TABLE ENTRADA_PRODUCTOS ADD CONSTRAINT FK_ENTRADA_PRODUCTOS_0
   FOREIGN KEY (IDPROVEDOR) REFERENCES PROVEEDORES (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE ENTRADA_PRODUCTOS ADD CONSTRAINT FK_ENTRADA_PRODUCTOS_1
   FOREIGN KEY (IDPRODUCTO) REFERENCES PRODUCTOS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE ESTUDIANTE ADD CONSTRAINT FK_ESTUDIANTE_1
-  FOREIGN KEY (ID) REFERENCES PERSONAS (ID);
+ALTER TABLE ESTUDIANTE ADD CONSTRAINT FK_ESTUDIANTE_0
+  FOREIGN KEY (ID) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE CASCADE;
 COMMENT ON COLUMN E_S_SYS.ID_E_S_SYS IS 'Identificador unico de la empresa.';
 COMMENT ON COLUMN E_S_SYS.NOMBRE IS 'Campo que almacena el nombre de la empresa';
 COMMENT ON COLUMN E_S_SYS.TELEFONOS IS 'Campo que almacena los numeros telefonico de la empresa.';
@@ -4042,9 +3982,6 @@ GRANT RRR_SECRETARIA TO JHIRONSEL WITH ADMIN OPTION;
 GRANT RRR_SECRETARIA TO SYSDBA WITH ADMIN OPTION;
 GRANT RRR_SOFTSURENA TO SYSDBA WITH ADMIN OPTION;
 GRANT RRR_VENDEDOR TO SYSDBA WITH ADMIN OPTION;
-GRANT EXECUTE
- ON FUNCTION F_INSERT_CLIENTE_SB TO  SYSDBA WITH GRANT OPTION;
-
 GRANT EXECUTE
  ON PROCEDURE ACTUALIZAR_ESTADISTICAS_INDICES TO ROLE RDB$ADMIN WITH GRANT OPTION;
 
