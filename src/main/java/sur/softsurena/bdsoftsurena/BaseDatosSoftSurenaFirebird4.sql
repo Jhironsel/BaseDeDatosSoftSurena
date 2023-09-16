@@ -264,6 +264,36 @@ END^
 SET TERM ; ^
 
 SET TERM ^ ;
+CREATE PROCEDURE ADMIN_AGREGAR_PERMISO_ADMIN_PROCE (
+    I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+    I_NOMBREROL D_VARCHAR_70 )
+SQL SECURITY DEFINER
+AS 
+BEGIN SUSPEND; 
+END^
+SET TERM ; ^
+
+SET TERM ^ ;
+CREATE PROCEDURE ADMIN_ALTER_ROLE (
+    I_NOMBRE_ACTUAL D_VARCHAR_70,
+    I_NOMBRE_NUEVO D_VARCHAR_70 )
+SQL SECURITY DEFINER
+AS 
+BEGIN SUSPEND; 
+END^
+SET TERM ; ^
+
+SET TERM ^ ;
+CREATE PROCEDURE ADMIN_BORRAR_PERMISO_ADMIN_PROCE (
+    I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+    I_NOMBREROL D_VARCHAR_70 )
+SQL SECURITY DEFINER
+AS 
+BEGIN SUSPEND; 
+END^
+SET TERM ; ^
+
+SET TERM ^ ;
 CREATE PROCEDURE ADMIN_CERRAR_TURNO (
     I_ID D_ID )
 SQL SECURITY DEFINER
@@ -273,8 +303,59 @@ END^
 SET TERM ; ^
 
 SET TERM ^ ;
+CREATE PROCEDURE ADMIN_DAR_PERMISO_ROL (
+    I_PROCEDIMIENTO D_VARCHAR_70,
+    I_ROL D_VARCHAR_70,
+    I_ADMIN D_BOOLEAN_F )
+SQL SECURITY DEFINER
+AS 
+BEGIN SUSPEND; 
+END^
+SET TERM ; ^
+
+SET TERM ^ ;
+CREATE PROCEDURE ADMIN_DAR_ROL_USUARIO (
+    I_ROL D_VARCHAR_70,
+    I_USUARIO D_VARCHAR_70,
+    I_ADMIN D_BOOLEAN_F )
+SQL SECURITY DEFINER
+AS 
+BEGIN SUSPEND; 
+END^
+SET TERM ; ^
+
+SET TERM ^ ;
 CREATE PROCEDURE ADMIN_HABILITAR_TURNO (
     I_USER_NAME D_USER_NAME )
+SQL SECURITY DEFINER
+AS 
+BEGIN SUSPEND; 
+END^
+SET TERM ; ^
+
+SET TERM ^ ;
+CREATE PROCEDURE ADMIN_QUITAR_PERMISO_ADMIN_PROCE (
+    I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+    I_NOMBREROL D_VARCHAR_70 )
+SQL SECURITY DEFINER
+AS 
+BEGIN SUSPEND; 
+END^
+SET TERM ; ^
+
+SET TERM ^ ;
+CREATE PROCEDURE ADMIN_QUITAR_ROL_USUARIO (
+    I_ROL D_VARCHAR_70,
+    I_USUARIO D_VARCHAR_70 )
+SQL SECURITY DEFINER
+AS 
+BEGIN SUSPEND; 
+END^
+SET TERM ; ^
+
+SET TERM ^ ;
+CREATE PROCEDURE ADMIN_SET_ROLE (
+    I_ROLE D_VARCHAR_70 )
 SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
@@ -301,7 +382,7 @@ CREATE PROCEDURE PARSER (
     TCSEPARADOR D_VARCHAR_15 )
 RETURNS (
     FTCNOMBRE D_VARCHAR_1024 )
-SQL SECURITY INVOKER
+SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
 END^
@@ -316,16 +397,6 @@ CREATE PROCEDURE PRO_PERMISOS (
     REFERENCIA D_BOOLEAN_F,
     VISTA D_VARCHAR_45,
     USER_NAME D_USER_NAME )
-SQL SECURITY DEFINER
-AS 
-BEGIN SUSPEND; 
-END^
-SET TERM ; ^
-
-SET TERM ^ ;
-CREATE PROCEDURE SP_ALTER_ROLE (
-    I_NOMBRE_ACTUAL D_VARCHAR_70,
-    I_NOMBRE_NUEVO D_VARCHAR_70 )
 SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
@@ -528,7 +599,7 @@ CREATE PROCEDURE SP_INSERT_DETALLE_RECETAS (
     I_ID_MEDICAMENTO D_ID,
     I_CANTIDAD D_DINERO,
     I_D_DOSIS D_VARCHAR_255 )
-SQL SECURITY INVOKER
+SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
 END^
@@ -1023,15 +1094,6 @@ RETURNS (
     O_TAG_NOMBRE D_VARCHAR_255,
     O_TAG_VALOR D_VARCHAR_255,
     O_DESCRIPCION D_VARCHAR_255 )
-SQL SECURITY DEFINER
-AS 
-BEGIN SUSPEND; 
-END^
-SET TERM ; ^
-
-SET TERM ^ ;
-CREATE PROCEDURE SP_SET_ROLE (
-    I_ROLE_NAME D_VARCHAR_70 )
 SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
@@ -2047,8 +2109,8 @@ SELECT r.ID, r.ID_CATEGORIA, c.DESCRIPCION, c.IMAGEN_TEXTO, r.CODIGO,
        r.DESCRIPCION, r.IMAGEN_TEXTO, r.NOTA, r.FECHA_CREACION, r.ESTADO
 FROM V_PRODUCTOS r
 INNER JOIN V_CATEGORIAS c ON c.ID = r.ID_CATEGORIA;
-CREATE VIEW GET_ROL (USER_NAME, ROL, DESCRIPCION)
-AS SELECT UPPER(TRIM(p.RDB$USER)) AS USER_NAME, TRIM(p.RDB$RELATION_NAME) AS ROL, r.DESCRIPCION
+CREATE VIEW GET_ROL (USER_NAME, ROL, DESCRIPCION, ADMINISTRACION)
+AS SELECT UPPER(TRIM(p.RDB$USER)) AS USER_NAME, TRIM(p.RDB$RELATION_NAME) AS ROL, r.DESCRIPCION, p.RDB$GRANT_OPTION
 FROM RDB$USER_PRIVILEGES p
 LEFT JOIN GET_ROLES r ON TRIM(r.ROL) STARTING WITH TRIM(p.RDB$RELATION_NAME)
 WHERE p.RDB$PRIVILEGE = 'M'
@@ -2695,18 +2757,21 @@ SET TERM ; ^
 /******************** DDL TRIGGERS ********************/
 
 
-COMMENT ON ROLE CAJERO IS 'Es un rol de sistema que permite a los usuarios hacer lo siguiente de forma predeterminada.
-
-* Crear Facturas.
-
-Debe obtener los permisos para realizar lo siguiente:
-* Cobros de deudas.
-* Registrar deudas.
-* Crear clientes.
-* Modificar clientes.
-* Borrar clietnes.
-
-';
+COMMENT ON ROLE CAJERO IS '<h1>Descripcion del rol</h1>
+<div>
+	<div>
+		Es un rol de sistema que permite a los usuarios hacer lo siguiente de forma predeterminada.</br>
+		Debe obtener los permisos para realizar lo siguiente:</br>
+		<ul>
+		  <li>Crear Facturas.</li>
+		  <li>Cobros de deudas.</li>
+		  <li>Registrar deudas.</li>
+		  <li>Crear clientes.</li>
+		  <li>Modificar clientes.</li>
+		  <li>Borrar clietnes.</li>
+		</ul>
+	</div>
+</div>';
 COMMENT ON ROLE RRR_SOFTSURENA IS 'Es un rol que puede ser usado para hacer ajuste importante del sistema.';
 SET TERM ^ ;
 ALTER FUNCTION F_PRIVILEGIO (
@@ -2775,6 +2840,21 @@ END
 SET TERM ; ^
 
 
+COMMENT ON PROCEDURE ACTUALIZAR_TABLA_PIVOT IS 'Este procedimiento en Firebird parece estar diseñado para actualizar una tabla pivot en función de los datos de una vista y algunas otras columnas especificadas. Aquí está el desglose de lo que hace:
+
+1. **Declaración de Variables**: Comienza declarando varias variables que se utilizarán en el procedimiento.
+
+2. **Construcción de Consulta SELECT**: El procedimiento construye una consulta SELECT dinámica utilizando los parámetros de entrada, como `TCVISTA`, `TCPRIMERACOLUMNACABECERA`, `TCOTRASCOLUMNASCABECERA`, `TCCOLUMNADATOS`, y `TCVALORESDATOS`. La consulta se construye para agrupar datos en función de las columnas especificadas.
+
+3. **Ejecución de la Consulta SELECT**: Luego, se ejecuta la consulta SELECT construida y los resultados se almacenan en las variables `lcInto1`, `lcInto2`, y `lcInto3`.
+
+4. **Actualización o Inserción de Datos en la Tabla Pivot**: Se realiza una serie de manipulaciones en las variables y se construye una consulta de actualización o inserción (`UPDATE OR INSERT`) en la tabla pivot (`tcTablaPivot`). Esto se hace en función de los resultados de la consulta SELECT. Los datos de la columna de la cabecera se tratan de acuerdo con su tipo de datos y se reemplazan algunos caracteres especiales en el nombre de la columna.
+
+5. **Actualización de Otras Columnas de la Cabecera**: Si `tcOtrasColumnasCabecera` contiene datos adicionales, el procedimiento también actualiza estas columnas en la tabla pivot. Para cada columna adicional, se ejecuta una subconsulta para obtener el valor correspondiente de la vista y se actualiza en la tabla pivot.
+
+6. **Concesión de Permiso**: Finalmente, se otorgan permisos de ejecución en el procedimiento a los roles `RDB$ADMIN` y `SYSDBA` con la opción de otorgar permisos.
+
+En resumen, este procedimiento se utiliza para mantener actualizada una tabla pivot en función de los datos de una vista y otras columnas especificadas. Realiza operaciones de inserción y actualización en la tabla pivot según los resultados de la consulta SELECT. También permite otorgar permisos de ejecución a roles específicos.';
 SET TERM ^ ;
 ALTER PROCEDURE ACTUALIZAR_TABLA_PIVOT (
     TCTABLAPIVOT VARCHAR(28),
@@ -2874,6 +2954,105 @@ END
 SET TERM ; ^
 
 
+COMMENT ON PROCEDURE ADMIN_AGREGAR_PERMISO_ADMIN_PROCE IS 'Este es un SP que permite agregar el permiso de administracion a los SP.';
+SET TERM ^ ;
+ALTER PROCEDURE ADMIN_AGREGAR_PERMISO_ADMIN_PROCE (
+    I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+    I_NOMBREROL D_VARCHAR_70 )
+SQL SECURITY DEFINER
+
+AS
+BEGIN
+     /*Validar si el procedimiento y el rol existen. Se podria validar que no este en uso.*/
+     EXECUTE STATEMENT 'GRANT EXECUTE ON PROCEDURE '||:i_nombreProcedimiento||' TO '||:i_nombreRol||' WITH GRANT OPTION;';
+END
+^
+SET TERM ; ^
+
+
+COMMENT ON PROCEDURE ADMIN_ALTER_ROLE IS '/**
+* SP que permite a los administradores modificar los nombres de los roles y
+* pasar los permisos y asignaciones de los roles al nuevo rol creado.
+* 
+* @param actual recibe el nombre de un rol existente. 
+* @param nuevo recibe el nuevo nombre del rol a crear. 
+* 
+* @return devuelve un objecto Resultados para obtener informacion de la op.
+*/';
+SET TERM ^ ;
+ALTER PROCEDURE ADMIN_ALTER_ROLE (
+    I_NOMBRE_ACTUAL D_VARCHAR_70,
+    I_NOMBRE_NUEVO D_VARCHAR_70 )
+SQL SECURITY DEFINER
+
+AS
+DECLARE VARIABLE privilegio D_VARCHAR_15;
+DECLARE VARIABLE object_name D_VARCHAR_70;
+DECLARE VARIABLE grant_opcion D_TURNO;
+DECLARE VARIABLE miembro D_VARCHAR_70;
+BEGIN
+     /* Paso 1: Crear un nuevo rol con el nuevo nombre */
+     EXECUTE STATEMENT 'CREATE ROLE ' || :I_NOMBRE_NUEVO;
+     
+     /* Paso 2: Transferir los privilegios del rol original al nuevo rol */
+     FOR SELECT F_PRIVILEGIO(p.RDB$PRIVILEGE), p.RDB$RELATION_NAME, p.RDB$GRANT_OPTION
+     FROM RDB$USER_PRIVILEGES p
+     WHERE p.RDB$USER = :I_NOMBRE_ACTUAL
+     INTO :privilegio, :object_name, :grant_opcion
+     DO
+     BEGIN
+          IF(:privilegio = 'MEMBERSHIP') THEN BEGIN
+               IF(:grant_opcion <> '0') THEN 
+                    EXECUTE STATEMENT 'GRANT ' || :privilegio || ' ON ' || :object_name || ' TO ' || :I_NOMBRE_NUEVO || ' WITH GRANT OPTION;';
+               ELSE
+                    EXECUTE STATEMENT 'GRANT ' || :privilegio || ' ON ' || :object_name || ' TO ' || :I_NOMBRE_NUEVO;
+          END
+          IF(:privilegio = 'EXECUTE') THEN BEGIN
+               IF(:grant_opcion <> '0') THEN 
+                    EXECUTE STATEMENT 'GRANT ' || :privilegio || ' ON PROCEDURE ' || :object_name || ' TO ' || :I_NOMBRE_NUEVO || ' WITH GRANT OPTION;';
+               ELSE
+                    EXECUTE STATEMENT 'GRANT ' || :privilegio || ' ON PROCEDURE ' || :object_name || ' TO ' || :I_NOMBRE_NUEVO;
+          END
+     END
+
+     /* Paso 3: Transferir miembros de rol */
+     FOR SELECT r.RDB$USER, r.RDB$GRANT_OPTION
+     FROM RDB$USER_PRIVILEGES r
+     WHERE r.RDB$RELATION_NAME = :I_NOMBRE_ACTUAL
+     INTO :miembro, :grant_opcion
+     DO
+     BEGIN
+          IF(:grant_opcion <> '0')THEN
+               EXECUTE STATEMENT 'GRANT ' || :I_NOMBRE_NUEVO || ' TO ' || :miembro ||' WITH ADMIN OPTION;';
+          ELSE
+               EXECUTE STATEMENT 'GRANT ' || :I_NOMBRE_NUEVO || ' TO ' || :miembro;
+     END
+
+     /* Paso 4: Opcionalmente, eliminar el rol original */
+     EXECUTE STATEMENT 'DROP ROLE ' || :I_NOMBRE_ACTUAL;
+END
+^
+SET TERM ; ^
+
+
+COMMENT ON PROCEDURE ADMIN_BORRAR_PERMISO_ADMIN_PROCE IS 'Este es un SP que permite BORRAR el permiso de SP al rol.';
+SET TERM ^ ;
+ALTER PROCEDURE ADMIN_BORRAR_PERMISO_ADMIN_PROCE (
+    I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+    I_NOMBREROL D_VARCHAR_70 )
+SQL SECURITY DEFINER
+
+AS
+BEGIN
+     /*
+          Validar si el procedimiento y el rol existen. Se podria validar que no este en uso.
+     */
+     EXECUTE STATEMENT 'REVOKE EXECUTE ON PROCEDURE '||:i_nombreProcedimiento||' FROM '||:i_nombreRol||';';
+END
+^
+SET TERM ; ^
+
+
 SET TERM ^ ;
 ALTER PROCEDURE ADMIN_CERRAR_TURNO (
     I_ID D_ID )
@@ -2892,6 +3071,38 @@ BEGIN
           a.ESTADO = FALSE
      WHERE
           a.ID = :I_ID;
+END
+^
+SET TERM ; ^
+
+
+SET TERM ^ ;
+ALTER PROCEDURE ADMIN_DAR_PERMISO_ROL (
+    I_PROCEDIMIENTO D_VARCHAR_70,
+    I_ROL D_VARCHAR_70,
+    I_ADMIN D_BOOLEAN_F )
+SQL SECURITY DEFINER
+
+AS
+BEGIN
+     /*Deberia validarse el procedimiento y el rol que exista.*/
+     EXECUTE STATEMENT 'GRANT EXECUTE ON PROCEDURE '|| :i_procedimiento ||' TO ROLE '|| :i_rol ||IIF(i_admin,' WITH GRANT OPTION;','');
+END
+^
+SET TERM ; ^
+
+
+SET TERM ^ ;
+ALTER PROCEDURE ADMIN_DAR_ROL_USUARIO (
+    I_ROL D_VARCHAR_70,
+    I_USUARIO D_VARCHAR_70,
+    I_ADMIN D_BOOLEAN_F )
+SQL SECURITY DEFINER
+
+AS
+BEGIN
+     /*Deberia validarse el usuario y el rol que exista.*/
+     EXECUTE STATEMENT 'GRANT '|| :i_rol ||' TO '|| :i_usuario ||IIF(i_admin,' WITH ADMIN OPTION;','');
 END
 ^
 SET TERM ; ^
@@ -2932,6 +3143,66 @@ BEGIN
      
      INSERT INTO V_TURNOS (TURNO_USUARIO, MONTO_FACTURADO, MONTO_DEVUELTO, MONTO_EFECTIVO, MONTO_CREDITO)
      VALUES (UPPER(:I_USER_NAME),0,0,0,0);
+END
+^
+SET TERM ; ^
+
+
+COMMENT ON PROCEDURE ADMIN_QUITAR_PERMISO_ADMIN_PROCE IS 'Este es un SP que permite quitar el permiso de administracion a los SP.';
+SET TERM ^ ;
+ALTER PROCEDURE ADMIN_QUITAR_PERMISO_ADMIN_PROCE (
+    I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+    I_NOMBREROL D_VARCHAR_70 )
+SQL SECURITY DEFINER
+
+AS
+BEGIN
+     /*Validar si el procedimiento y el rol existen. Se podria validar que no este en uso.*/
+     EXECUTE STATEMENT 'REVOKE GRANT OPTION FOR EXECUTE ON PROCEDURE '||:i_nombreProcedimiento||' FROM '||:i_nombreRol||';';
+END
+^
+SET TERM ; ^
+
+
+SET TERM ^ ;
+ALTER PROCEDURE ADMIN_QUITAR_ROL_USUARIO (
+    I_ROL D_VARCHAR_70,
+    I_USUARIO D_VARCHAR_70 )
+SQL SECURITY DEFINER
+
+AS
+BEGIN
+     EXECUTE STATEMENT 'REVOKE '||:I_ROL||' FROM '||:I_USUARIO;
+END
+^
+SET TERM ; ^
+
+
+COMMENT ON PROCEDURE ADMIN_SET_ROLE IS '/**
+* Este metodo nos permite establecer el rol que el usuario usará en el
+* sistema, puede ser ejecutado una vez que el usuario haya iniciado
+* session.
+* 
+* Es un procedimiento de uso publico, ya que todos van a cambiar su rol en 
+* el sistema.
+*
+* @param i_role Nombre del rol que va a establecerse al usuario que ejecute
+* el metodo.
+* @return
+*/';
+SET TERM ^ ;
+ALTER PROCEDURE ADMIN_SET_ROLE (
+    I_ROLE D_VARCHAR_70 )
+SQL SECURITY DEFINER
+
+AS
+BEGIN
+     /*
+          Queda pendiente validar el rol que se trata de establecer.
+          Verificar que exista el rol
+          Crear la excepcion para esa validacion.
+     */
+     EXECUTE STATEMENT 'SET ROLE '|| :i_role;
 END
 ^
 SET TERM ; ^
@@ -2999,6 +3270,7 @@ END
 SET TERM ; ^
 
 
+COMMENT ON PROCEDURE PARSER IS 'Su misión es extraer un subtexto dentro de un texto.';
 SET TERM ^ ;
 ALTER PROCEDURE PARSER (
     TCTEXTO D_BLOB_TEXTO,
@@ -3014,6 +3286,7 @@ BEGIN
    lnPosicion = Position(tcSeparador IN tcTexto);
  
    ftcNombre = Left(tcTexto, lnPosicion - 1) ;
+   SUSPEND;
  
 END
 ^
@@ -3061,62 +3334,6 @@ begin
       execute statement 'grant REFERENCES on '||:VISTA||' to '||:USER_NAME;
      end
 end
-^
-SET TERM ; ^
-
-
-SET TERM ^ ;
-ALTER PROCEDURE SP_ALTER_ROLE (
-    I_NOMBRE_ACTUAL D_VARCHAR_70,
-    I_NOMBRE_NUEVO D_VARCHAR_70 )
-SQL SECURITY DEFINER
-
-AS
-DECLARE VARIABLE privilegio D_VARCHAR_15;
-DECLARE VARIABLE object_name D_VARCHAR_70;
-DECLARE VARIABLE grant_opcion D_TURNO;
-DECLARE VARIABLE miembro D_VARCHAR_70;
-BEGIN
-     /* Paso 1: Crear un nuevo rol con el nuevo nombre */
-     EXECUTE STATEMENT 'CREATE ROLE ' || :I_NOMBRE_NUEVO;
-     
-     /* Paso 2: Transferir los privilegios del rol original al nuevo rol */
-     FOR SELECT F_PRIVILEGIO(p.RDB$PRIVILEGE), p.RDB$RELATION_NAME, p.RDB$GRANT_OPTION
-     FROM RDB$USER_PRIVILEGES p
-     WHERE p.RDB$USER = :I_NOMBRE_ACTUAL
-     INTO :privilegio, :object_name, :grant_opcion
-     DO
-     BEGIN
-          IF(:privilegio = 'MEMBERSHIP') THEN BEGIN
-               IF(:grant_opcion <> '0') THEN 
-                    EXECUTE STATEMENT 'GRANT ' || :privilegio || ' ON ' || :object_name || ' TO ' || :I_NOMBRE_NUEVO || ' WITH GRANT OPTION;';
-               ELSE
-                    EXECUTE STATEMENT 'GRANT ' || :privilegio || ' ON ' || :object_name || ' TO ' || :I_NOMBRE_NUEVO;
-          END
-          IF(:privilegio = 'EXECUTE') THEN BEGIN
-               IF(:grant_opcion <> '0') THEN 
-                    EXECUTE STATEMENT 'GRANT ' || :privilegio || ' ON PROCEDURE ' || :object_name || ' TO ' || :I_NOMBRE_NUEVO || ' WITH GRANT OPTION;';
-               ELSE
-                    EXECUTE STATEMENT 'GRANT ' || :privilegio || ' ON PROCEDURE ' || :object_name || ' TO ' || :I_NOMBRE_NUEVO;
-          END
-     END
-
-     /* Paso 3: Transferir miembros de rol */
-     FOR SELECT r.RDB$USER, r.RDB$GRANT_OPTION
-     FROM RDB$USER_PRIVILEGES r
-     WHERE r.RDB$RELATION_NAME = :I_NOMBRE_ACTUAL
-     INTO :miembro, :grant_opcion
-     DO
-     BEGIN
-          IF(:grant_opcion <> '0')THEN
-               EXECUTE STATEMENT 'GRANT ' || :I_NOMBRE_NUEVO || ' TO ' || :miembro ||' WITH ADMIN OPTION;';
-          ELSE
-               EXECUTE STATEMENT 'GRANT ' || :I_NOMBRE_NUEVO || ' TO ' || :miembro;
-     END
-
-     /* Paso 4: Opcionalmente, eliminar el rol original */
-     EXECUTE STATEMENT 'DROP ROLE ' || :I_NOMBRE_ACTUAL;
-END
 ^
 SET TERM ; ^
 
@@ -3203,6 +3420,27 @@ END
 SET TERM ; ^
 
 
+COMMENT ON PROCEDURE SP_DELETE_CLIENTE_CC IS '<!DOCTYPE html>
+<html>
+<head>
+<style>
+/* This is
+a multi-line
+comment */
+
+p {
+  color: red;
+} 
+</style>
+</head>
+<body>
+
+<p>Hello World!</p>
+<p>This paragraph is styled with CSS.</p>
+<p>CSS comments are not shown in the output.</p>
+
+</body>
+</html>';
 SET TERM ^ ;
 ALTER PROCEDURE SP_DELETE_CLIENTE_CC (
     ID D_ID )
@@ -3314,6 +3552,10 @@ END
 SET TERM ; ^
 
 
+COMMENT ON PROCEDURE SP_DELETE_USUARIO IS 'Permite eliminar un usuario del sistema, pero antes de eliminarlo este realiza la siguientes comprobaciones:
+	1) Verifica que el usuario no tenga un turno abierto.
+
+';
 SET TERM ^ ;
 ALTER PROCEDURE SP_DELETE_USUARIO (
     I_USER_NAME D_USER_NAME )
@@ -3322,10 +3564,8 @@ SQL SECURITY DEFINER
 AS
 BEGIN
      /*
-          A medida que se va desarrollando, se debe cuestionar 
-     
+          A medida que se va desarrollando, se debe cuestionar
           ¿cuando un usuario no debe ser borrado?
-     
      */
      IF((SELECT (1) 
           FROM V_TURNOS t 
@@ -4991,26 +5231,6 @@ END
 SET TERM ; ^
 
 
-COMMENT ON PROCEDURE SP_SET_ROLE IS 'Es un procedimiento de uso publico, ya que todos van a cambiar su rol en el sistema.
-';
-SET TERM ^ ;
-ALTER PROCEDURE SP_SET_ROLE (
-    I_ROLE_NAME D_VARCHAR_70 )
-SQL SECURITY DEFINER
-
-AS
-BEGIN
-     /*
-          Queda pendiente validar el rol que se trata de establecer.
-          Verificar que exista el rol
-          Crear la excepcion para esa validacion.
-     */
-     EXECUTE STATEMENT 'SET ROLE '|| :I_ROLE_NAME;
-END
-^
-SET TERM ; ^
-
-
 SET TERM ^ ;
 ALTER PROCEDURE SP_UPDATE_ANTECEDENTE (
     I_ID D_ID,
@@ -6070,8 +6290,8 @@ COMMENT ON EXCEPTION E_CATEGORIAS_INACTIVA IS 'Excepcion utilizada para indicar 
 COMMENT ON EXCEPTION E_CORREO_INACTIVO IS 'Exception lanzada cuando un correo se encuentra inactivo o eliminado de la vista V_CONTACTS_TEL.';
 COMMENT ON EXCEPTION E_DIRECCION_INACTIVO IS 'Exception lanzada cuando una direccion de una persona no se encuentra registada en la vista V_DIRECCIONES.';
 COMMENT ON EXCEPTION E_TELEFONO_INACTIVO IS 'Exception lanzada cuando el telefono de una persona se encuentra inactivo o ha sido eliminado de la vista de V_CONTACTS_TEL.';
-GRANT CAJERO TO JHADIEL;
-GRANT CAJERO TO JHIRONSEL;
+GRANT CAJERO TO JHADIEL WITH ADMIN OPTION;
+GRANT CAJERO TO JHIRONSEL WITH ADMIN OPTION;
 GRANT CAJERO TO RDB$ADMIN WITH ADMIN OPTION;
 GRANT CAJERO TO SYSDBA WITH ADMIN OPTION;
 GRANT DOCTOR TO RDB$ADMIN WITH ADMIN OPTION;
@@ -6081,7 +6301,7 @@ GRANT GERENTE TO SYSDBA WITH ADMIN OPTION;
 GRANT PADRE TO RDB$ADMIN WITH ADMIN OPTION;
 GRANT PADRE TO SYSDBA WITH ADMIN OPTION;
 GRANT PRUEBA22 TO JHADIEL WITH ADMIN OPTION;
-GRANT PRUEBA22 TO JHIRONSEL;
+GRANT PRUEBA22 TO SYSDBA WITH ADMIN OPTION;
 GRANT RRHH TO JHIRONSEL;
 GRANT RRHH TO RDB$ADMIN WITH ADMIN OPTION;
 GRANT RRHH TO SYSDBA WITH ADMIN OPTION;
@@ -6091,6 +6311,9 @@ GRANT SECRETARIA TO RDB$ADMIN WITH ADMIN OPTION;
 GRANT SECRETARIA TO SYSDBA WITH ADMIN OPTION;
 GRANT VENDEDOR TO RDB$ADMIN WITH ADMIN OPTION;
 GRANT VENDEDOR TO SYSDBA WITH ADMIN OPTION;
+GRANT EXECUTE
+ ON FUNCTION F_PRIVILEGIO TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
 GRANT EXECUTE
  ON FUNCTION F_PRIVILEGIO TO  SYSDBA WITH GRANT OPTION;
 
@@ -6107,16 +6330,70 @@ GRANT EXECUTE
  ON PROCEDURE ACTUALIZAR_TABLA_PIVOT TO  SYSDBA WITH GRANT OPTION;
 
 GRANT EXECUTE
+ ON PROCEDURE ADMIN_AGREGAR_PERMISO_ADMIN_PROCE TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_AGREGAR_PERMISO_ADMIN_PROCE TO  SYSDBA WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_ALTER_ROLE TO ROLE PRUEBA22 WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_ALTER_ROLE TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_ALTER_ROLE TO  SYSDBA WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_BORRAR_PERMISO_ADMIN_PROCE TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_BORRAR_PERMISO_ADMIN_PROCE TO  SYSDBA WITH GRANT OPTION;
+
+GRANT EXECUTE
  ON PROCEDURE ADMIN_CERRAR_TURNO TO ROLE RDB$ADMIN WITH GRANT OPTION;
 
 GRANT EXECUTE
  ON PROCEDURE ADMIN_CERRAR_TURNO TO  SYSDBA WITH GRANT OPTION;
 
 GRANT EXECUTE
+ ON PROCEDURE ADMIN_DAR_PERMISO_ROL TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_DAR_PERMISO_ROL TO  SYSDBA WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_DAR_ROL_USUARIO TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_DAR_ROL_USUARIO TO  SYSDBA WITH GRANT OPTION;
+
+GRANT EXECUTE
  ON PROCEDURE ADMIN_HABILITAR_TURNO TO ROLE RDB$ADMIN WITH GRANT OPTION;
 
 GRANT EXECUTE
  ON PROCEDURE ADMIN_HABILITAR_TURNO TO  SYSDBA WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_QUITAR_PERMISO_ADMIN_PROCE TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_QUITAR_PERMISO_ADMIN_PROCE TO  SYSDBA WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_QUITAR_ROL_USUARIO TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_QUITAR_ROL_USUARIO TO  SYSDBA WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_SET_ROLE TO  "PUBLIC";
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_SET_ROLE TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE ADMIN_SET_ROLE TO  SYSDBA WITH GRANT OPTION;
 
 GRANT EXECUTE
  ON PROCEDURE CREAR_TABLA_PIVOT TO ROLE RDB$ADMIN WITH GRANT OPTION;
@@ -6135,12 +6412,6 @@ GRANT EXECUTE
 
 GRANT EXECUTE
  ON PROCEDURE PRO_PERMISOS TO  SYSDBA WITH GRANT OPTION;
-
-GRANT EXECUTE
- ON PROCEDURE SP_ALTER_ROLE TO ROLE RDB$ADMIN WITH GRANT OPTION;
-
-GRANT EXECUTE
- ON PROCEDURE SP_ALTER_ROLE TO  SYSDBA WITH GRANT OPTION;
 
 GRANT EXECUTE
  ON PROCEDURE SP_CREATE_ROLE TO ROLE RDB$ADMIN WITH GRANT OPTION;
@@ -6216,6 +6487,9 @@ GRANT EXECUTE
 
 GRANT EXECUTE
  ON PROCEDURE SP_INSERT_ANTECEDENTE TO  SYSDBA WITH GRANT OPTION;
+
+GRANT EXECUTE
+ ON PROCEDURE SP_INSERT_ARS TO ROLE PRUEBA22 WITH GRANT OPTION;
 
 GRANT EXECUTE
  ON PROCEDURE SP_INSERT_ARS TO ROLE RDB$ADMIN WITH GRANT OPTION;
@@ -6371,9 +6645,6 @@ GRANT EXECUTE
  ON PROCEDURE SP_SELECT_ANALISIS TO  SYSDBA WITH GRANT OPTION;
 
 GRANT EXECUTE
- ON PROCEDURE SP_SELECT_GET_CAJEROS TO ROLE CAJERO;
-
-GRANT EXECUTE
  ON PROCEDURE SP_SELECT_GET_CAJEROS TO ROLE RDB$ADMIN WITH GRANT OPTION;
 
 GRANT EXECUTE
@@ -6387,9 +6658,6 @@ GRANT EXECUTE
 
 GRANT EXECUTE
  ON PROCEDURE SP_SELECT_GET_CLIENTES_SB TO  SYSDBA WITH GRANT OPTION;
-
-GRANT EXECUTE
- ON PROCEDURE SP_SELECT_GET_PRODUCTOS TO ROLE CAJERO;
 
 GRANT EXECUTE
  ON PROCEDURE SP_SELECT_GET_PRODUCTOS TO ROLE RDB$ADMIN WITH GRANT OPTION;
@@ -6419,7 +6687,7 @@ GRANT EXECUTE
  ON PROCEDURE SP_SELECT_PRODUCTOS_ID_CODIGO TO  SYSDBA WITH GRANT OPTION;
 
 GRANT EXECUTE
- ON PROCEDURE SP_SELECT_TURNOS TO ROLE CAJERO;
+ ON PROCEDURE SP_SELECT_TURNOS TO ROLE CAJERO WITH GRANT OPTION;
 
 GRANT EXECUTE
  ON PROCEDURE SP_SELECT_TURNOS TO ROLE RDB$ADMIN WITH GRANT OPTION;
@@ -6438,15 +6706,6 @@ GRANT EXECUTE
 
 GRANT EXECUTE
  ON PROCEDURE SP_SELECT_USUARIOS_TAGS TO  SYSDBA WITH GRANT OPTION;
-
-GRANT EXECUTE
- ON PROCEDURE SP_SET_ROLE TO  "PUBLIC";
-
-GRANT EXECUTE
- ON PROCEDURE SP_SET_ROLE TO ROLE RDB$ADMIN WITH GRANT OPTION;
-
-GRANT EXECUTE
- ON PROCEDURE SP_SET_ROLE TO  SYSDBA WITH GRANT OPTION;
 
 GRANT EXECUTE
  ON PROCEDURE SP_UPDATE_ANTECEDENTE TO ROLE RDB$ADMIN WITH GRANT OPTION;
@@ -7241,7 +7500,13 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_PERSONAS_PROVEEDORES TO  SYSDBA WITH GRANT OPTION;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
+ ON V_PERSONAS_PROVEEDORES_ATR TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_PERSONAS_PROVEEDORES_ATR TO  SYSDBA WITH GRANT OPTION;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
+ ON V_PLAN_CUENTA_CONTABLE TO ROLE RDB$ADMIN WITH GRANT OPTION;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_PLAN_CUENTA_CONTABLE TO  SYSDBA WITH GRANT OPTION;
@@ -7274,7 +7539,13 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_RECETAS TO  SYSDBA WITH GRANT OPTION;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
+ ON V_RELACION_PADRE_ESTUDIANTE TO ROLE RDB$ADMIN WITH GRANT OPTION;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_RELACION_PADRE_ESTUDIANTE TO  SYSDBA WITH GRANT OPTION;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
+ ON V_RELACION_PADRE_PACIENTE TO ROLE RDB$ADMIN WITH GRANT OPTION;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON V_RELACION_PADRE_PACIENTE TO  SYSDBA WITH GRANT OPTION;
