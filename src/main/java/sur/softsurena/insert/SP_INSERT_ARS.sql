@@ -1,2 +1,0 @@
-EXECUTE PROCEDURE SP_INSERT_ARS ('Prueba', 26.8,
-     true);
