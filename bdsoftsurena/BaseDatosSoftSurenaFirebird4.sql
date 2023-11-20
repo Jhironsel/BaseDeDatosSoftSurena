@@ -519,15 +519,6 @@ END^
 SET TERM ; ^
 
 SET TERM ^ ;
-CREATE PROCEDURE SP_DELETE_CLIENTE_CC (
-    ID D_ID )
-SQL SECURITY DEFINER
-AS 
-BEGIN SUSPEND; 
-END^
-SET TERM ; ^
-
-SET TERM ^ ;
 CREATE PROCEDURE SP_DELETE_CLIENTE_SB (
     V_ID D_ID )
 SQL SECURITY DEFINER
@@ -632,30 +623,6 @@ CREATE PROCEDURE SP_INSERT_CATEGORIAS (
     DESCRIPCION D_VARCHAR_25,
     IMAGEN_TEXTO D_BLOB_TEXTO,
     ESTADO D_BOOLEAN_T )
-SQL SECURITY DEFINER
-AS 
-BEGIN SUSPEND; 
-END^
-SET TERM ; ^
-
-SET TERM ^ ;
-CREATE PROCEDURE SP_INSERT_CLIENTE (
-    I_ID D_ID,
-    I_ESTADO D_BOOLEAN_T )
-SQL SECURITY DEFINER
-AS 
-BEGIN SUSPEND; 
-END^
-SET TERM ; ^
-
-SET TERM ^ ;
-CREATE PROCEDURE SP_INSERT_CLIENTE_CC (
-    PNOMBRE D_NOMBRES,
-    SNOMBRE D_NOMBRES,
-    APELLIDOS D_APELLIDOS,
-    SEXO D_SEXO,
-    CORREO D_CORREO,
-    SALDO D_DINERO )
 SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
@@ -910,48 +877,6 @@ END^
 SET TERM ; ^
 
 SET TERM ^ ;
-CREATE PROCEDURE SP_SELECT_GET_PRODUCTOS (
-    CRITERIOBUSQUEDA D_VARCHAR_70 )
-RETURNS (
-    ID TYPE OF COLUMN GET_PRODUCTOS.ID,
-    ID_CATEGORIA TYPE OF COLUMN GET_PRODUCTOS.ID_CATEGORIA,
-    DESC_CATEGORIA TYPE OF COLUMN GET_PRODUCTOS.DESC_CATEGORIA,
-    IMAGEN_CATEGORIA TYPE OF COLUMN GET_PRODUCTOS.IMAGEN_CATEGORIA,
-    CODIGO TYPE OF COLUMN GET_PRODUCTOS.CODIGO,
-    DESCRIPCION TYPE OF COLUMN GET_PRODUCTOS.DESCRIPCION,
-    IMAGEN_PRODUCTO TYPE OF COLUMN GET_PRODUCTOS.IMAGEN_PRODUCTO,
-    NOTA TYPE OF COLUMN GET_PRODUCTOS.NOTA,
-    FECHA_CREACION TYPE OF COLUMN GET_PRODUCTOS.FECHA_CREACION,
-    ESTADO TYPE OF COLUMN GET_PRODUCTOS.ESTADO )
-SQL SECURITY DEFINER
-AS 
-BEGIN SUSPEND; 
-END^
-SET TERM ; ^
-
-SET TERM ^ ;
-CREATE PROCEDURE SP_SELECT_GET_PROVEEDORES
-RETURNS (
-    ID TYPE OF COLUMN GET_PROVEEDORES.ID,
-    PERSONA TYPE OF COLUMN GET_PROVEEDORES.PERSONA,
-    PNOMBRE TYPE OF COLUMN GET_PROVEEDORES.PNOMBRE,
-    SNOMBRE TYPE OF COLUMN GET_PROVEEDORES.SNOMBRE,
-    APELLIDOS TYPE OF COLUMN GET_PROVEEDORES.APELLIDOS,
-    SEXO TYPE OF COLUMN GET_PROVEEDORES.SEXO,
-    ESTADO TYPE OF COLUMN GET_PROVEEDORES.ESTADO,
-    CEDULA TYPE OF COLUMN GET_PROVEEDORES.CEDULA,
-    ID_PERSONA TYPE OF COLUMN GET_PROVEEDORES.ID_PERSONA,
-    ID_PROVINCIA TYPE OF COLUMN GET_PROVEEDORES.ID_PROVINCIA,
-    ID_MUNICIPIO TYPE OF COLUMN GET_PROVEEDORES.ID_MUNICIPIO,
-    DIRECCION TYPE OF COLUMN GET_PROVEEDORES.DIRECCION,
-    CODIGO TYPE OF COLUMN GET_PROVEEDORES.CODIGO )
-SQL SECURITY INVOKER
-AS 
-BEGIN SUSPEND; 
-END^
-SET TERM ; ^
-
-SET TERM ^ ;
 CREATE PROCEDURE SP_SELECT_PRODUCTOS
 RETURNS (
     ID TYPE OF COLUMN V_PRODUCTOS.ID,
@@ -1001,22 +926,6 @@ RETURNS (
     ESTADO TYPE OF COLUMN V_PRODUCTOS.ESTADO,
     USER_NAME TYPE OF COLUMN V_PRODUCTOS.USER_NAME,
     ROL TYPE OF COLUMN V_PRODUCTOS.ROL )
-SQL SECURITY DEFINER
-AS 
-BEGIN SUSPEND; 
-END^
-SET TERM ; ^
-
-SET TERM ^ ;
-CREATE PROCEDURE SP_SELECT_USUARIOS
-RETURNS (
-    USERNAME TYPE OF COLUMN V_USUARIOS.USERNAME,
-    PNOMBRE TYPE OF COLUMN V_USUARIOS.PNOMBRE,
-    SNOMBRE TYPE OF COLUMN V_USUARIOS.SNOMBRE,
-    APELLIDOS TYPE OF COLUMN V_USUARIOS.APELLIDOS,
-    ESTADO TYPE OF COLUMN V_USUARIOS.ESTADO,
-    ADMINISTRADOR TYPE OF COLUMN V_USUARIOS.ADMINISTRADOR,
-    DESCRIPCION TYPE OF COLUMN V_USUARIOS.DESCRIPCION )
 SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
@@ -1093,21 +1002,6 @@ CREATE PROCEDURE SP_UPDATE_CATEGORIA (
     I_DESCRIPCION TYPE OF COLUMN V_CATEGORIAS.DESCRIPCION,
     I_IMAGEN_TEXTO TYPE OF COLUMN V_CATEGORIAS.IMAGEN_TEXTO,
     I_ESTADO TYPE OF COLUMN V_CATEGORIAS.ESTADO )
-SQL SECURITY DEFINER
-AS 
-BEGIN SUSPEND; 
-END^
-SET TERM ; ^
-
-SET TERM ^ ;
-CREATE PROCEDURE SP_UPDATE_CLIENTE_CC (
-    ID D_ID,
-    PNOMBRE D_NOMBRES,
-    SNOMBRE D_NOMBRES,
-    APELLIDOS D_APELLIDOS,
-    SEXO D_SEXO,
-    CORREO D_CORREO,
-    SALDO D_DINERO )
 SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
@@ -1934,7 +1828,7 @@ SELECT
      u.ESTADO, 
      u.DESCRIPCION
 FROM GET_ROL r 
-INNER JOIN V_USUARIOS u ON TRIM(u.USERNAME) LIKE TRIM(r.USER_NAME)
+INNER JOIN GET_USUARIOS u ON TRIM(u.USERNAME) LIKE TRIM(r.USER_NAME)
 WHERE 
      r.ROL LIKE 'CAJERO' AND 
      r.USER_NAME NOT STARTING WITH 'SYSDBA'
@@ -1986,19 +1880,6 @@ INNER JOIN V_PERSONAS r ON r.ID = c.ID
 INNER JOIN V_CONTACTOS_DIRECCIONES d ON d.ID_PERSONA = c.ID
 INNER JOIN V_GENERALES g ON g.ID_PERSONA = c.ID
 --;
-CREATE VIEW GET_CLIENTES_CC (ID, PERSONA, PNOMBRE, SNOMBRE, 
-     APELLIDOS, SEXO, CORREO, SALDO)
-AS SELECT c.ID, p.PERSONA, p.PNOMBRE, p.SNOMBRE, p.APELLIDOS, 
-     CASE p.SEXO
-          WHEN 'M' THEN 'Masculino'
-          WHEN 'F' THEN 'Femenino' 
-          ELSE 'No definido'
-     END, e.EMAIL, COALESCE(a.SALDO, 0.00) AS SALDO
-FROM V_PERSONAS_CLIENTES c 
-LEFT JOIN V_PERSONAS_CLIENTES_ATR a ON a.ID = c.ID
-LEFT JOIN V_PERSONAS p ON p.ID = c.ID
-LEFT JOIN V_CONTACTOS_EMAIL e ON e.ID_PERSONA = c.ID
-WHERE p.ESTADO AND e.POR_DEFECTO and e.ESTADO AND c.ID > 0;
 CREATE VIEW GET_CLIENTES_SB (ID, CEDULA, PERSONA, PNOMBRE, SNOMBRE, 
      APELLIDOS, SEXO, FECHA_NACIMIENTO, ESTADO_CIVIL, FECHA_INGRESO, 
      ESTADO)
@@ -2115,19 +1996,27 @@ LEFT JOIN RDB$PROCEDURES p ON TRIM(p.RDB$PROCEDURE_NAME) = TRIM(u.RDB$RELATION_N
 CREATE VIEW GET_PRODUCTOS (ID, ID_CATEGORIA, DESC_CATEGORIA, 
      IMAGEN_CATEGORIA, CODIGO, DESCRIPCION, IMAGEN_PRODUCTO, NOTA, 
      FECHA_CREACION, ESTADO)
-AS /*
-     Esta consulta nos permite obtener un listado de producto, del cual al unirla con la tabla de categoria podemos
-     obtener el nombre o descripcion de la categoria y la imagen de la categoria, ademas de los atributos del 
-     producto como identificador, codigo, descripcion, imagen del producto, nota, fecha de creacion y estado.
+AS /*Inicio
 */
-SELECT r.ID, r.ID_CATEGORIA, c.DESCRIPCION, c.IMAGEN_TEXTO, r.CODIGO, 
-       r.DESCRIPCION, r.IMAGEN_TEXTO, r.NOTA, r.FECHA_CREACION, r.ESTADO
+SELECT 
+     r.ID, 
+     r.ID_CATEGORIA, 
+     c.DESCRIPCION, 
+     c.IMAGEN_TEXTO, 
+     r.CODIGO, 
+     r.DESCRIPCION, 
+     r.IMAGEN_TEXTO, 
+     r.NOTA, 
+     r.FECHA_CREACION, 
+     r.ESTADO
 FROM V_PRODUCTOS r
-INNER JOIN V_CATEGORIAS c ON c.ID = r.ID_CATEGORIA;
+INNER JOIN V_CATEGORIAS c ON c.ID = r.ID_CATEGORIA
+--FIN;
 CREATE VIEW GET_PROVEEDORES (ID, PERSONA, PNOMBRE, SNOMBRE, 
      APELLIDOS, SEXO, ESTADO, CEDULA, ID_PERSONA, ID_PROVINCIA, 
      ID_MUNICIPIO, DIRECCION, CODIGO)
-AS SELECT 
+AS --
+SELECT 
      p.ID, 
      a.PERSONA, a.PNOMBRE, a.SNOMBRE, a.APELLIDOS, a.SEXO, a.ESTADO,
      b.CEDULA,
@@ -2218,6 +2107,24 @@ INNER JOIN V_ALMACENES a ON a.ID = r.ID_ALMACEN
 INNER JOIN V_M_FACTURAS b ON b.ID_TURNO = r.ID AND b.ESTADO_FACTURA = 'I'
 WHERE r.ID >= 0 AND a.ID >= 0 AND b.ID >= 0
 /**/;
+CREATE VIEW GET_USUARIOS (USERNAME, PNOMBRE, SNOMBRE, APELLIDOS, 
+     ESTADO, ADMINISTRADOR, DESCRIPCION)
+AS --
+SELECT 
+  CAST(U.SEC$USER_NAME AS D_USER_NAME)  AS USUARIO,
+  COALESCE(U.SEC$FIRST_NAME, '')        AS PRIMER_NOMBRE,
+  COALESCE(U.SEC$MIDDLE_NAME, '')       AS SEGUNDO_NOMBRE,
+  COALESCE(U.SEC$LAST_NAME, '')         AS APELLIDO,
+  U.SEC$ACTIVE                          AS ESTA_ACTIVO,
+  U.SEC$ADMIN                           AS ES_ADMIN, 
+  COALESCE(U.SEC$DESCRIPTION, '')       AS DESCRIPCION
+FROM 
+  SEC$USERS U
+WHERE TRIM(U.SEC$USER_NAME) NOT STARTING WITH 'SYSDBA'
+--;;
+CREATE VIEW GET_USUARIOS_TAGS (LLAVE, VALOR, USUARIO, PLUGING)
+AS SELECT SEC$KEY, SEC$VALUE, SEC$USER_NAME, SEC$PLUGIN
+FROM SEC$USER_ATTRIBUTES u;
 CREATE VIEW VS_PRIVILEGIO (USUARIO, GRANTOR, ABRV_PRIVILEGIO, 
      NOMBRE_ABREV, GRANT_OPTION, CON_OPC_ADMIN, NOMBRE_RELACION, 
      NOMBRE_CAMPO, ID_TIPO_USUARIO, TIPO_USUARIO, ID_TIPO_OBJ, 
@@ -2596,7 +2503,8 @@ AS SELECT
   U.SEC$ADMIN                           AS ES_ADMIN, 
   u.SEC$DESCRIPTION                     AS DESCRIPCION
 FROM 
-  SEC$USERS U;
+  SEC$USERS U
+WHERE TRIM(U.SEC$USER_NAME) <> 'SYSDBA';
 /******************* EXCEPTIONS *******************/
 
 CREATE EXCEPTION E_CAJERO_NO_REGISTRADO
@@ -3073,7 +2981,8 @@ SET TERM ; ^
 
 
 COMMENT ON DOMAIN D_CEDULA IS 'Esto es una cedula por ejemplo: 000-0012345-2';
-COMMENT ON DOMAIN D_ESTADO_CIVIL IS 'El dominio D_ESTADO_CIVIL admitirá una sola letra mayúscula la cual puede ser:
+COMMENT ON DOMAIN D_ESTADO_CIVIL IS '
+El dominio D_ESTADO_CIVIL admitirá una sola letra mayúscula la cual puede ser:
 S(soltero)
 C(casado)
 D(divorciado)
@@ -3880,42 +3789,6 @@ END
 SET TERM ; ^
 
 
-COMMENT ON PROCEDURE SP_DELETE_CLIENTE_CC IS '<!DOCTYPE html>
-<html>
-<head>
-<style>
-/* This is
-a multi-line
-comment */
-
-p {
-  color: red;
-} 
-</style>
-</head>
-<body>
-
-<p>Hello World!</p>
-<p>This paragraph is styled with CSS.</p>
-<p>CSS comments are not shown in the output.</p>
-
-</body>
-</html>';
-SET TERM ^ ;
-ALTER PROCEDURE SP_DELETE_CLIENTE_CC (
-    ID D_ID )
-SQL SECURITY DEFINER
-
-AS
-BEGIN
-     DELETE FROM V_PERSONAS_CLIENTES
-     WHERE
-          ID = :ID;
-END
-^
-SET TERM ; ^
-
-
 SET TERM ^ ;
 ALTER PROCEDURE SP_DELETE_CLIENTE_SB (
     V_ID D_ID )
@@ -4177,57 +4050,6 @@ END
 SET TERM ; ^
 
 
-SET TERM ^ ;
-ALTER PROCEDURE SP_INSERT_CLIENTE (
-    I_ID D_ID,
-    I_ESTADO D_BOOLEAN_T )
-SQL SECURITY DEFINER
-
-AS
-BEGIN
-     --Ingresando el cliente
-     INSERT INTO V_PERSONAS_CLIENTES(ID) VALUES(:I_ID);
-     
-     --Guardamos la cantidad de registro por tabla.
-     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS_CLIENTES');
-END
-^
-SET TERM ; ^
-
-
-SET TERM ^ ;
-ALTER PROCEDURE SP_INSERT_CLIENTE_CC (
-    PNOMBRE D_NOMBRES,
-    SNOMBRE D_NOMBRES,
-    APELLIDOS D_APELLIDOS,
-    SEXO D_SEXO,
-    CORREO D_CORREO,
-    SALDO D_DINERO )
-SQL SECURITY DEFINER
-
-AS
-DECLARE VARIABLE V_ID D_ID;
-BEGIN
-     INSERT INTO V_PERSONAS (ID, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, SEXO)
-     VALUES (NULL, 'F', :pNombre, :sNombre, :apellidos, :sexo)
-     RETURNING ID 
-     INTO :V_ID;
-     
-     INSERT INTO V_PERSONAS_CLIENTES (ID)
-     VALUES (:V_ID);
-     
-     INSERT INTO V_CONTACTOS_EMAIL (ID_PERSONA, EMAIL)
-     VALUES (:V_ID, :correo);
-     
-     INSERT INTO V_PERSONAS_CLIENTES_ATR (ID, SALDO)
-     VALUES (:V_ID, :saldo);
-
-     
-END
-^
-SET TERM ; ^
-
-
 COMMENT ON PROCEDURE SP_INSERT_CLIENTE_SB IS 'Es el procedimiento utilizado para almacenar un cliente en el sb.';
 SET TERM ^ ;
 ALTER PROCEDURE SP_INSERT_CLIENTE_SB (
@@ -4246,18 +4068,14 @@ SQL SECURITY DEFINER
 
 AS
 BEGIN
-     V_ID = GEN_ID(G_ID_PERSONA, 1);
+     
      /*Validaciones de insercion*/
-     INSERT INTO V_PERSONAS (ID, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, 
-     FECHA_NACIMIENTO, ESTADO) VALUES (
-          :V_ID,
-          :I_PERSONA,
-          :I_PNOMBRE,
-          :I_SNOMBRE,
-          :I_APELLIDOS,
-          :I_SEXO,
-          :I_FECHA_NACIMIENTO,
-          :I_ESTADO);
+     INSERT INTO V_PERSONAS (ID, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, 
+                              SEXO, FECHA_NACIMIENTO, ESTADO) 
+     VALUES (NULL, :I_PERSONA, :I_PNOMBRE, :I_SNOMBRE, :I_APELLIDOS,
+               :I_SEXO, :I_FECHA_NACIMIENTO, :I_ESTADO)
+     RETURNING ID
+     INTO V_ID;
        
      /*Guardamos cantidad de registros por estado*/
      EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_PERSONAS', :I_ESTADO);   
@@ -4269,14 +4087,13 @@ BEGIN
      --Guardamos cantidad de registros por estado
      EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS_CLIENTES');
      
-     --Ingresando el cliente
-     INSERT INTO V_GENERALES(ID_PERSONA, CEDULA, ID_TIPO_SANGRE, ESTADO_CIVIL) 
-     VALUES(
-          :V_ID,
-          :I_CEDULA,
-          0,
-          :I_ESTADO_CIVIL
-     );
+     IF(I_CEDULA <> NULL)THEN
+     BEGIN
+          --Ingresando el cliente
+          INSERT INTO V_GENERALES(ID_PERSONA, CEDULA, ID_TIPO_SANGRE, ESTADO_CIVIL) 
+          VALUES(:V_ID, :I_CEDULA, 0, :I_ESTADO_CIVIL);
+     END
+     
      
      --Guardamos cantidad de registros por estado
      EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_GENERALES');
@@ -4770,7 +4587,10 @@ BEGIN
      
      IF((SELECT (1) FROM V_PERSONAS_CLIENTES c WHERE c.ID = :I_ID) IS NULL) THEN 
      BEGIN
+          --Insertamos el id en la siguiente vista o tabla.
           INSERT INTO V_PERSONAS_CLIENTES (ID) VALUES (:I_ID);
+          
+          --Para asunto estadisticos
           EXECUTE PROCEDURE SYS_RECCOUNT ('I', 'V_PERSONAS_CLIENTES');
           --EXCEPTION E_CLIENTE_ENCONTRADO;
      END
@@ -4874,8 +4694,8 @@ BEGIN
           EXCEPTION E_USUARIO_NO_ENCONTRADO;
           
      IF((SELECT ESTADO 
-          FROM SP_SELECT_USUARIOS 
-          WHERE TRIM(USERNAME) LIKE TRIM(:I_TURNO_USUARIO)) IS FALSE) THEN
+          FROM GET_USUARIOS 
+          WHERE TRIM(USERNAME) STARTING WITH TRIM(:I_TURNO_USUARIO)) IS FALSE) THEN
           EXCEPTION E_USUARIO_INACTIVO;
      
      INSERT INTO V_TURNOS (TURNO_USUARIO, FECHA_HORA_FINAL)
@@ -4927,122 +4747,6 @@ BEGIN
      
      POST_EVENT 'INSERT_USUARIOS';
      
-END
-^
-SET TERM ; ^
-
-
-COMMENT ON PROCEDURE SP_SELECT_GET_PRODUCTOS IS 'Muestra los productos del sistema sin las categorias añadidas. ';
-SET TERM ^ ;
-ALTER PROCEDURE SP_SELECT_GET_PRODUCTOS (
-    CRITERIOBUSQUEDA D_VARCHAR_70 )
-RETURNS (
-    ID TYPE OF COLUMN GET_PRODUCTOS.ID,
-    ID_CATEGORIA TYPE OF COLUMN GET_PRODUCTOS.ID_CATEGORIA,
-    DESC_CATEGORIA TYPE OF COLUMN GET_PRODUCTOS.DESC_CATEGORIA,
-    IMAGEN_CATEGORIA TYPE OF COLUMN GET_PRODUCTOS.IMAGEN_CATEGORIA,
-    CODIGO TYPE OF COLUMN GET_PRODUCTOS.CODIGO,
-    DESCRIPCION TYPE OF COLUMN GET_PRODUCTOS.DESCRIPCION,
-    IMAGEN_PRODUCTO TYPE OF COLUMN GET_PRODUCTOS.IMAGEN_PRODUCTO,
-    NOTA TYPE OF COLUMN GET_PRODUCTOS.NOTA,
-    FECHA_CREACION TYPE OF COLUMN GET_PRODUCTOS.FECHA_CREACION,
-    ESTADO TYPE OF COLUMN GET_PRODUCTOS.ESTADO )
-SQL SECURITY DEFINER
-
-AS
-BEGIN
-     
-     FOR SELECT 
-          a.ID, 
-          a.ID_CATEGORIA, 
-          a.DESC_CATEGORIA, 
-          a.IMAGEN_CATEGORIA, 
-          a.CODIGO, 
-          a.DESCRIPCION, 
-          a.IMAGEN_PRODUCTO, 
-          a.NOTA, 
-          a.FECHA_CREACION, 
-          a.ESTADO
-     FROM GET_PRODUCTOS a
-     WHERE a.ID >= 0 AND 
-          TRIM(a.CODIGO) STARTING WITH TRIM(:criterioBusqueda) OR
-          TRIM(a.CODIGO) CONTAINING TRIM(:criterioBusqueda) OR
-          TRIM(a.DESCRIPCION) STARTING WITH TRIM(:criterioBusqueda) OR
-          TRIM(a.DESCRIPCION) CONTAINING TRIM(:criterioBusqueda) OR
-          a.ID_CATEGORIA IN(SELECT c.ID FROM V_CATEGORIAS c WHERE TRIM(c.DESCRIPCION) STARTING WITH TRIM(:criterioBusqueda))
-     INTO 
-          ID, 
-          ID_CATEGORIA, 
-          DESC_CATEGORIA, 
-          IMAGEN_CATEGORIA, 
-          CODIGO, 
-          DESCRIPCION, 
-          IMAGEN_PRODUCTO, 
-          NOTA, 
-          FECHA_CREACION, 
-          ESTADO 
-     DO
-     BEGIN
-          SUSPEND;
-     END
-END
-^
-SET TERM ; ^
-
-
-SET TERM ^ ;
-ALTER PROCEDURE SP_SELECT_GET_PROVEEDORES
-RETURNS (
-    ID TYPE OF COLUMN GET_PROVEEDORES.ID,
-    PERSONA TYPE OF COLUMN GET_PROVEEDORES.PERSONA,
-    PNOMBRE TYPE OF COLUMN GET_PROVEEDORES.PNOMBRE,
-    SNOMBRE TYPE OF COLUMN GET_PROVEEDORES.SNOMBRE,
-    APELLIDOS TYPE OF COLUMN GET_PROVEEDORES.APELLIDOS,
-    SEXO TYPE OF COLUMN GET_PROVEEDORES.SEXO,
-    ESTADO TYPE OF COLUMN GET_PROVEEDORES.ESTADO,
-    CEDULA TYPE OF COLUMN GET_PROVEEDORES.CEDULA,
-    ID_PERSONA TYPE OF COLUMN GET_PROVEEDORES.ID_PERSONA,
-    ID_PROVINCIA TYPE OF COLUMN GET_PROVEEDORES.ID_PROVINCIA,
-    ID_MUNICIPIO TYPE OF COLUMN GET_PROVEEDORES.ID_MUNICIPIO,
-    DIRECCION TYPE OF COLUMN GET_PROVEEDORES.DIRECCION,
-    CODIGO TYPE OF COLUMN GET_PROVEEDORES.CODIGO )
-SQL SECURITY INVOKER
-
-AS
-BEGIN
-     FOR SELECT 
-          a.ID, 
-          a.PERSONA, 
-          a.PNOMBRE, 
-          a.SNOMBRE, 
-          a.APELLIDOS, 
-          a.SEXO, 
-          a.ESTADO, 
-          a.CEDULA, 
-          a.ID_PERSONA, 
-          a.ID_PROVINCIA, 
-          a.ID_MUNICIPIO, 
-          a.DIRECCION, 
-          a.CODIGO
-     FROM GET_PROVEEDORES a
-     INTO 
-          ID, 
-          PERSONA, 
-          PNOMBRE, 
-          SNOMBRE, 
-          APELLIDOS, 
-          SEXO, 
-          ESTADO, 
-          CEDULA, 
-          ID_PERSONA, 
-          ID_PROVINCIA, 
-          ID_MUNICIPIO, 
-          DIRECCION, 
-          CODIGO 
-     DO
-     BEGIN
-          SUSPEND;
-     END
 END
 ^
 SET TERM ; ^
@@ -5180,47 +4884,6 @@ END
 SET TERM ; ^
 
 
-SET TERM ^ ;
-ALTER PROCEDURE SP_SELECT_USUARIOS
-RETURNS (
-    USERNAME TYPE OF COLUMN V_USUARIOS.USERNAME,
-    PNOMBRE TYPE OF COLUMN V_USUARIOS.PNOMBRE,
-    SNOMBRE TYPE OF COLUMN V_USUARIOS.SNOMBRE,
-    APELLIDOS TYPE OF COLUMN V_USUARIOS.APELLIDOS,
-    ESTADO TYPE OF COLUMN V_USUARIOS.ESTADO,
-    ADMINISTRADOR TYPE OF COLUMN V_USUARIOS.ADMINISTRADOR,
-    DESCRIPCION TYPE OF COLUMN V_USUARIOS.DESCRIPCION )
-SQL SECURITY DEFINER
-
-AS
-BEGIN
-     FOR SELECT 
-          TRIM(a.USERNAME), 
-          TRIM(a.PNOMBRE), 
-          TRIM(a.SNOMBRE), 
-          TRIM(a.APELLIDOS), 
-          a.ESTADO, 
-          a.ADMINISTRADOR, 
-          TRIM(a.DESCRIPCION)
-     FROM V_USUARIOS a 
-     WHERE TRIM(a.USERNAME) <> 'SYSDBA'
-     INTO 
-          USERNAME, 
-          PNOMBRE, 
-          SNOMBRE, 
-          APELLIDOS, 
-          ESTADO, 
-          ADMINISTRADOR, 
-          DESCRIPCION 
-     DO
-     BEGIN
-          SUSPEND;
-     END
-END
-^
-SET TERM ; ^
-
-
 COMMENT ON PROCEDURE SP_SELECT_USUARIOS_TAGS IS 'Permiso que permite consultar las etiquetas de los usuarios del sistema.
 
 Recibe como parametro de entrada el nombre del usuario y devuelve un 
@@ -5241,7 +4904,7 @@ BEGIN
      
      FOR SELECT SEC$KEY, SEC$VALUE
      FROM SEC$USER_ATTRIBUTES 
-     WHERE TRIM(SEC$USER_NAME) = TRIM(:I_USER_NAME)
+     WHERE TRIM(SEC$USER_NAME) STARTING WITH UPPER(TRIM(:I_USER_NAME))
      INTO o_tag_nombre, o_tag_valor
      DO BEGIN
           SUSPEND;
@@ -5417,88 +5080,6 @@ BEGIN
           ESTADO = :I_ESTADO
      WHERE
           ID = :I_ID;
-END
-^
-SET TERM ; ^
-
-
-SET TERM ^ ;
-ALTER PROCEDURE SP_UPDATE_CLIENTE_CC (
-    ID D_ID,
-    PNOMBRE D_NOMBRES,
-    SNOMBRE D_NOMBRES,
-    APELLIDOS D_APELLIDOS,
-    SEXO D_SEXO,
-    CORREO D_CORREO,
-    SALDO D_DINERO )
-SQL SECURITY DEFINER
-
-AS
-DECLARE VARIABLE CORREO_ANTERIOR D_CORREO;
-DECLARE VARIABLE SALDO_ANTERIOR D_DINERO;
-BEGIN
-     /*Actualizamos los atributos basicos*/
-     UPDATE V_PERSONAS a
-     SET 
-          a.PNOMBRE = :PNOMBRE, 
-          a.SNOMBRE = :SNOMBRE, 
-          a.APELLIDOS = :APELLIDOS, 
-          a.SEXO = :SEXO
-     WHERE
-          a.ID = :ID;
-          
-     /*Recuperamos el correo anteriordel cliente.*/
-     CORREO_ANTERIOR = (
-                         SELECT e.EMAIL 
-                         FROM V_CONTACTOS_EMAIL e 
-                         WHERE e.ID_PERSONA = :ID AND e.ESTADO AND e.POR_DEFECTO
-               );
-
-     /*Si el correo anterior es diferente al correo actual, lo actualizamos. 
-     En caso contrario no.*/
-     IF(TRIM(UPPER(:CORREO_ANTERIOR)) <> TRIM(UPPER(:CORREO)))THEN BEGIN
-          /*Eliminamos cualquier correo por defecto de cliente.*/
-          UPDATE V_CONTACTOS_EMAIL e
-          SET
-               e.POR_DEFECTO = FALSE
-          WHERE 
-               e.ID_PERSONA = :ID;
-          
-          /*Insertamos un correo nuevo el cual sera activo y por defecto del cliente.*/
-          INSERT INTO V_CONTACTOS_EMAIL (ID_PERSONA, EMAIL)
-          VALUES (:ID, :CORREO);
-     END
-     
-     /*Investigamos el saldo_anterior del cliente. Si es nulo obtenemos 0.00*/
-     SALDO_ANTERIOR = COALESCE(
-                                   (
-                                        SELECT a.SALDO 
-                                        FROM V_PERSONAS_CLIENTES_ATR a 
-                                        WHERE a.ID = :ID
-                                   ), 
-                                   0.00
-                              );
-     
-     /*Si el saldo anterior es 0.00, agregamos el nuevo saldo al cliente.*/
-     IF(SALDO_ANTERIOR = 0.00)THEN BEGIN
-          UPDATE V_PERSONAS_CLIENTES_ATR a
-          SET
-               a.SALDO = :SALDO
-          WHERE
-               a.ID = :ID;
-     END ELSE BEGIN
-          /*Pero si el saldo anterior es diferente del saldo actual, 
-          sumamos o restamo la cantidad de SALDO.*/
-          IF(SALDO_ANTERIOR <> :SALDO)THEN BEGIN
-               UPDATE V_PERSONAS_CLIENTES_ATR a
-               SET
-                    a.SALDO = a.SALDO + :SALDO
-               WHERE
-                    a.ID = :ID;
-          END
-     END
-          
-     
 END
 ^
 SET TERM ; ^
@@ -6033,7 +5614,7 @@ SQL SECURITY DEFINER
 
 AS
 BEGIN
-     IF((SELECT (1) FROM V_USUARIOS u WHERE TRIM(u.USERNAME) LIKE TRIM(:I_USER_NAME)) IS NULL)THEN
+     IF((SELECT (1) FROM GET_USUARIOS u WHERE TRIM(u.USERNAME) LIKE TRIM(:I_USER_NAME)) IS NULL)THEN
           EXCEPTION E_USUARIO_NO_ENCONTRADO;
      O_USER_NAME = TRIM(:I_USER_NAME);
      SUSPEND;
@@ -6511,11 +6092,6 @@ De la vista de V_PRODUCTOS traemos los Identificadores de las CATEGORIAS del cam
 Una categoria activa deberia de ser aquella donde los productos activos contienen una categoria. El CTE nos da aquella lista de id_categoria que tiene productos activos.
 
 ';
-COMMENT ON VIEW GET_CLIENTES_CC IS 'Esta vista es utilizada para el sistema web de Control cliente.
-
-La cc significa Control Cliente.
-
-';
 COMMENT ON VIEW GET_CLIENTES_SB IS '
 Consulta que nos permite obtener los clientes.
 
@@ -6549,6 +6125,13 @@ Debe de obtenerse las relaciones entre padre he hijo de la tabla RELACION_FAMILI
 ';
 COMMENT ON VIEW GET_PACIENTES IS '
 Debe de obtenerse las relaciones entre padre he hijo de la tabla RELACION_FAMILIAR.
+';
+COMMENT ON VIEW GET_PRODUCTOS IS '
+Esta consulta nos permite obtener un listado de producto, del cual al unirla con la tabla de categoria podemos obtener el nombre o descripcion de la categoria y la imagen de la categoria, ademas de los atributos del producto como identificador, codigo, descripcion, imagen del producto, nota, fecha de creacion y estado.
+
+
+Filtro que se esta utilizando: 
+
 ';
 COMMENT ON VIEW GET_ROL IS 'Vista que nos permite obtener los roles de los usuarios.
 
@@ -6602,6 +6185,9 @@ COMMENT ON VIEW V_PERSONAS_ESTUDIANTES_VER IS 'Esta vista permite obtener el ide
 Para verificar si un estudiante esta registrado en la base de datos por su matricula y que este en estado activo.
 ';
 COMMENT ON VIEW V_TURNOS IS 'Tabla utilizada para guardar los turnos de los cajeros del sistema.';
+COMMENT ON VIEW V_USUARIOS IS '
+Esta vista no puede entregar el usuario SYSDBA.
+';
 COMMENT ON EXCEPTION E_CAJERO_TURNO_INACTIVO IS 'Este excepcion es lanzada cuando el cajero no cuenta con un turno activado en la vista V_TURNOS. ';
 COMMENT ON EXCEPTION E_CATEGORIAS_INACTIVA IS 'Excepcion utilizada para indicar que un producto no se encuentra activado y no debe utilizarse.';
 COMMENT ON EXCEPTION E_CORREO_INACTIVO IS 'Exception lanzada cuando un correo se encuentra inactivo o eliminado de la vista V_CONTACTS_TEL.';
@@ -6806,12 +6392,6 @@ GRANT EXECUTE
  ON PROCEDURE SP_DELETE_CATEGORIAS TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
- ON PROCEDURE SP_DELETE_CLIENTE_CC TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_DELETE_CLIENTE_CC TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
  ON PROCEDURE SP_DELETE_CLIENTE_SB TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
@@ -6876,18 +6456,6 @@ GRANT EXECUTE
 
 GRANT EXECUTE
  ON PROCEDURE SP_INSERT_CATEGORIAS TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_INSERT_CLIENTE TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_INSERT_CLIENTE TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_INSERT_CLIENTE_CC TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_INSERT_CLIENTE_CC TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
  ON PROCEDURE SP_INSERT_CLIENTE_SB TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
@@ -6983,18 +6551,6 @@ GRANT EXECUTE
  ON PROCEDURE SP_INSERT_USUARIO TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
- ON PROCEDURE SP_SELECT_GET_PRODUCTOS TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_SELECT_GET_PRODUCTOS TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_SELECT_GET_PROVEEDORES TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_SELECT_GET_PROVEEDORES TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
  ON PROCEDURE SP_SELECT_PRODUCTOS TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
@@ -7011,12 +6567,6 @@ GRANT EXECUTE
 
 GRANT EXECUTE
  ON PROCEDURE SP_SELECT_PRODUCTOS_ID_CODIGO TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_SELECT_USUARIOS TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_SELECT_USUARIOS TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
  ON PROCEDURE SP_SELECT_USUARIOS_TAGS TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
@@ -7053,12 +6603,6 @@ GRANT EXECUTE
 
 GRANT EXECUTE
  ON PROCEDURE SP_UPDATE_CATEGORIA TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_UPDATE_CLIENTE_CC TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
-
-GRANT EXECUTE
- ON PROCEDURE SP_UPDATE_CLIENTE_CC TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
  ON PROCEDURE SP_UPDATE_CLIENTE_SB TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
@@ -7519,12 +7063,6 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON GET_CLIENTES TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA;
 
-GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
- ON GET_CLIENTES_CC TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA;
-
-GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
- ON GET_CLIENTES_CC TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA;
-
 GRANT SELECT
  ON GET_CLIENTES_SB TO ROLE CAJERO WITH GRANT OPTION GRANTED BY SYSDBA;
 
@@ -7623,6 +7161,12 @@ GRANT SELECT
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON GET_TURNOS TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
+ ON GET_USUARIOS TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
+ ON GET_USUARIOS_TAGS TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON VS_PRIVILEGIO TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA;
