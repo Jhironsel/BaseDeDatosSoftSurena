@@ -952,8 +952,6 @@ SET TERM ^ ;
 CREATE PROCEDURE SP_UPDATE_DEUDA_ESTADO (
     E_ID_DEUDA D_ID NOT NULL,
     E_OBJ D_ESTADO_C_I_P_A_N_T NOT NULL )
-RETURNS (
-    S_SALIDA D_VARCHAR_15 )
 SQL SECURITY DEFINER
 AS 
 BEGIN SUSPEND; 
@@ -4039,6 +4037,8 @@ BEGIN
           EXECUTE STATEMENT V_SQL;
           V_SQL = 'GRANT SELECT ON V_CATEGORIAS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
           EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON GET_TEMPORALES TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
           
           --Procedimiento mismo
           V_SQL = 'GRANT EXECUTE ON PROCEDURE PERM_CREAR_FACTURAS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
@@ -4058,6 +4058,8 @@ BEGIN
           V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON GET_CATEGORIA_ACTIVAS FROM '||:I_ROL;
           EXECUTE STATEMENT V_SQL;
           V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON V_CATEGORIAS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON GET_TEMPORALES FROM '||:I_ROL;
           EXECUTE STATEMENT V_SQL;
           
           --Procedimiento mismo
@@ -4740,11 +4742,14 @@ BEGIN
           en el sistema. Por ejemplo, Cantidad de total facturas, las cantidades de la facturas que se realizan en
           un dia, en una semana, en un mes y en un año para el sistema analitico, cantidad de facturas por estado.
      */
+     --Validando que el turno este activo.
      IF(( SELECT (1) 
           FROM V_TURNOS t 
           WHERE t.ID = :I_ID_TURNO AND t.ESTADO) IS NULL)THEN
           EXCEPTION E_CAJERO_TURNO_INACTIVO;
      
+     --Validando que el id de contacto es diferente de cero y que se encuentre en la tabla de CONTACTOS_TEL y
+     --el codigo de cliente este relacionado a ese contacto y que el estado sea activo.
      IF(:I_ID_CONTACTOS_TEL <> 0 AND (SELECT (1) 
           FROM V_CONTACTOS_TEL t 
           WHERE t.ID = :I_ID_CONTACTOS_TEL AND 
@@ -4752,6 +4757,7 @@ BEGIN
                 t.ESTADO) IS NULL) THEN
           EXCEPTION E_TELEFONO_INACTIVO;
      
+     --Por igual.
      IF(:I_ID_CONTACTOS_EMAIL <> 0 AND (SELECT (1) 
           FROM V_CONTACTOS_EMAIL e 
           WHERE e.ID = :I_ID_CONTACTOS_EMAIL AND 
@@ -4759,13 +4765,14 @@ BEGIN
                 e.ESTADO) IS NULL) THEN
           EXCEPTION E_CORREO_INACTIVO;
           
+     --Por igual.
      IF(:I_ID_CONTACTOS_DIRECCIONES <> 0 AND 
           (SELECT (1) 
                FROM V_CONTACTOS_DIRECCIONES e
                WHERE e.ID = :I_ID_CONTACTOS_DIRECCIONES AND 
                 e.ID_PERSONA = :I_ID_CLIENTE AND 
                 e.ESTADO) IS NULL) THEN
-                              EXCEPTION E_DIRECCION_INACTIVO;
+          EXCEPTION E_DIRECCION_INACTIVO;
           
      UPDATE OR INSERT INTO V_M_FACTURAS (ID, ID_CLIENTE, ID_CONTACTOS_TEL, ID_CONTACTOS_DIRECCIONES, ID_CONTACTOS_EMAIL, ID_TURNO, TOTAL, 
                EFECTIVO, ESTADO_FACTURA, NOMBRE_TEMP)
@@ -5261,7 +5268,7 @@ ALTER PROCEDURE SP_UPDATE_CATEGORIA (
     I_DESCRIPCION TYPE OF COLUMN V_CATEGORIAS.DESCRIPCION,
     I_IMAGEN_TEXTO TYPE OF COLUMN V_CATEGORIAS.IMAGEN_TEXTO,
     I_ESTADO TYPE OF COLUMN V_CATEGORIAS.ESTADO )
-SQL SECURITY DEFINER
+SQL SECURITY INVOKER
 
 AS
 BEGIN
@@ -5333,8 +5340,6 @@ SET TERM ^ ;
 ALTER PROCEDURE SP_UPDATE_DEUDA_ESTADO (
     E_ID_DEUDA D_ID NOT NULL,
     E_OBJ D_ESTADO_C_I_P_A_N_T NOT NULL )
-RETURNS (
-    S_SALIDA D_VARCHAR_15 )
 SQL SECURITY DEFINER
 
 AS
@@ -5344,54 +5349,14 @@ BEGIN
           FROM V_DEUDAS d 
           WHERE d.ID = :e_id_Deuda) IS NULL)THEN
     BEGIN
-          s_salida = 'No encontrada;';
-          SUSPEND;
           EXCEPTION E_DEUDA_NO_ENCONTRADA;
     END
     
-    IF(:e_obj = 'i')THEN
-    BEGIN
-        UPDATE V_DEUDAS a
-        SET 
-            a.ESTADO = 'i'
-        WHERE
-            a.ID = :e_id_Deuda;
-        s_salida = 'Iniciada';
-        SUSPEND;
-    END
-    
-    IF(:e_obj = 'p')THEN
-    BEGIN
-        UPDATE V_DEUDAS a
-        SET 
-            a.ESTADO = 'p'
-        WHERE
-            a.ID = :e_id_Deuda;
-        s_salida = 'Pagada';
-        SUSPEND;
-    END
-    
-    IF(:e_obj = 'a')THEN
-    BEGIN
-        UPDATE V_DEUDAS a
-        SET 
-            a.ESTADO = 'a'
-        WHERE
-            a.ID = :e_id_Deuda;
-        s_salida = 'Abonada';
-        SUSPEND;
-    END
-    
-    IF(:e_obj = 'n')THEN
-    BEGIN
-        UPDATE V_DEUDAS a
-        SET 
-            a.ESTADO = 'n'
-        WHERE
-            a.ID = :e_id_Deuda;
-        s_salida = 'Nulada';
-        SUSPEND;
-    END
+     UPDATE V_DEUDAS a
+     SET 
+          a.ESTADO = :e_obj
+     WHERE
+          a.ID = :e_id_Deuda;
 END
 ^
 SET TERM ; ^
@@ -7280,6 +7245,9 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON GET_TANDAS_DETALLADAS TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA;
+
+GRANT SELECT
+ ON GET_TEMPORALES TO ROLE CAJERO WITH GRANT OPTION GRANTED BY SYSDBA;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON GET_TEMPORALES TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA;
