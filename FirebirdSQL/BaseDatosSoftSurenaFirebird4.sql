@@ -7345,6 +7345,9 @@ GRANT EXECUTE
  ON PROCEDURE PERM_PANEL_USUARIO TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
+ ON PROCEDURE SP_DELETE_ALL TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
+
+GRANT EXECUTE
  ON PROCEDURE SP_DELETE_ALL TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
@@ -7444,7 +7447,13 @@ GRANT EXECUTE
  ON PROCEDURE SP_INSERT_CLIENTE_SB TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
+ ON PROCEDURE SP_INSERT_CONSULTA TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
+
+GRANT EXECUTE
  ON PROCEDURE SP_INSERT_CONSULTA TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
+
+GRANT EXECUTE
+ ON PROCEDURE SP_INSERT_CONTACTOS_TEL TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
  ON PROCEDURE SP_INSERT_CONTACTOS_TEL TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
@@ -7517,6 +7526,9 @@ GRANT EXECUTE
 
 GRANT EXECUTE
  ON PROCEDURE SP_INSERT_PROVEEDOR TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
+
+GRANT EXECUTE
+ ON PROCEDURE SP_INSERT_TEST TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
 
 GRANT EXECUTE
  ON PROCEDURE SP_INSERT_TEST TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA                                                                                                                                                                                                                                                      ;
@@ -8111,6 +8123,9 @@ GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON GET_TURNOS TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
+ ON VS_CATEGORIAS TO ROLE RDB$ADMIN WITH GRANT OPTION GRANTED BY SYSDBA;
 
 GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE
  ON VS_CATEGORIAS TO  SYSDBA WITH GRANT OPTION GRANTED BY SYSDBA;

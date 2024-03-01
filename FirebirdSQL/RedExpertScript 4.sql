@@ -1,0 +1,8275 @@
+
+/* Setting properties */
+
+SET NAMES UTF8;
+SET SQL DIALECT 3;
+CONNECT 'localhost:3050//home/jhironsel/BaseDatos/BaseDeDatos42.fdb' USER 'SYSDBA' PASSWORD '1';
+SET AUTODDL ON;
+
+/* ----- Creating Domains ----- */
+
+/* D_ABREVIATURA */
+CREATE DOMAIN D_ABREVIATURA AS CHAR(1)
+ NOT NULL CHECK (VALUE IN('S', 'I', 'U', 'D', 'G', 'M', 'X', 'R')) COLLATE UTF8;
+/* D_APELLIDOS */
+CREATE DOMAIN D_APELLIDOS AS VARCHAR(40)
+ DEFAULT '' CHECK (value similar to '[[:ALPHA:]-'' .ÑñÁáÉéÍíÓóÚú]*' escape '@') COLLATE UTF8;
+/* D_BLOB_BINARIO */
+CREATE DOMAIN D_BLOB_BINARIO AS BLOB SUB_TYPE BINARY
+;
+/* D_BLOB_TEXTO */
+CREATE DOMAIN D_BLOB_TEXTO AS BLOB SUB_TYPE TEXT
+ COLLATE UTF8;
+/* D_BOOLEAN_F */
+CREATE DOMAIN D_BOOLEAN_F AS BOOLEAN
+ DEFAULT FALSE NOT NULL;
+/* D_BOOLEAN_T */
+CREATE DOMAIN D_BOOLEAN_T AS BOOLEAN
+ DEFAULT TRUE;
+/* D_CEDULA */
+CREATE DOMAIN D_CEDULA AS CHAR(13)
+ CHECK (value similar to '[[:DIGIT:]]{3}[-][[:DIGIT:]]{7}[-][[:DIGIT:]]{1}') COLLATE UTF8;
+/* D_CLAVE */
+CREATE DOMAIN D_CLAVE AS VARCHAR(30)
+ COLLATE UTF8;
+/* D_CODIGO */
+CREATE DOMAIN D_CODIGO AS VARCHAR(20)
+ COLLATE UTF8;
+/* D_CODIGO_CUENTA_CONTABLE */
+CREATE DOMAIN D_CODIGO_CUENTA_CONTABLE AS VARCHAR(14)
+ DEFAULT '-1' NOT NULL COLLATE UTF8;
+/* D_CODIGO_PAI */
+CREATE DOMAIN D_CODIGO_PAI AS CHAR(7)
+ COLLATE UTF8;
+/* D_CORREO */
+CREATE DOMAIN D_CORREO AS VARCHAR(100)
+ CHECK (trim(VALUE) SIMILAR TO '[[:ALNUM:]-_.]*@[[:ALNUM:]-_]*.[[:ALPHA:].]*' and 
+     ascii_val(SUBSTRING(VALUE FROM 1 FOR 1)) > 65 and ascii_val(SUBSTRING(VALUE FROM 1 FOR 1)) < 90 or 
+     ascii_val(SUBSTRING(VALUE FROM 1 FOR 1)) > 97 and ascii_val(SUBSTRING(VALUE FROM 1 FOR 1)) < 122) COLLATE UTF8;
+/* D_DEDO */
+CREATE DOMAIN D_DEDO AS CHAR(2)
+ DEFAULT 'IN' NOT NULL CHECK (value in('PU', 'IN', 'MA', 'AN', 'ME')) COLLATE UTF8;
+/* D_DESCUENTO */
+CREATE DOMAIN D_DESCUENTO AS NUMERIC(5,2)
+ DEFAULT 0.00 CHECK (VALUE >= 0 AND VALUE <= 100);
+/* D_DIA */
+CREATE DOMAIN D_DIA AS CHAR(2)
+ DEFAULT 'LU' CHECK (value in('LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO')) COLLATE UTF8;
+/* D_DINERO */
+CREATE DOMAIN D_DINERO AS NUMERIC(18,2)
+ DEFAULT 0.00;
+/* D_DOBLE_PRESICION */
+CREATE DOMAIN D_DOBLE_PRESICION AS DOUBLE PRECISION
+;
+/* D_EDAD */
+CREATE DOMAIN D_EDAD AS SMALLINT
+ DEFAULT 0 NOT NULL CHECK (VALUE >= 0);
+/* D_ESTADO_CIVIL */
+CREATE DOMAIN D_ESTADO_CIVIL AS CHAR(1)
+ DEFAULT 'S' CHECK (VALUE IN ('S', 'C', 'D', 'V', 'U', 'X')) COLLATE UTF8;
+/* D_ESTADO_C_I_P_A_N_T */
+CREATE DOMAIN D_ESTADO_C_I_P_A_N_T AS CHAR(1)
+ DEFAULT 'i' CHECK (LOWER(VALUE) IN('c','i', 'p', 'a', 'n', 't')) COLLATE UTF8;
+/* D_ESTADO_MENSAJES */
+CREATE DOMAIN D_ESTADO_MENSAJES AS CHAR(1)
+ DEFAULT 'N' NOT NULL CHECK (VALUE IN('N', 'L', 'R', 'B')) COLLATE UTF8;
+/* D_FECHA */
+CREATE DOMAIN D_FECHA AS DATE
+ DEFAULT CURRENT_DATE;
+/* D_FECHA_HORA */
+CREATE DOMAIN D_FECHA_HORA AS TIMESTAMP
+ DEFAULT CURRENT_TIMESTAMP;
+/* D_HORA */
+CREATE DOMAIN D_HORA AS TIME
+ DEFAULT CURRENT_TIME;
+/* D_ID */
+CREATE DOMAIN D_ID AS INTEGER
+ DEFAULT NULL CHECK (VALUE >= -1);
+/* D_INSERT_DELETE */
+CREATE DOMAIN D_INSERT_DELETE AS CHAR(1)
+ DEFAULT 'I' NOT NULL CHECK (UPPER(value) in('I', 'D')) COLLATE UTF8;
+/* D_MEDIDA */
+CREATE DOMAIN D_MEDIDA AS NUMERIC(18,2)
+ DEFAULT 0.00;
+/* D_NIVEL_CUENTA */
+CREATE DOMAIN D_NIVEL_CUENTA AS CHAR(1)
+ DEFAULT 'X' NOT NULL CHECK (VALUE IN('D', 'G')) COLLATE UTF8;
+/* D_NOMBRES */
+CREATE DOMAIN D_NOMBRES AS VARCHAR(40)
+ DEFAULT '' CHECK (value similar to '[[:ALPHA:]-'' .ÑñÁáÉéÍíÓóÚú]*' escape '@') COLLATE UTF8;
+/* D_PERSONA */
+CREATE DOMAIN D_PERSONA AS CHAR(1)
+ DEFAULT 'F' CHECK (VALUE in ('F', 'J', 'X')) COLLATE UTF8;
+/* D_PUNTO_CARDINALES */
+CREATE DOMAIN D_PUNTO_CARDINALES AS VARCHAR(5)
+ DEFAULT 'N/A' CHECK (VALUE IN('Norte', 'Este', 'Sur', 'Oeste', 'N/A')) COLLATE UTF8;
+/* D_ROL */
+CREATE DOMAIN D_ROL AS CHAR(31)
+ DEFAULT CURRENT_ROLE NOT NULL COLLATE UTF8;
+/* D_SANGRE_SIMBOLOS */
+CREATE DOMAIN D_SANGRE_SIMBOLOS AS VARCHAR(3)
+ DEFAULT 'N/A' CHECK (VALUE in('N/A','O-','O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+')) COLLATE UTF8;
+/* D_SEXO */
+CREATE DOMAIN D_SEXO AS CHAR(1)
+ DEFAULT 'M' CHECK (UPPER(value) = 'M' or UPPER(value) = 'F' or UPPER(value) = 'X') COLLATE UTF8;
+/* D_TELEFONO */
+CREATE DOMAIN D_TELEFONO AS CHAR(16)
+ CHECK (value similar to '[+][1][(][[:digit:]]{3}[)][ ][[:digit:]]{3}[-][[:digit:]]{4}') COLLATE UTF8;
+/* D_TIEMPO_GESTACION */
+CREATE DOMAIN D_TIEMPO_GESTACION AS NUMERIC(4,2)
+ DEFAULT 4 NOT NULL CHECK (VALUE > 1 AND VALUE < 10);
+/* D_TIPO_CUENTAS */
+CREATE DOMAIN D_TIPO_CUENTAS AS VARCHAR(2)
+ DEFAULT 'XX' NOT NULL CHECK ((VALUE IN('A', 'PA', 'PT', 'I', 'G', 'CC', 'CO'))
+/*
+     A  = ACTIVO,
+     PA = PASIVO, 
+     PT = PATRIMONIO, 
+     I  = INGRESOS, 
+     G  = GASTOS, 
+     CC = CUENTAS DE CIERRE, 
+     CO = CUENTAS DE ORDEN.
+*/) COLLATE UTF8;
+/* D_TURNO */
+CREATE DOMAIN D_TURNO AS SMALLINT
+ DEFAULT 0 CHECK (VALUE >= 0);
+/* D_USER_NAME */
+CREATE DOMAIN D_USER_NAME AS VARCHAR(63)
+ DEFAULT CURRENT_USER NOT NULL COLLATE UTF8;
+/* D_VARCHAR_1024 */
+CREATE DOMAIN D_VARCHAR_1024 AS VARCHAR(1024)
+ COLLATE UTF8;
+/* D_VARCHAR_15 */
+CREATE DOMAIN D_VARCHAR_15 AS VARCHAR(15)
+ COLLATE UTF8;
+/* D_VARCHAR_25 */
+CREATE DOMAIN D_VARCHAR_25 AS VARCHAR(25)
+ COLLATE UTF8;
+/* D_VARCHAR_255 */
+CREATE DOMAIN D_VARCHAR_255 AS VARCHAR(255)
+ COLLATE UTF8;
+/* D_VARCHAR_45 */
+CREATE DOMAIN D_VARCHAR_45 AS VARCHAR(45)
+ COLLATE UTF8;
+/* D_VARCHAR_70 */
+CREATE DOMAIN D_VARCHAR_70 AS VARCHAR(70)
+ COLLATE UTF8;
+/* D_VARCHAR_MAX */
+CREATE DOMAIN D_VARCHAR_MAX AS VARCHAR(32765) CHARACTER SET ISO8859_1
+ COLLATE ES_ES_CI_AI;
+/* ----- Creating Tables ----- */
+
+/* ALMACENES */
+CREATE TABLE ALMACENES (
+    ID D_ID NOT NULL,
+    NOMBRE D_VARCHAR_70,
+    UBICACION D_VARCHAR_255,
+    ESTADO D_BOOLEAN_T);
+
+
+/* ANTECEDENTES */
+CREATE TABLE ANTECEDENTES (
+    ID D_ID NOT NULL,
+    ID_CONSULTA D_ID NOT NULL,
+    DESCRIPCION D_VARCHAR_1024 NOT NULL);
+
+COMMENT ON TABLE ANTECEDENTES IS 'Es una tabla utilizada para almacenar los antecedentes de los pacientes del sistema, dicho antecedente describe la condicion de los paciente en el momento de la consulta.';
+
+/* ARS */
+CREATE TABLE ARS (
+    ID D_ID NOT NULL,
+    DESCRIPCION D_VARCHAR_45 NOT NULL,
+    COVERCONSULTAPORC D_DESCUENTO NOT NULL,
+    ESTADO D_BOOLEAN_T NOT NULL,
+    CANTIDAD_REGISTRO D_ID,
+    USER_NAME D_USER_NAME,
+    ROL D_ROL NOT NULL);
+
+COMMENT ON TABLE ARS IS 'Tabla que almacenas las propiedades basicas de los seguros con lo que opera el sistema.
+
+Descripcion seria el nombre de la aseguradora, la converConsulta guardar el valor en porciento de lo que el seguro cubre por consulta.';
+
+/* ASEGURADOS */
+CREATE TABLE ASEGURADOS (
+    ID_PERSONA D_ID NOT NULL,
+    ID_ARS D_ID,
+    NO_NSS D_VARCHAR_25,
+    ESTADO D_BOOLEAN_T NOT NULL);
+
+
+/* CARTONES_BINGO */
+CREATE TABLE CARTONES_BINGO (
+    ID D_ID NOT NULL,
+    CARTON_HASH D_ID NOT NULL,
+    FECHA_CREACCION D_FECHA_HORA NOT NULL,
+    MATRIZ_OBJ D_BLOB_TEXTO NOT NULL,
+    ESTADO D_BOOLEAN_T);
+
+
+/* CATEGORIAS */
+CREATE TABLE CATEGORIAS (
+    ID D_ID NOT NULL,
+    DESCRIPCION D_VARCHAR_25 NOT NULL,
+    IMAGEN_TEXTO D_BLOB_TEXTO,
+    FECHA_CREACION D_FECHA NOT NULL,
+    ESTADO D_BOOLEAN_T NOT NULL,
+    USER_NAME D_USER_NAME);
+
+
+/* CODIGOS_POSTALES */
+CREATE TABLE CODIGOS_POSTALES (
+    ID D_ID NOT NULL,
+    IDPROVINCIA D_ID,
+    LOCALIDAD D_VARCHAR_45,
+    CODIGO_POSTAL D_ID);
+
+
+/* CONSULTAS */
+CREATE TABLE CONSULTAS (
+    ID D_ID NOT NULL,
+    ID_PACIENTE D_ID,
+    ID_CONTROL_CONSULTA D_ID,
+    FECHA D_FECHA,
+    TURNO D_TURNO,
+    ESTADO D_BOOLEAN_T,
+    USER_NAME D_USER_NAME);
+
+COMMENT ON COLUMN CONSULTAS.ID IS 'Identificador de la consulta.';
+COMMENT ON COLUMN CONSULTAS.ID_PACIENTE IS 'Es el identificador de los paciente del sistema o la tabla PERSONAS_PACIENTES.';
+COMMENT ON COLUMN CONSULTAS.ID_CONTROL_CONSULTA IS 'Identificador del control de la consulta que indica fecha y hora de la consulta.
+';
+COMMENT ON COLUMN CONSULTAS.FECHA IS 'Es la fecha en la que se realiza la consulta.';
+COMMENT ON COLUMN CONSULTAS.TURNO IS 'Es el orden de los paciente en la consulta. ';
+COMMENT ON COLUMN CONSULTAS.ESTADO IS 'Es el estado de la consulta que se desea realizar.';
+COMMENT ON COLUMN CONSULTAS.USER_NAME IS 'Usuario que realiza la consulta. ';
+
+/* CONSULTAS_APROBADAS */
+CREATE TABLE CONSULTAS_APROBADAS (
+    ID D_ID NOT NULL,
+    COD_AUTORIZACION D_VARCHAR_15 NOT NULL,
+    COSTO D_DINERO NOT NULL,
+    DESCUENTO D_DESCUENTO NOT NULL,
+    USER_NAME D_USER_NAME,
+    TOTALCOSTO NUMERIC(18,2));
+
+
+/* CONTACTOS_DIRECCIONES */
+CREATE TABLE CONTACTOS_DIRECCIONES (
+    ID D_ID NOT NULL,
+    ID_PERSONA D_ID NOT NULL,
+    ID_PROVINCIA D_ID DEFAULT 0 NOT NULL,
+    ID_MUNICIPIO D_ID DEFAULT 0 NOT NULL,
+    ID_DISTRITO_MUNICIPAL D_ID DEFAULT 0 NOT NULL,
+    ID_CODIGO_POSTAL D_ID DEFAULT 0 NOT NULL,
+    DIRECCION D_VARCHAR_255 DEFAULT 'Sin direccion ingresada',
+    FECHA D_FECHA NOT NULL,
+    ESTADO D_BOOLEAN_F NOT NULL,
+    POR_DEFECTO D_BOOLEAN_F NOT NULL);
+
+COMMENT ON COLUMN CONTACTOS_DIRECCIONES.ID IS 'Identificador del registro.';
+COMMENT ON COLUMN CONTACTOS_DIRECCIONES.ID_PERSONA IS 'Identificador de la personas en el sistema.';
+COMMENT ON COLUMN CONTACTOS_DIRECCIONES.ID_PROVINCIA IS 'Identificador de la pronvincia que tiene registrada la persona.';
+COMMENT ON COLUMN CONTACTOS_DIRECCIONES.ID_MUNICIPIO IS 'Identificador del municipio que tiene registrada la persona.';
+COMMENT ON COLUMN CONTACTOS_DIRECCIONES.ID_DISTRITO_MUNICIPAL IS 'Identificador del distrito municipal que tiene registrada la persona.';
+COMMENT ON COLUMN CONTACTOS_DIRECCIONES.ID_CODIGO_POSTAL IS 'Identificador del codigo postal que tiene registrada la persona.';
+COMMENT ON COLUMN CONTACTOS_DIRECCIONES.DIRECCION IS 'Direccion de la persona en la cual se debe registrar el nombre de la calle y numero de la casa o referencia.';
+COMMENT ON COLUMN CONTACTOS_DIRECCIONES.FECHA IS 'Fecha en la que se hizo el registro en el sistema.';
+COMMENT ON COLUMN CONTACTOS_DIRECCIONES.ESTADO IS 'Este campo indica si la direccion de la persona sigue utilizando  dicha direccion.';
+COMMENT ON COLUMN CONTACTOS_DIRECCIONES.POR_DEFECTO IS 'Este campo indica si la direccion es la principal utilizada por el sistema.';
+COMMENT ON TABLE CONTACTOS_DIRECCIONES IS 'Tabla que almacena la direcciones de las personas en el sistema.
+
+Se supone que estos registros no deben de eliminarse al menos que 
+no tenga registros asociado a la llave primaria.';
+
+/* CONTACTOS_EMAIL */
+CREATE TABLE CONTACTOS_EMAIL (
+    ID D_ID NOT NULL,
+    ID_PERSONA D_ID NOT NULL,
+    EMAIL D_CORREO NOT NULL,
+    FECHA D_FECHA NOT NULL,
+    ESTADO D_BOOLEAN_T NOT NULL,
+    POR_DEFECTO D_BOOLEAN_T NOT NULL);
+
+
+/* CONTACTOS_TEL */
+CREATE TABLE CONTACTOS_TEL (
+    ID D_ID NOT NULL,
+    ID_PERSONA D_ID NOT NULL,
+    TELEFONO D_TELEFONO NOT NULL,
+    TIPO D_VARCHAR_15 NOT NULL,
+    FECHA D_FECHA NOT NULL,
+    ESTADO D_BOOLEAN_T NOT NULL,
+    POR_DEFECTO D_BOOLEAN_T NOT NULL);
+
+COMMENT ON COLUMN CONTACTOS_TEL.ID IS 'Identificador de registro.';
+COMMENT ON COLUMN CONTACTOS_TEL.ID_PERSONA IS 'Identificador de la persona propietario del numero de telefono.';
+COMMENT ON COLUMN CONTACTOS_TEL.TELEFONO IS 'Registros de telefono que sera unico para una persona, Dos o mas persona pueden ser propietario de un numero telefonico.';
+COMMENT ON COLUMN CONTACTOS_TEL.TIPO IS 'Indica si es un celular movil, residencial, fax, entre otros. ';
+COMMENT ON COLUMN CONTACTOS_TEL.FECHA IS 'Fecha de registro consultado. ';
+COMMENT ON COLUMN CONTACTOS_TEL.ESTADO IS 'Estado del registro, indicando si es activo o inactivo.';
+COMMENT ON COLUMN CONTACTOS_TEL.POR_DEFECTO IS 'Indica cual es el telefono registrado por defecto de la persona. ';
+
+/* CONTROL_CONSULTA */
+CREATE TABLE CONTROL_CONSULTA (
+    ID D_ID NOT NULL,
+    USER_NAME D_USER_NAME,
+    CANTIDADPACIENTE D_TURNO,
+    DIA D_DIA,
+    INICIAL D_HORA,
+    FINAL D_HORA,
+    ESTADO D_BOOLEAN_T,
+    USER_NAME_ D_USER_NAME);
+
+COMMENT ON COLUMN CONTROL_CONSULTA.USER_NAME IS 'Este campo es utilizando para guardar el usuario que va a tener consultas programadas cierto dias.';
+COMMENT ON COLUMN CONTROL_CONSULTA.USER_NAME_ IS 'Este campo guarda el usuario que realizo el registro. ';
+
+/* DEUDAS */
+CREATE TABLE DEUDAS (
+    ID D_ID NOT NULL,
+    ID_CLIENTE D_ID NOT NULL,
+    CONCEPTO D_VARCHAR_255 NOT NULL,
+    MONTO D_DINERO DEFAULT 0.00 NOT NULL,
+    FECHA D_FECHA NOT NULL,
+    HORA D_HORA NOT NULL,
+    ESTADO D_ESTADO_C_I_P_A_N_T NOT NULL);
+
+COMMENT ON COLUMN DEUDAS.ID IS 'Identificador de la deuda.';
+COMMENT ON COLUMN DEUDAS.ID_CLIENTE IS 'Identificador del Cliente';
+COMMENT ON COLUMN DEUDAS.CONCEPTO IS 'Concepto por el cual se registra la deuda.';
+COMMENT ON COLUMN DEUDAS.MONTO IS 'El monto de la deuda';
+COMMENT ON COLUMN DEUDAS.FECHA IS 'La fecha de la deuda, se inserta SOLA';
+COMMENT ON COLUMN DEUDAS.HORA IS 'La Hora tambien se Inserta SOLA';
+COMMENT ON COLUMN DEUDAS.ESTADO IS 'Estado si es Deuda Inicial (i), Pagada (p), Abonada (a), Nulada (n).';
+COMMENT ON TABLE DEUDAS IS 'Tabla que almacenas las deudas del sistema, tanto deuda por facturacion o externas.';
+
+/* DISTRITOS_MUNICIPALES */
+CREATE TABLE DISTRITOS_MUNICIPALES (
+    ID D_ID NOT NULL,
+    NOMBRE D_VARCHAR_45,
+    IDMUNICIPIO D_ID);
+
+
+/* D_ANALISIS */
+CREATE TABLE D_ANALISIS (
+    ID D_ID NOT NULL,
+    ID_M_ANALISIS D_ID NOT NULL,
+    LINEA D_ID NOT NULL,
+    ID_T_ANALITICA D_ID NOT NULL,
+    OTRO D_VARCHAR_1024);
+
+
+/* D_DEUDAS_PAGAS */
+CREATE TABLE D_DEUDAS_PAGAS (
+    ID D_ID NOT NULL,
+    ID_DEUDAS D_ID NOT NULL,
+    MONTO_PAGO D_DINERO NOT NULL,
+    FECHA_HORA D_FECHA_HORA DEFAULT CURRENT_TIMESTAMP NOT NULL);
+
+COMMENT ON TABLE D_DEUDAS_PAGAS IS 'En esta tabla llevamos los pagos de los cliente a las deudas registrada en la tabla de Deudas.';
+
+/* D_ENTRADA_PRODUCTO */
+CREATE TABLE D_ENTRADA_PRODUCTO (
+    ID_M_ENTRADA_PRODUCTO D_ID NOT NULL,
+    LINEA D_ID NOT NULL,
+    ID_PRODUCTO D_ID NOT NULL,
+    ENTRADA D_MEDIDA NOT NULL,
+    COSTO D_DINERO NOT NULL,
+    PRECIO D_DINERO NOT NULL,
+    FECHA_VECIMIENTO D_FECHA,
+    OBSERVACION D_VARCHAR_1024);
+
+COMMENT ON COLUMN D_ENTRADA_PRODUCTO.ID_M_ENTRADA_PRODUCTO IS 'Es el identificador maestro de la entra del producto al sistema. ';
+COMMENT ON COLUMN D_ENTRADA_PRODUCTO.LINEA IS 'Consecutivo de la lista de producto ingresado al sistema.';
+COMMENT ON COLUMN D_ENTRADA_PRODUCTO.ID_PRODUCTO IS 'Identificador unico del producto.';
+COMMENT ON COLUMN D_ENTRADA_PRODUCTO.ENTRADA IS 'Es la cantidad de producto a ingresar al invetario del sistema.';
+COMMENT ON COLUMN D_ENTRADA_PRODUCTO.COSTO IS 'Campo que representa el costo del producto. ';
+COMMENT ON COLUMN D_ENTRADA_PRODUCTO.PRECIO IS 'Es el precio que se utilizará u ofertará a los clientes.';
+COMMENT ON COLUMN D_ENTRADA_PRODUCTO.FECHA_VECIMIENTO IS 'Es la fecha de vecimiento de algunos productos en el sistema. No es un campo obligatorio. ';
+COMMENT ON COLUMN D_ENTRADA_PRODUCTO.OBSERVACION IS 'Se agrega informacion extra de los productos en el sistema al momento de agregarlo al inventario.';
+
+/* D_FACTURAS */
+CREATE TABLE D_FACTURAS (
+    ID_FACTURA D_ID NOT NULL,
+    ID_LINEA D_ID NOT NULL,
+    ID_PRODUCTO D_ID NOT NULL,
+    PRECIO D_DINERO NOT NULL,
+    CANTIDAD D_DINERO NOT NULL);
+
+
+/* D_GUIA_VIGILANCIA_DESARROLLO */
+CREATE TABLE D_GUIA_VIGILANCIA_DESARROLLO (
+    ID_GVD D_ID NOT NULL,
+    ID_PACIENTE D_ID NOT NULL,
+    FECHA D_FECHA_HORA);
+
+
+/* D_MOTIVO_CONSULTA */
+CREATE TABLE D_MOTIVO_CONSULTA (
+    IDCONSULTA D_ID NOT NULL,
+    IDMCONSULTA D_ID NOT NULL);
+
+
+/* D_RECETAS */
+CREATE TABLE D_RECETAS (
+    ID_RECETA D_ID NOT NULL,
+    LINEA D_TURNO NOT NULL,
+    ID_MEDICAMENTO D_ID NOT NULL,
+    CANTIDAD D_MEDIDA,
+    D_DOSIS D_VARCHAR_255);
+
+
+/* E_S_SYS */
+CREATE TABLE E_S_SYS (
+    ID D_ID NOT NULL,
+    NOMBRE_EMPRESA D_NOMBRES,
+    FCHI D_FECHA NOT NULL,
+    FCHA D_FECHA NOT NULL,
+    FCHV D_FECHA NOT NULL,
+    TELEFONOS D_TELEFONO,
+    DIRECCION D_VARCHAR_255,
+    MENSAJE_FOOTER D_VARCHAR_255,
+    LOGO D_BLOB_TEXTO,
+    URLDB D_VARCHAR_255 NOT NULL);
+
+COMMENT ON COLUMN E_S_SYS.ID IS 'Identificador unico de la empresa.';
+COMMENT ON COLUMN E_S_SYS.NOMBRE_EMPRESA IS 'Campo que almacena el nombre de la empresa';
+COMMENT ON COLUMN E_S_SYS.FCHI IS 'Fecha de inicio de servicio de la empresa. ';
+COMMENT ON COLUMN E_S_SYS.FCHA IS 'Fecha actual de la empresa.';
+COMMENT ON COLUMN E_S_SYS.FCHV IS 'Fecha de vencimiento de la licencia del servicio. ';
+COMMENT ON COLUMN E_S_SYS.TELEFONOS IS 'Campo que almacena los numeros telefonico de la empresa.';
+COMMENT ON COLUMN E_S_SYS.DIRECCION IS 'Direccion del local donde opera el sistema.';
+COMMENT ON COLUMN E_S_SYS.MENSAJE_FOOTER IS 'Mensaje que se presentan en el pie de la factura. ';
+COMMENT ON COLUMN E_S_SYS.LOGO IS 'Logo tipo de la empresa, que se presenta en la ventana principal. ';
+COMMENT ON TABLE E_S_SYS IS 'Esta tabla tiene la finalidad de almacenar datos importantes del negocio.';
+
+/* GENERALES */
+CREATE TABLE GENERALES (
+    ID_PERSONA D_ID NOT NULL,
+    CEDULA D_CEDULA NOT NULL,
+    ID_TIPO_SANGRE D_ID,
+    ESTADO_CIVIL D_ESTADO_CIVIL);
+
+
+/* GUIA_VIGILANCIA_DESARROLLO */
+CREATE TABLE GUIA_VIGILANCIA_DESARROLLO (
+    ID D_ID NOT NULL,
+    EDAD D_EDAD,
+    CARACT_DESARR_EVALUAR D_VARCHAR_255);
+
+COMMENT ON COLUMN GUIA_VIGILANCIA_DESARROLLO.ID IS 'Identificador para indentificar las caracteristicas del niño a su edad.';
+COMMENT ON COLUMN GUIA_VIGILANCIA_DESARROLLO.EDAD IS 'Las edades que registran aqui son en meses';
+COMMENT ON COLUMN GUIA_VIGILANCIA_DESARROLLO.CARACT_DESARR_EVALUAR IS 'Describe el comportamiento de niño a su edad.';
+
+/* HUELLAS */
+CREATE TABLE HUELLAS (
+    ID D_ID NOT NULL,
+    TIPO_DEDO D_DEDO NOT NULL,
+    IMAGEN_TEXTO D_BLOB_TEXTO);
+
+
+/* INSCRIPCIONES */
+CREATE TABLE INSCRIPCIONES (
+    ID D_ID NOT NULL,
+    ID_ESTUDIANTE D_ID NOT NULL,
+    ID_TANDA D_ID NOT NULL,
+    PAGO D_DINERO NOT NULL,
+    FECHA_INSCRIPCION D_FECHA_HORA NOT NULL,
+    ROL D_ROL NOT NULL,
+    USER_NAME D_USER_NAME NOT NULL);
+
+
+/* MENSAJES */
+CREATE TABLE MENSAJES (
+    ID D_ID NOT NULL,
+    ID_DOCTOR D_USER_NAME NOT NULL,
+    ID_PACIENTE D_ID DEFAULT 0 NOT NULL,
+    HORA D_HORA NOT NULL,
+    FECHA D_FECHA NOT NULL,
+    MENSAJE D_BLOB_TEXTO NOT NULL,
+    ESTADO D_ESTADO_MENSAJES NOT NULL);
+
+
+/* METRICAS */
+CREATE TABLE METRICAS (
+    ID D_ID NOT NULL,
+    IDCONSULTA D_ID,
+    FECHA D_FECHA_HORA,
+    PESOKG D_MEDIDA,
+    ESTATURAMETRO D_MEDIDA,
+    ESCEFALO D_MEDIDA,
+    ENF_DETECT D_VARCHAR_255,
+    HALLAZGOS_POS D_VARCHAR_255,
+    ID_DIAG D_VARCHAR_255,
+    TX D_VARCHAR_255,
+    COMPLEMENTO D_VARCHAR_255,
+    IMAGEN_TEXTO D_BLOB_TEXTO,
+    USER_NAME D_USER_NAME);
+
+
+/* MOTIVO_CONSULTA */
+CREATE TABLE MOTIVO_CONSULTA (
+    ID D_ID NOT NULL,
+    DESCRIPCION D_VARCHAR_45 NOT NULL);
+
+
+/* MUNICIPIOS */
+CREATE TABLE MUNICIPIOS (
+    ID D_ID NOT NULL,
+    NOMBRE D_VARCHAR_45,
+    IDPROVINCIA D_ID);
+
+
+/* M_ANALISIS */
+CREATE TABLE M_ANALISIS (
+    ID D_ID NOT NULL,
+    ID_PACIENTE D_ID DEFAULT 0 NOT NULL,
+    FECHA_HORA_CREADA D_FECHA_HORA NOT NULL,
+    FECHA_HORA_VISTA D_FECHA_HORA NOT NULL,
+    ROL D_ROL,
+    USER_NAME D_USER_NAME);
+
+COMMENT ON COLUMN M_ANALISIS.ID IS 'Identificador de la analitica del paciente.';
+COMMENT ON COLUMN M_ANALISIS.ID_PACIENTE IS 'Identificador del paciente que recibe la analitica.';
+COMMENT ON COLUMN M_ANALISIS.FECHA_HORA_CREADA IS 'Fecha en la se le indico la analitica al paciente.';
+COMMENT ON COLUMN M_ANALISIS.FECHA_HORA_VISTA IS 'Fecha y hora que se le entrega la analitica al paciente o que la consultan por la web.';
+COMMENT ON COLUMN M_ANALISIS.ROL IS 'Rol de la persona que indica la analitica.';
+COMMENT ON COLUMN M_ANALISIS.USER_NAME IS 'Usuario que indica la analitica al paciente.';
+
+/* M_ENTRADA_PRODUCTOS */
+CREATE TABLE M_ENTRADA_PRODUCTOS (
+    ID D_ID NOT NULL,
+    IDPROVEDOR D_ID NOT NULL,
+    ID_ALMACEN D_ID NOT NULL,
+    COD_FACTURA D_CODIGO NOT NULL,
+    FECHA_ENTRADA D_FECHA_HORA NOT NULL,
+    USER_NAME D_USER_NAME NOT NULL,
+    ROL D_ROL);
+
+COMMENT ON COLUMN M_ENTRADA_PRODUCTOS.ID IS 'Identificador unico de la entrada de los productos al sistema.';
+COMMENT ON COLUMN M_ENTRADA_PRODUCTOS.IDPROVEDOR IS 'Identificador del proveedor que proporciona los productos.';
+COMMENT ON COLUMN M_ENTRADA_PRODUCTOS.COD_FACTURA IS 'Codigo de la orden de compra o factura que identifica los productos que se van a recibir en el almacen.';
+COMMENT ON COLUMN M_ENTRADA_PRODUCTOS.FECHA_ENTRADA IS 'Indica el dia y la hora en la cual se registro la compra.';
+COMMENT ON COLUMN M_ENTRADA_PRODUCTOS.USER_NAME IS 'Usuario que realiza la orden de compra. ';
+COMMENT ON COLUMN M_ENTRADA_PRODUCTOS.ROL IS 'Rol utilizado para realizar la operaciones. ';
+COMMENT ON TABLE M_ENTRADA_PRODUCTOS IS 'Es la tabla que se utiliza para darle entrada a las mercancia a los almacenes.
+
+El estado de la entrada en genera debe pasar por distintos estados, el primero es en transito, recibido, supervisado, depositado entre otros por definir.';
+
+/* M_FACTURAS */
+CREATE TABLE M_FACTURAS (
+    ID D_ID NOT NULL,
+    ID_CLIENTE D_ID NOT NULL,
+    ID_CONTACTOS_TEL D_ID,
+    ID_CONTACTOS_DIRECCIONES D_ID,
+    ID_CONTACTOS_EMAIL D_ID,
+    ID_TURNO D_ID NOT NULL,
+    FECHA_HORA D_FECHA_HORA NOT NULL,
+    TOTAL D_DINERO,
+    EFECTIVO D_DINERO NOT NULL,
+    ESTADO_FACTURA D_ESTADO_C_I_P_A_N_T,
+    NOMBRE_TEMP D_NOMBRES DEFAULT 'N A',
+    USER_NAME D_USER_NAME NOT NULL);
+
+COMMENT ON COLUMN M_FACTURAS.ID IS 'Identificador de la tabla facturas.';
+COMMENT ON COLUMN M_FACTURAS.ID_CLIENTE IS 'Identificador del cliente';
+COMMENT ON COLUMN M_FACTURAS.ID_CONTACTOS_TEL IS 'Es el contacto telefonico del cliente por defecto y es el asignado para la factura.';
+COMMENT ON COLUMN M_FACTURAS.ID_CONTACTOS_DIRECCIONES IS 'Es la direccion del cliente por defecto y es la asignada para la factura.';
+COMMENT ON COLUMN M_FACTURAS.ID_CONTACTOS_EMAIL IS 'Es el contacto de correo del cliente por defecto y es el asignado para la factura.';
+COMMENT ON COLUMN M_FACTURAS.ID_TURNO IS 'Turno que tiene asignado el cajero para realizar las operaciones de factura.';
+COMMENT ON COLUMN M_FACTURAS.FECHA_HORA IS 'Fecha y hora de la creacion de la factura. ';
+COMMENT ON COLUMN M_FACTURAS.TOTAL IS 'Este campo almacena el total de la factura.';
+COMMENT ON COLUMN M_FACTURAS.EFECTIVO IS 'Es el dinero que entrega el cliente al cajero.';
+COMMENT ON COLUMN M_FACTURAS.ESTADO_FACTURA IS 'Este campo sirve para ver el estado de la factura que puede ser:
+c = Contado
+i = Iniciada
+p = Pagado
+a = Credito
+n = nula
+t = temporal
+';
+COMMENT ON COLUMN M_FACTURAS.NOMBRE_TEMP IS 'Nombre utilizado de manera temporal de la factura, para indentificar el cliente.';
+COMMENT ON TABLE M_FACTURAS IS 'El campo estado puede ser  p=Pagado, c=credito, a=abono.';
+
+/* PERSONAS */
+CREATE TABLE PERSONAS (
+    ID D_ID NOT NULL,
+    PERSONA D_PERSONA NOT NULL,
+    PNOMBRE D_NOMBRES NOT NULL,
+    SNOMBRE D_NOMBRES NOT NULL,
+    APELLIDOS D_APELLIDOS NOT NULL,
+    SEXO D_SEXO NOT NULL,
+    FECHA_NACIMIENTO D_FECHA NOT NULL,
+    FECHA_INGRESO D_FECHA_HORA NOT NULL,
+    FECHA_HORA_ULTIMO_UPDATE D_FECHA_HORA NOT NULL,
+    ESTADO D_BOOLEAN_T NOT NULL,
+    USER_NAME D_USER_NAME,
+    ROL_USUARIO D_ROL NOT NULL);
+
+COMMENT ON COLUMN PERSONAS.ID IS 'Identificador de la Persona en el sistema';
+COMMENT ON COLUMN PERSONAS.PERSONA IS 'Identidad de una persona F Fisica o J Juridica.';
+COMMENT ON COLUMN PERSONAS.PNOMBRE IS 'Primer nombre de la persona, como se encuentra en la cedula de identidad.';
+COMMENT ON COLUMN PERSONAS.SNOMBRE IS 'Segundo nombre de la persona. Este campo puede ser nulo o vacio.';
+COMMENT ON COLUMN PERSONAS.APELLIDOS IS 'Apellidos Paternos mas Maternos';
+COMMENT ON COLUMN PERSONAS.SEXO IS 'El sexo solo se define como Masculino y Femenino';
+COMMENT ON COLUMN PERSONAS.FECHA_NACIMIENTO IS 'Fecha de nacimiento, este campo debe ser actualizado por una persona autorizada.';
+COMMENT ON COLUMN PERSONAS.FECHA_INGRESO IS 'Este campo nadie deberia de modificarlo.';
+COMMENT ON COLUMN PERSONAS.FECHA_HORA_ULTIMO_UPDATE IS 'Este campo debe ser actualizado cada vez que el registro se actualice. ';
+COMMENT ON COLUMN PERSONAS.ESTADO IS 'Este campo hace referencia a estado en el sistema de la persona, si es true activo o false inactivo.';
+COMMENT ON COLUMN PERSONAS.USER_NAME IS 'Ident. del usuario que registro a la persona al sistema.';
+COMMENT ON COLUMN PERSONAS.ROL_USUARIO IS 'Conocer el rol que tenia ese usuario cuando registro esta persona.';
+COMMENT ON TABLE PERSONAS IS 'Objetivos:
+La entidad Persona es una tabla que guardar todos los registros de los clientes, estudiantes, proveedores, padres entre otros, la cual debe almacenar los atributos mas basicos de estos en una sola tabla.
+
+Nota:
+	1) Los registros de esta tabla no deben borrarse.
+
+Reglas:
+
+[SELECT]
+
+[INSERT]
+
+[UPDATE]
+
+[DELETE]';
+
+/* PERSONAS_CLIENTES */
+CREATE TABLE PERSONAS_CLIENTES (
+    ID D_ID NOT NULL);
+
+
+/* PERSONAS_CLIENTES_ATR */
+CREATE TABLE PERSONAS_CLIENTES_ATR (
+    ID D_ID NOT NULL,
+    TOTAL_FACTURADO D_DINERO,
+    TOTAL_DEUDA D_DINERO,
+    CANTIDAD_FACTURA D_ID,
+    FECHA_ULTIMA_COMPRA D_FECHA,
+    SALDO D_DINERO);
+
+
+/* PERSONAS_ESTUDIANTES */
+CREATE TABLE PERSONAS_ESTUDIANTES (
+    ID D_ID NOT NULL);
+
+
+/* PERSONAS_ESTUDIANTES_ATR */
+CREATE TABLE PERSONAS_ESTUDIANTES_ATR (
+    ID D_ID NOT NULL,
+    MATRICULA D_VARCHAR_15 NOT NULL);
+
+
+/* PERSONAS_PACIENTES */
+CREATE TABLE PERSONAS_PACIENTES (
+    ID D_ID NOT NULL);
+
+
+/* PERSONAS_PACIENTES_ATR */
+CREATE TABLE PERSONAS_PACIENTES_ATR (
+    ID_PACIENTE D_ID NOT NULL,
+    PESO_NACIMIENTO_KG D_MEDIDA,
+    ALTURA D_MEDIDA,
+    PERIMETRO_CEFALICO D_MEDIDA,
+    CESAREA D_BOOLEAN_T,
+    TIEMPO_GESTACION D_TIEMPO_GESTACION,
+    USER_NAME D_USER_NAME,
+    MASA_CEFALICA NUMERIC(18,2));
+
+
+/* PERSONAS_PADRES */
+CREATE TABLE PERSONAS_PADRES (
+    ID D_ID NOT NULL);
+
+
+/* PERSONAS_PROVEEDORES */
+CREATE TABLE PERSONAS_PROVEEDORES (
+    ID D_ID NOT NULL);
+
+
+/* PERSONAS_PROVEEDORES_ATR */
+CREATE TABLE PERSONAS_PROVEEDORES_ATR (
+    ID D_ID NOT NULL,
+    CODIGO D_CODIGO NOT NULL);
+
+
+/* PLAN_CUENTA_CONTABLE */
+CREATE TABLE PLAN_CUENTA_CONTABLE (
+    ID D_ID NOT NULL,
+    PAIS D_VARCHAR_15 NOT NULL,
+    CODIGO_CUENTA_CONTABLE D_CODIGO_CUENTA_CONTABLE,
+    NOMBRE_CUENTA D_VARCHAR_255 NOT NULL,
+    TIPO_CUENTA D_TIPO_CUENTAS NOT NULL,
+    NIVEL_CUENTA D_NIVEL_CUENTA NOT NULL,
+    USA_TERCERO D_BOOLEAN_F NOT NULL,
+    CENTRO_COSTOS D_BOOLEAN_F NOT NULL,
+    PORCENTAJE_BASE D_DESCUENTO DEFAULT 0 NOT NULL,
+    MONTO_BASE_MIN D_DINERO DEFAULT 0 NOT NULL,
+    DETALLE_CUENTA D_BLOB_TEXTO DEFAULT 'NO PROPORCIONADO');
+
+
+/* PRODUCTOS */
+CREATE TABLE PRODUCTOS (
+    ID D_ID NOT NULL,
+    ID_CATEGORIA D_ID NOT NULL,
+    CODIGO D_VARCHAR_25 NOT NULL,
+    DESCRIPCION D_VARCHAR_70 NOT NULL,
+    EXISTENCIA D_MEDIDA NOT NULL,
+    IMAGEN_TEXTO D_BLOB_TEXTO,
+    ESTADO D_BOOLEAN_T NOT NULL,
+    FECHA_CREACION D_FECHA NOT NULL,
+    NOTA D_VARCHAR_1024 DEFAULT 'N/A',
+    USER_NAME D_USER_NAME,
+    ROL D_ROL);
+
+COMMENT ON COLUMN PRODUCTOS.ID IS 'Identificador unico del producto.
+';
+COMMENT ON COLUMN PRODUCTOS.ID_CATEGORIA IS 'Identificador de la categoria del producto.
+';
+COMMENT ON COLUMN PRODUCTOS.CODIGO IS 'En este campo se almacenan los codigos de barras de los productos. 
+';
+COMMENT ON COLUMN PRODUCTOS.DESCRIPCION IS 'Descripcion del producto en la cual puede digitarse el modelo, marca, serie del producto.
+';
+COMMENT ON COLUMN PRODUCTOS.EXISTENCIA IS 'Es el total de la cantidad de producto registrada en el sistema, de este campo es que se descuenta la cantidad existentes del producto.
+';
+COMMENT ON COLUMN PRODUCTOS.IMAGEN_TEXTO IS 'Imagen del producto, es utilizada cuando se el sistema de factura tactil. 
+';
+COMMENT ON COLUMN PRODUCTOS.ESTADO IS 'Indica cual es el estado del producto en el sistema, si esta activo o inactivo.
+';
+COMMENT ON COLUMN PRODUCTOS.FECHA_CREACION IS 'Se registra la fecha cuando fue creado en el sistema el producto.
+';
+COMMENT ON COLUMN PRODUCTOS.NOTA IS 'Una nota que puede indicar otras observaciones en el sistema del producto. En esta puede indicarse si el producto debe mantenerse refrigerado o en una condiciones especiales.';
+COMMENT ON COLUMN PRODUCTOS.USER_NAME IS 'En este campo se registra el usuario que registro el producto por primera vez.';
+COMMENT ON COLUMN PRODUCTOS.ROL IS 'Muestra el rol utilizado por el usuario para registrar el producto. ';
+COMMENT ON TABLE PRODUCTOS IS 'Tabla de los productos que contiene la informacion de los productos que el sistema tiene registrados.';
+
+/* PROVINCIAS */
+CREATE TABLE PROVINCIAS (
+    ID D_ID NOT NULL,
+    NOMBRE D_VARCHAR_45 NOT NULL,
+    ZONA D_PUNTO_CARDINALES);
+
+
+/* RECCOUNT */
+CREATE TABLE RECCOUNT (
+    ID D_ID NOT NULL,
+    TABLA D_VARCHAR_45 NOT NULL,
+    CANTIDAD D_ID NOT NULL);
+
+
+/* RECETAS */
+CREATE TABLE RECETAS (
+    ID D_ID NOT NULL,
+    IDCONSULTA D_ID NOT NULL,
+    FECHA D_FECHA_HORA NOT NULL,
+    USER_NAME D_USER_NAME NOT NULL);
+
+
+/* RELACION_PADRE_ESTUDIANTE */
+CREATE TABLE RELACION_PADRE_ESTUDIANTE (
+    ID_PADRE_O_MADRE D_ID DEFAULT 0 NOT NULL,
+    ID_ESTUDIANTE D_ID DEFAULT 0 NOT NULL);
+
+
+/* RELACION_PADRE_PACIENTE */
+CREATE TABLE RELACION_PADRE_PACIENTE (
+    ID_PADRE_O_MADRE D_ID DEFAULT 0 NOT NULL,
+    ID_PACIENTE D_ID DEFAULT 0 NOT NULL);
+
+
+/* SINTOMAS */
+CREATE TABLE SINTOMAS (
+    ID D_ID NOT NULL,
+    ID_PACIENTE D_ID DEFAULT 0 NOT NULL,
+    SINTOMAS D_VARCHAR_255,
+    FECHA D_FECHA,
+    HORA D_HORA,
+    NOTA D_VARCHAR_255,
+    USER_NAME D_USER_NAME);
+
+
+/* TANDAS */
+CREATE TABLE TANDAS (
+    ID D_ID NOT NULL,
+    ANNO_INICIAL D_FECHA DEFAULT CURRENT_DATE NOT NULL,
+    ANNO_FINAL D_FECHA NOT NULL,
+    HORA_INICIO D_HORA NOT NULL,
+    HORA_FINAL D_HORA NOT NULL,
+    LUNES D_BOOLEAN_F,
+    MARTES D_BOOLEAN_F,
+    MIERCOLES D_BOOLEAN_F,
+    JUEVES D_BOOLEAN_F,
+    VIERNES D_BOOLEAN_F,
+    SABADOS D_BOOLEAN_F,
+    DOMINGOS D_BOOLEAN_F,
+    CANTIDAD_ESTUDIANTES D_TURNO,
+    CON_EDAD D_BOOLEAN_T,
+    EDAD_MINIMA D_TURNO,
+    EDAD_MAXIMA D_TURNO,
+    ESTADO D_BOOLEAN_T);
+
+COMMENT ON COLUMN TANDAS.ID IS 'Identificador de la tanda en el sistema.';
+COMMENT ON COLUMN TANDAS.ANNO_INICIAL IS 'Es el año que se piensa impartir la docencia al grupo.';
+COMMENT ON COLUMN TANDAS.ANNO_FINAL IS 'Es el año que se piensa en termina el curso registrado.';
+COMMENT ON COLUMN TANDAS.HORA_INICIO IS 'Hora que empienza la clase.';
+COMMENT ON COLUMN TANDAS.HORA_FINAL IS 'Hora que termina la clase.';
+COMMENT ON COLUMN TANDAS.CANTIDAD_ESTUDIANTES IS 'Cantidad de estudiantes que soporta la clase. ';
+COMMENT ON COLUMN TANDAS.EDAD_MINIMA IS 'La edad minina admitida por el curso.';
+COMMENT ON COLUMN TANDAS.EDAD_MAXIMA IS 'La edad maxima admitida por el curso.';
+
+/* TIPOS_SANGRE */
+CREATE TABLE TIPOS_SANGRE (
+    ID D_ID NOT NULL,
+    DESCRIPCION D_SANGRE_SIMBOLOS);
+
+
+/* TURNOS */
+CREATE TABLE TURNOS (
+    ID D_ID NOT NULL,
+    ID_ALMACEN D_ID DEFAULT 0 NOT NULL,
+    TURNO_USUARIO D_USER_NAME,
+    FECHA_HORA_INICIO D_FECHA_HORA NOT NULL,
+    FECHA_HORA_FINAL D_FECHA_HORA,
+    ESTADO D_BOOLEAN_T NOT NULL,
+    MONTO_FACTURADO D_DINERO,
+    MONTO_DEVUELTO D_DINERO,
+    MONTO_EFECTIVO D_DINERO,
+    MONTO_CREDITO D_DINERO,
+    ROL D_ROL,
+    USER_NAME D_USER_NAME);
+
+COMMENT ON TABLE TURNOS IS 'Tabla que almacena los turnos de los cajeros en el sistema.
+
+Debe:
+   *Debe validarse que el usuario exista en el sistema.
+   *';
+
+/* T_ANALISIS */
+CREATE TABLE T_ANALISIS (
+    ID D_ID NOT NULL,
+    NOMBRE_CORTO_ANALISIS D_VARCHAR_70,
+    NOMBRE_ANALISIS D_VARCHAR_70,
+    NOTA D_VARCHAR_1024);
+
+
+/* T_PRUEBA */
+CREATE TABLE T_PRUEBA (
+    VALOR D_VARCHAR_1024);
+
+
+/* ----- Creating Views ----- */
+
+/* VS_PRIVILEGIO */
+CREATE OR ALTER VIEW VS_PRIVILEGIO (USUARIO, GRANTOR, ABRV_PRIVILEGIO, NOMBRE_ABREV, GRANT_OPTION, CON_OPC_ADMIN, NOMBRE_RELACION, NOMBRE_CAMPO, ID_TIPO_USUARIO, TIPO_USUARIO, ID_TIPO_OBJ, TIPO_OBJ) 
+AS 
+/*
+
+*/
+SELECT 
+     TRIM(RDB$USER), 
+     COALESCE(TRIM(RDB$GRANTOR), ''),
+     RDB$PRIVILEGE, 
+     F_PRIVILEGIO(RDB$PRIVILEGE), 
+     RDB$GRANT_OPTION, 
+     IIF(RDB$GRANT_OPTION = 0, 'NO', 'SI'), 
+     TRIM(RDB$RELATION_NAME), 
+     COALESCE(TRIM(RDB$FIELD_NAME), ''),
+     RDB$USER_TYPE,
+     F_TIPO_USUARIO(RDB$USER_TYPE), 
+     RDB$OBJECT_TYPE, 
+     F_OBJECTOS(RDB$OBJECT_TYPE)
+FROM RDB$USER_PRIVILEGES;
+COMMENT ON VIEW VS_PRIVILEGIO IS 'Prueba';
+
+/* GET_ROL */
+CREATE OR ALTER VIEW GET_ROL (USER_NAME, ROL, ADMINISTRACION, DESCRIPCION) 
+AS 
+/*
+    Esta vista proporciona los roles del sistema.
+*/
+SELECT 
+     UPPER(TRIM(p.USUARIO)), 
+     TRIM(p.NOMBRE_RELACION), 
+     p.GRANT_OPTION, 
+     COALESCE(r.DESCRIPCION, '')
+FROM VS_PRIVILEGIO p
+LEFT JOIN GET_ROLES r ON TRIM(r.ROL) STARTING WITH TRIM(p.NOMBRE_RELACION)
+WHERE p.ABRV_PRIVILEGIO = 'M' AND p.NOMBRE_RELACION NOT STARTING WITH 'RRR_';
+COMMENT ON VIEW GET_ROL IS 'Vista que nos permite obtener los roles de los usuarios.
+
+Al crear un nuevo usuario, esta vista debe ser asignada al usuario al crearse.
+
+Ofrece informacion de los roles de los usuarios tienen asignado en el sistema.
+
+Me permite obtener todos los roles del sistema registrados.
+
+
+USER_NAME Usuario del sistema.
+
+ROL Rol asignado al usuario.
+
+ADMINISTRACION
+0 Indica que no tiene derecho de administracion.
+2 Indica que tiene derecho de administracion.
+
+DESCRIPCION
+Es la descripcion del rol.
+Este puede ser escrito en HTML.';
+
+/* VS_USUARIOS */
+CREATE OR ALTER VIEW VS_USUARIOS (USERNAME, PNOMBRE, SNOMBRE, APELLIDOS, ESTADO, ADMINISTRADOR, DESCRIPCION) 
+AS 
+/*
+
+*/
+SELECT 
+  U.SEC$USER_NAME,
+  COALESCE(U.SEC$FIRST_NAME, ''),
+  COALESCE(U.SEC$MIDDLE_NAME, ''),
+  COALESCE(U.SEC$LAST_NAME, ''),
+  U.SEC$ACTIVE,
+  U.SEC$ADMIN, 
+  COALESCE(u.SEC$DESCRIPTION, '')
+FROM 
+  SEC$USERS U
+WHERE TRIM(U.SEC$USER_NAME) NOT IN('SYSDBA', 'REGISTRADOR');
+COMMENT ON VIEW VS_USUARIOS IS 'Esta vista no esta siendo utilizado.';
+
+/* GET_CAJEROS */
+CREATE OR ALTER VIEW GET_CAJEROS (USER_NAME, ROL, PNOMBRE, SNOMBRE, APELLIDOS, ESTADO, DESCRIPCION) 
+AS 
+/*
+
+*/
+SELECT 
+     r.USER_NAME, 
+     r.ROL, 
+     u.PNOMBRE, 
+     u.SNOMBRE, 
+     u.APELLIDOS, 
+     u.ESTADO, 
+     u.DESCRIPCION
+FROM GET_ROL r 
+INNER JOIN VS_USUARIOS u ON TRIM(u.USERNAME) LIKE TRIM(r.USER_NAME)
+WHERE 
+     r.ROL LIKE 'CAJERO' AND 
+     r.USER_NAME NOT STARTING WITH 'SYSDBA';
+COMMENT ON VIEW GET_CAJEROS IS 'Esta vista permite obtener la lista de los cajeros del sistema, la cual han sido asignado al rol de CAJERO. Se evita en esta consulta de obtener el usuario SYSDBA por cuestiones logica, ya que es el super usuario del sistema.';
+
+/* V_PRODUCTOS */
+CREATE OR ALTER VIEW V_PRODUCTOS (ID, ID_CATEGORIA, CODIGO, DESCRIPCION, EXISTENCIA, IMAGEN_TEXTO, NOTA, FECHA_CREACION, ESTADO, USER_NAME, ROL) 
+AS 
+/*
+     Inicio
+*/
+SELECT 
+     ID, 
+     ID_CATEGORIA, 
+     CODIGO, 
+     DESCRIPCION, 
+     EXISTENCIA, 
+     IMAGEN_TEXTO, 
+     NOTA, 
+     FECHA_CREACION, 
+     ESTADO, 
+     USER_NAME, 
+     ROL
+FROM PRODUCTOS p
+WHERE ID >= 0
+/*
+     Fin
+*/;
+
+/* VS_CATEGORIAS */
+CREATE OR ALTER VIEW VS_CATEGORIAS (ID, DESCRIPCION, IMAGEN_TEXTO, FECHA_CREACION, ESTADO, USER_NAME) 
+AS 
+/*
+     
+*/
+SELECT 
+     ID, 
+     DESCRIPCION, 
+     COALESCE(IMAGEN_TEXTO, ''),
+     FECHA_CREACION, 
+     ESTADO, 
+     USER_NAME
+FROM CATEGORIAS 
+WHERE ID >= 0;
+
+/* GET_CATEGORIA_ACTIVAS */
+CREATE OR ALTER VIEW GET_CATEGORIA_ACTIVAS (ID, DESCRIPCION, IMAGEN_TEXTO) 
+AS 
+/*
+     Uso de tabla CTE.
+*/
+WITH V_PRODUCTOS_CTE AS (
+     SELECT DISTINCT p.ID_CATEGORIA
+     FROM V_PRODUCTOS p
+     WHERE p.ID >= 0 AND p.ESTADO
+)
+SELECT 
+     c.ID, 
+     c.DESCRIPCION, 
+     c.IMAGEN_TEXTO
+FROM VS_CATEGORIAS c
+RIGHT JOIN V_PRODUCTOS_CTE p ON c.ID = p.ID_CATEGORIA
+WHERE c.ID >= 0;
+COMMENT ON VIEW GET_CATEGORIA_ACTIVAS IS 'De la vista de V_PRODUCTOS traemos los Identificadores de las CATEGORIAS del campo ID_CATEGORIAS.
+
+
+Una categoria activa deberia de ser aquella donde los productos activos contienen una categoria. El CTE nos da aquella lista de id_categoria que tiene productos activos.';
+
+/* V_GENERALES */
+CREATE OR ALTER VIEW V_GENERALES (ID_PERSONA, CEDULA, ID_TIPO_SANGRE, ESTADO_CIVIL) 
+AS 
+/*
+*/
+SELECT 
+     ID_PERSONA, 
+     CEDULA, 
+     ID_TIPO_SANGRE, 
+     ESTADO_CIVIL
+FROM GENERALES 
+WHERE ID_PERSONA >= -1
+/*
+*/;
+
+/* V_PERSONAS_CLIENTES */
+CREATE OR ALTER VIEW V_PERSONAS_CLIENTES (ID) 
+AS 
+/*
+
+*/
+SELECT 
+     ID 
+FROM PERSONAS_CLIENTES
+WHERE ID >= 0;
+COMMENT ON VIEW V_PERSONAS_CLIENTES IS 'Tabla que almacena las claves primaria de los clientes.
+     
+     Para paginacion usar esto:
+     
+     ROWS (5 - 1) * 40 + 1 TO (5 + 1) * 40        donde 
+     
+     ROWS
+     (nPaginaNro - 1) * nCantidadFilas + 1 TO (nPaginaNro + (nCantidadPaginas - 1)) * nCantidadFilas
+     
+     Utilizar el ORDER BY.';
+
+/* V_PERSONAS */
+CREATE OR ALTER VIEW V_PERSONAS (ID, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, FECHA_NACIMIENTO, FECHA_INGRESO, FECHA_HORA_ULTIMO_UPDATE, ESTADO, USER_NAME, ROL_USUARIO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     PERSONA, 
+     PNOMBRE, 
+     SNOMBRE, 
+     APELLIDOS, 
+     SEXO, 
+     FECHA_NACIMIENTO, 
+     FECHA_INGRESO, 
+     FECHA_HORA_ULTIMO_UPDATE, 
+     ESTADO, 
+     USER_NAME, 
+     ROL_USUARIO
+FROM PERSONAS 
+WHERE ID >= 0
+/*
+
+*/;
+COMMENT ON VIEW V_PERSONAS IS 'Tabla para almacenar las personas tanto clientes, provedores, padres Entre otros.
+
+Es la tabla que almacena todas las informaciones de las entidades por debajo de ella.
+     
+     Estas entidades son:
+          1) Los clientes
+          2) Los estudiantes
+          3) Los pacientes
+          4) Los padres
+          5) Los proveedores
+          
+     Reglas:
+          Esta tabla no permite que se eliminen los registros de las entidades.';
+
+/* GET_CLIENTES_SB */
+CREATE OR ALTER VIEW GET_CLIENTES_SB (ID, CEDULA, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, FECHA_NACIMIENTO, ESTADO_CIVIL, FECHA_INGRESO, ESTADO) 
+AS 
+/*
+
+*/
+SELECT 
+     r.ID, 
+     COALESCE(g.CEDULA, '000-0000000-0'),
+     r.PERSONA, 
+     r.PNOMBRE, 
+     r.SNOMBRE, 
+     r.APELLIDOS, 
+     r.SEXO, 
+     r.FECHA_NACIMIENTO, 
+     COALESCE(g.ESTADO_CIVIL, 'X'), 
+     r.FECHA_INGRESO, 
+     r.ESTADO
+FROM V_PERSONAS_CLIENTES c 
+LEFT JOIN V_PERSONAS r ON c.ID = r.ID 
+LEFT JOIN V_GENERALES g ON c.ID = g.ID_PERSONA 
+WHERE c.ID >= 0 AND 
+      r.ID >= 0 AND 
+      g.ID_PERSONA >= 0 OR 
+      c.ID IS NULL OR 
+      r.ID IS NULL OR 
+      g.ID_PERSONA IS NULL;
+COMMENT ON VIEW GET_CLIENTES_SB IS 'Consulta que nos permite obtener los clientes.
+La siguiente consulta busca todos los usuarios del 1 al 20
+SELECT ID, CEDULA, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, 
+          SEXO, FECHA_NACIMIENTO, FECHA_INGRESO, ESTADO 
+FROM GET_CLIENTES_SB 
+WHERE ID = -1 OR
+UPPER(TRIM(CEDULA)) STARTING WITH UPPER(TRIM('''')) OR 
+UPPER(TRIM(PNOMBRE)) STARTING WITH UPPER(TRIM('''')) OR 
+UPPER(TRIM(SNOMBRE)) STARTING WITH UPPER(TRIM('''')) OR 
+UPPER(TRIM(APELLIDOS)) STARTING WITH UPPER(TRIM('''')) 
+ROWS (1 - 1) * 20 + 1 TO (1 + (1 - 1)) * 20;';
+
+/* V_DEUDAS */
+CREATE OR ALTER VIEW V_DEUDAS (ID, ID_CLIENTE, CONCEPTO, MONTO, FECHA, HORA, ESTADO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_CLIENTE, 
+     CONCEPTO, 
+     MONTO, 
+     FECHA, 
+     HORA, 
+     ESTADO
+FROM DEUDAS 
+WHERE ID >= 0;
+
+/* GET_DEUDAS */
+CREATE OR ALTER VIEW GET_DEUDAS (ID, ID_CLIENTE, CONCEPTO, MONTO, FECHA, HORA, ESTADO, P_NOMBRE, S_NOMBRE, APELLIDOS, CEDULA) 
+AS 
+/*
+
+*/
+SELECT 
+     d.ID, d.ID_CLIENTE, d.CONCEPTO, d.MONTO, d.FECHA, d.HORA,
+     DECODE(
+          d.ESTADO, 
+               'i', 'Inicial', 
+               'c', 'Credito', 
+               'a', 'Abonada', 
+               ''
+     ) AS ESTADO,
+     p.PNOMBRE, p.SNOMBRE, p.APELLIDOS,
+     g.CEDULA
+FROM V_DEUDAS d
+INNER JOIN V_PERSONAS p ON p.ID = d.ID_CLIENTE
+INNER JOIN V_GENERALES g ON g.ID_PERSONA = d.ID_CLIENTE
+WHERE d.ESTADO IN('c', 'i', 'a') AND d.ID IS NULL OR p.ID IS NULL OR g.ID_PERSONA IS NULL;
+
+/* V_CONTACTOS_DIRECCIONES */
+CREATE OR ALTER VIEW V_CONTACTOS_DIRECCIONES (ID, ID_PERSONA, ID_PROVINCIA, ID_MUNICIPIO, ID_DISTRITO_MUNICIPAL, ID_CODIGO_POSTAL, DIRECCION, FECHA, ESTADO, POR_DEFECTO) 
+AS 
+/*
+
+*/
+SELECT
+	ID,
+	ID_PERSONA,
+	ID_PROVINCIA,
+	ID_MUNICIPIO,
+	ID_DISTRITO_MUNICIPAL,
+	ID_CODIGO_POSTAL,
+	DIRECCION,
+	FECHA,
+	ESTADO,
+	POR_DEFECTO
+FROM
+	CONTACTOS_DIRECCIONES
+WHERE
+	ID >= 0;
+
+/* V_MUNICIPIOS */
+CREATE OR ALTER VIEW V_MUNICIPIOS (ID, NOMBRE, IDPROVINCIA) 
+AS 
+/*
+*/
+SELECT 
+     ID, 
+     NOMBRE, 
+     IDPROVINCIA --FK
+FROM MUNICIPIOS 
+WHERE ID >= 0;
+
+/* V_DISTRITOS_MUNICIPALES */
+CREATE OR ALTER VIEW V_DISTRITOS_MUNICIPALES (ID, NOMBRE, IDMUNICIPIO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     NOMBRE, 
+     IDMUNICIPIO
+FROM DISTRITOS_MUNICIPALES 
+WHERE ID >= 0;
+
+/* V_CODIGOS_POSTALES */
+CREATE OR ALTER VIEW V_CODIGOS_POSTALES (ID, IDPROVINCIA, LOCALIDAD, CODIGO_POSTAL) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     IDPROVINCIA, 
+     LOCALIDAD, 
+     CODIGO_POSTAL
+FROM CODIGOS_POSTALES 
+WHERE ID >= 0;
+
+/* V_PROVINCIAS */
+CREATE OR ALTER VIEW V_PROVINCIAS (ID, NOMBRE, ZONA) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     NOMBRE, 
+     ZONA
+FROM PROVINCIAS
+WHERE ID >= 0;
+
+/* GET_DIRECCION_BY_ID */
+CREATE OR ALTER VIEW GET_DIRECCION_BY_ID (ID, ID_PERSONA, ID_PROVINCIA, PROVINCIA, ID_MUNICIPIO, MUNICIPIO, ID_DISTRITO_MUNICIPAL, DISTRITO_MUNICIPAL, ID_CODIGO_POSTAL, CODIGO_POSTAL, DIRECCION, FECHA, ESTADO, POR_DEFECTO) 
+AS 
+SELECT r.ID, r.ID_PERSONA, 
+     r.ID_PROVINCIA, p.NOMBRE, 
+     r.ID_MUNICIPIO, m.NOMBRE,
+     r.ID_DISTRITO_MUNICIPAL, d.NOMBRE, 
+     r.ID_CODIGO_POSTAL, c.CODIGO_POSTAL, 
+     r.DIRECCION, r.FECHA, r.ESTADO, r.POR_DEFECTO
+FROM V_CONTACTOS_DIRECCIONES r
+LEFT JOIN V_PROVINCIAS p ON p.ID = r.ID_PROVINCIA
+LEFT JOIN V_MUNICIPIOS m ON m.ID = r.ID_MUNICIPIO
+LEFT JOIN V_DISTRITOS_MUNICIPALES d ON d.ID = r.ID_DISTRITO_MUNICIPAL
+LEFT JOIN V_CODIGOS_POSTALES c ON c.ID = r.ID_CODIGO_POSTAL
+WHERE r.ID >= 0 AND p.ID >= 0 AND m.ID >= 0 AND d.ID >= 0 AND c.ID >= 0;
+
+/* V_D_FACTURAS */
+CREATE OR ALTER VIEW V_D_FACTURAS (ID_FACTURA, ID_LINEA, ID_PRODUCTO, PRECIO, CANTIDAD) 
+AS 
+/*
+
+*/
+SELECT 
+     ID_FACTURA, 
+     ID_LINEA, 
+     ID_PRODUCTO, 
+     PRECIO, 
+     CANTIDAD
+FROM D_FACTURAS 
+WHERE ID_FACTURA >= 0;
+
+/* GET_D_FACTURAS */
+CREATE OR ALTER VIEW GET_D_FACTURAS (ID_FACTURA, ID_LINEA, ID_PRODUCTO, DESCRIPCION, CANTIDAD) 
+AS 
+/*
+
+*/
+SELECT 
+     r.ID_FACTURA, 
+     r.ID_LINEA, 
+     r.ID_PRODUCTO, 
+     p.DESCRIPCION, 
+     r.CANTIDAD
+FROM V_D_FACTURAS r 
+LEFT JOIN V_PRODUCTOS p ON p.ID = r.ID_PRODUCTO
+WHERE r.ID_FACTURA >= 0 AND p.ID >= 0;
+COMMENT ON VIEW GET_D_FACTURAS IS 'SELECT Anterior:
+      SELECT r.ID_FACTURA, r.ID_LINEA, r.ID_PRODUCTO, p.DESCRIPCION, r.PRECIO, r.CANTIDAD, (r.PRECIO * r.CANTIDAD) AS TOTAL
+      FROM V_D_FACTURAS r 
+      LEFT JOIN V_PRODUCTOS p ON p.ID = r.ID_PRODUCTO
+      WHERE r.ID_FACTURA >= 0 AND p.ID >= 0
+
+
+     He eliminado el campo precio y total porque este campo deberia de vinir de otra tabla, dicha tabla es la 
+     ENTRADA_PRODUCTOS que debe contenerlo.';
+
+/* V_PERSONAS_ESTUDIANTES_ATR */
+CREATE OR ALTER VIEW V_PERSONAS_ESTUDIANTES_ATR (ID, MATRICULA) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     MATRICULA
+FROM PERSONAS_ESTUDIANTES_ATR 
+WHERE ID >= 0 
+/*
+
+*/;
+
+/* GET_ESTUDIANTES_SV */
+CREATE OR ALTER VIEW GET_ESTUDIANTES_SV (ID, MATRICULA, CEDULA, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, FECHA_NACIMIENTO, ESTADO) 
+AS 
+--
+SELECT 
+     r.ID, 
+     e.MATRICULA, 
+     g.CEDULA, 
+     r.PNOMBRE, 
+     r.SNOMBRE, 
+     r.APELLIDOS, 
+     r.SEXO, 
+     r.FECHA_NACIMIENTO, 
+     r.ESTADO
+FROM V_PERSONAS_ESTUDIANTES_ATR e 
+INNER JOIN V_PERSONAS r ON r.ID = e.ID
+INNER JOIN V_GENERALES g ON g.ID_PERSONA = e.ID
+/**/;
+COMMENT ON VIEW GET_ESTUDIANTES_SV IS 'Debe de obtenerse las relaciones entre padre he hijo de la tabla RELACION_FAMILIAR.';
+
+/* V_M_FACTURAS */
+CREATE OR ALTER VIEW V_M_FACTURAS (ID, ID_CLIENTE, ID_CONTACTOS_TEL, ID_CONTACTOS_DIRECCIONES, ID_CONTACTOS_EMAIL, ID_TURNO, FECHA_HORA, TOTAL, EFECTIVO, ESTADO_FACTURA, NOMBRE_TEMP, USER_NAME) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_CLIENTE, 
+     ID_CONTACTOS_TEL, 
+     ID_CONTACTOS_DIRECCIONES, 
+     ID_CONTACTOS_EMAIL, 
+     ID_TURNO,
+     FECHA_HORA, 
+     TOTAL, 
+     EFECTIVO, 
+     ESTADO_FACTURA, 
+     NOMBRE_TEMP, 
+     USER_NAME
+FROM M_FACTURAS 
+WHERE ID >= 0
+/*
+
+*/;
+
+/* GET_M_FACTURAS */
+CREATE OR ALTER VIEW GET_M_FACTURAS (ID, ID_CLIENTE, ID_CONTACTOS_TEL, ID_CONTACTOS_DIRECCIONES, ID_CONTACTOS_EMAIL, ID_TURNO, FECHA_HORA, TOTAL, EFECTIVO, ESTADO_FACTURA, NOMBRE_TEMP, USER_NAME) 
+AS 
+/*
+
+*/
+SELECT 
+     LPAD(ID, 7, 0), 
+     ID_CLIENTE, 
+     ID_CONTACTOS_TEL, 
+     ID_CONTACTOS_DIRECCIONES, 
+     ID_CONTACTOS_EMAIL, 
+     ID_TURNO,
+     FECHA_HORA, 
+     TOTAL, 
+     EFECTIVO, 
+     ESTADO_FACTURA, 
+     NOMBRE_TEMP, 
+     USER_NAME
+FROM V_M_FACTURAS 
+WHERE ID >= 0
+/*
+
+*/;
+
+/* V_PERSONAS_PACIENTES */
+CREATE OR ALTER VIEW V_PERSONAS_PACIENTES (ID) 
+AS 
+/*
+
+*/
+SELECT 
+     ID
+FROM PERSONAS_PACIENTES
+WHERE ID >= 0;
+
+/* V_ASEGURADOS */
+CREATE OR ALTER VIEW V_ASEGURADOS (ID_PERSONA, ID_ARS, NO_NSS, ESTADO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID_PERSONA, 
+     ID_ARS, 
+     NO_NSS, 
+     ESTADO 
+FROM ASEGURADOS 
+WHERE ID_PERSONA >= 0;
+
+/* GET_PACIENTES */
+CREATE OR ALTER VIEW GET_PACIENTES (ID, ID_ARS, NONSS, ID_TIPO_SANGRE, CEDULA, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, FECHA_NACIMIENTO, FECHA_INGRESO, FECHA_HORA_ULTIMO_UPDATE, ESTADO) 
+AS 
+/*
+
+*/
+SELECT 
+     r.ID, 
+     a.ID_ARS, 
+     a.NO_NSS, 
+     g.ID_TIPO_SANGRE, 
+     g.CEDULA, 
+     p.PNOMBRE, 
+     p.SNOMBRE, 
+     p.APELLIDOS, 
+     p.SEXO, 
+     p.FECHA_NACIMIENTO, 
+     p.FECHA_INGRESO, 
+     p.FECHA_HORA_ULTIMO_UPDATE, 
+     p.ESTADO
+FROM V_PERSONAS_PACIENTES r 
+INNER JOIN V_PERSONAS p ON p.ID = r.ID
+INNER JOIN V_ASEGURADOS a ON a.ID_PERSONA = r.ID
+INNER JOIN V_GENERALES g ON g.ID_PERSONA = r.ID
+WHERE r.ID >= 0 AND p.ID >= 0 AND a.ID_PERSONA >= 0 AND g.ID_PERSONA >= 0;
+COMMENT ON VIEW GET_PACIENTES IS 'Debe de obtenerse las relaciones entre padre he hijo de la tabla RELACION_FAMILIAR.';
+
+/* VS_PROCEDIMIENTOS */
+CREATE OR ALTER VIEW VS_PROCEDIMIENTOS (ID, PROCEDIMIENTO, PROPIETARIO, SQL_SECURITY, DESCRIPCION) 
+AS 
+/*
+
+*/
+SELECT 
+     RDB$PROCEDURE_ID, 
+     TRIM(RDB$PROCEDURE_NAME),
+     TRIM(RDB$OWNER_NAME), 
+     RDB$SQL_SECURITY, 
+     TRIM(RDB$DESCRIPTION)
+FROM RDB$PROCEDURES
+WHERE RDB$PROCEDURE_ID >= 0;
+
+/* GET_PERMISOS_ASIGNADOS */
+CREATE OR ALTER VIEW GET_PERMISOS_ASIGNADOS (NOMBRE_RELACION, GRANT_OPTION, ID_TIPO_OBJ, USUARIO, DESCRIPCION) 
+AS 
+/*
+
+*/
+SELECT 
+     TRIM(r.NOMBRE_RELACION) NOMBRE_RELACION, 
+     r.GRANT_OPTION,
+     r.ID_TIPO_OBJ,
+     r.USUARIO,
+     COALESCE(p.DESCRIPCION, '')
+FROM VS_PRIVILEGIO r 
+INNER JOIN VS_PROCEDIMIENTOS p ON TRIM(p.PROCEDIMIENTO) STARTING WITH TRIM(r.NOMBRE_RELACION);
+
+/* V_PERSONAS_ESTUDIANTES */
+CREATE OR ALTER VIEW V_PERSONAS_ESTUDIANTES (ID) 
+AS 
+/*
+
+*/
+SELECT 
+     ID
+FROM PERSONAS_ESTUDIANTES 
+WHERE ID >= 0
+/*
+     Tabla que almacenas las claves primarias de los estudiantes.
+*/;
+COMMENT ON VIEW V_PERSONAS_ESTUDIANTES IS 'Tabla que almacenas las claves primarias de los estudiantes.';
+
+/* GET_PERSONAS_ESTUDIANTES */
+CREATE OR ALTER VIEW GET_PERSONAS_ESTUDIANTES (ID, MATRICULA, ESTADO) 
+AS 
+/*
+     
+*/
+SELECT  
+     e.ID, 
+     ee.MATRICULA, 
+     p.ESTADO
+FROM V_PERSONAS_ESTUDIANTES e 
+INNER JOIN V_PERSONAS_ESTUDIANTES_ATR ee ON ee.ID = e.ID
+INNER JOIN V_PERSONAS p ON p.ID = e.ID;
+
+/* GET_PRIVILEGIOS */
+CREATE OR ALTER VIEW GET_PRIVILEGIOS (USER_NAME, CEDENTE, PRIVILEGIO, OPCION_PERMISO, NOMBRE_RELACION, NOMBRE_CAMPO, TIPO_USUARIO, TIPO_OBJECTO, DESCRIPCION) 
+AS 
+/*
+
+*/
+SELECT 
+     TRIM(u.USUARIO), 
+     COALESCE(TRIM(u.GRANTOR), ''),
+     TRIM(u.ABRV_PRIVILEGIO), 
+     u.GRANT_OPTION, 
+     TRIM(u.NOMBRE_RELACION), 
+     COALESCE(TRIM(u.NOMBRE_CAMPO), ''),
+     u.TIPO_USUARIO, 
+     u.TIPO_OBJ, 
+     COALESCE(p.DESCRIPCION, '')
+FROM VS_PRIVILEGIO u
+LEFT JOIN VS_PROCEDIMIENTOS p ON TRIM(p.PROCEDIMIENTO) = TRIM(u.NOMBRE_RELACION)
+/*
+     Filtro a utilizar 
+     WHERE u.RDB$RELATION_NAME STARTING 'SP_'
+*/;
+
+/* GET_PRODUCTOS */
+CREATE OR ALTER VIEW GET_PRODUCTOS (ID, ID_CATEGORIA, DESC_CATEGORIA, IMAGEN_CATEGORIA, CODIGO, DESCRIPCION, EXISTENCIA, IMAGEN_PRODUCTO, NOTA, FECHA_CREACION, ESTADO) 
+AS 
+/*
+
+*/
+SELECT 
+     r.ID, 
+     r.ID_CATEGORIA, 
+     c.DESCRIPCION, 
+     c.IMAGEN_TEXTO, 
+     r.CODIGO, 
+     r.DESCRIPCION, 
+     r.EXISTENCIA,
+     r.IMAGEN_TEXTO, 
+     r.NOTA, 
+     r.FECHA_CREACION, 
+     r.ESTADO
+FROM V_PRODUCTOS r
+INNER JOIN VS_CATEGORIAS c ON c.ID = r.ID_CATEGORIA;
+
+/* V_PERSONAS_PROVEEDORES_ATR */
+CREATE OR ALTER VIEW V_PERSONAS_PROVEEDORES_ATR (ID, CODIGO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     CODIGO
+FROM PERSONAS_PROVEEDORES_ATR;
+
+/* V_PERSONAS_PROVEEDORES */
+CREATE OR ALTER VIEW V_PERSONAS_PROVEEDORES (ID) 
+AS 
+/*
+*/
+SELECT 
+     ID 
+FROM PERSONAS_PROVEEDORES
+WHERE ID >= 0;
+
+/* GET_PROVEEDORES */
+CREATE OR ALTER VIEW GET_PROVEEDORES (ID, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, ESTADO, CEDULA, ID_PERSONA, ID_PROVINCIA, ID_MUNICIPIO, DIRECCION, CODIGO) 
+AS 
+/*
+
+*/
+SELECT 
+     p.ID, 
+     a.PERSONA, a.PNOMBRE, a.SNOMBRE, a.APELLIDOS, a.SEXO, a.ESTADO,
+     b.CEDULA,
+     c.ID_PERSONA, c.ID_PROVINCIA, c.ID_MUNICIPIO, c.DIRECCION,
+     d.CODIGO
+FROM V_PERSONAS_PROVEEDORES p
+INNER JOIN V_PERSONAS a ON a.ID = p.ID
+INNER JOIN V_GENERALES b ON b.ID_PERSONA = p.ID
+INNER JOIN V_CONTACTOS_DIRECCIONES c ON c.ID_PERSONA = p.ID
+INNER JOIN V_PERSONAS_PROVEEDORES_ATR d ON d.ID = p.ID
+WHERE p.ID >= 0 AND a.ID >= 0 AND b.ID_PERSONA >= 0 AND c.ID >= 0 AND d.ID >= 0;
+
+/* GET_ROLES */
+CREATE OR ALTER VIEW GET_ROLES (ROL, PROPIETARIO, DESCRIPCION) 
+AS 
+/*
+
+*/
+SELECT 
+     RDB$ROLE_NAME, 
+     RDB$OWNER_NAME, 
+     RDB$DESCRIPTION 
+FROM RDB$ROLES
+WHERE TRIM(RDB$ROLE_NAME) NOT STARTING WITH 'RRR_SOFTSURENA';
+COMMENT ON VIEW GET_ROLES IS 'Me permite obtener todos los roles del sistema registrados.
+
+Este rol debe ser ejecutados administradores del sistema.';
+
+/* V_TANDAS */
+CREATE OR ALTER VIEW V_TANDAS (ID, ANNO_INICIAL, ANNO_FINAL, HORA_INICIO, HORA_FINAL, LUNES, MARTES, MIERCOLES, JUEVES, VIERNES, SABADOS, DOMINGOS, CANTIDAD_ESTUDIANTES, CON_EDAD, EDAD_MINIMA, EDAD_MAXIMA, ESTADO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ANNO_INICIAL, 
+     ANNO_FINAL, 
+     HORA_INICIO, 
+     HORA_FINAL, 
+     LUNES, MARTES, MIERCOLES, JUEVES, VIERNES, SABADOS, DOMINGOS, 
+     CANTIDAD_ESTUDIANTES, 
+     CON_EDAD, 
+     EDAD_MINIMA, 
+     EDAD_MAXIMA, 
+     ESTADO
+FROM TANDAS
+WHERE ID >= 0
+/*
+
+*/;
+
+/* GET_TANDAS_DETALLADAS */
+CREATE OR ALTER VIEW GET_TANDAS_DETALLADAS (ID, HORARIO) 
+AS 
+SELECT t.id, trim( case lunes when 1 then 'Lunes ' else trim('') end || 
+                   case martes when 1 then 'Martes ' else trim('') end ||           
+                   case miercoles when 1 then 'Miercoles ' else trim('') end ||           
+                   case jueves when 1 then 'Jueves ' else trim('') end ||            
+                   case viernes when 1 then 'Viernes ' else trim('') end ||           
+                   case sabados when 1 then 'Sabados ' else trim('') end||           
+                   case domingos when 1 then 'Domingos ' else trim('') end) || ' De ' ||           
+                   subString(t.Hora_Inicio FROM 1 for 8) ||' Hasta '||              
+                   subString(t.Hora_Final FROM 1 for 8) AS HORARIO 
+FROM V_TANDAS t;
+
+/* GET_TEMPORALES */
+CREATE OR ALTER VIEW GET_TEMPORALES (ID_FACTURA, NOMBRE_TEMP, PNOMBRE, SNOMBRE, APELLIDOS, ID_TURNO, EFECTIVO, FECHA_HORA, ESTADO_FACTURA, ID_CLIENTE, USER_NAME) 
+AS 
+/*
+     TODO Analizar esta vista del sistema.
+*/
+SELECT 
+     f.ID, 
+     f.NOMBRE_TEMP, 
+     p.PNOMBRE, p.SNOMBRE, p.APELLIDOS, 
+     f.ID_TURNO, 
+     f.EFECTIVO,  
+     f.FECHA_HORA, 
+     f.ESTADO_FACTURA, 
+     f.ID_CLIENTE, 
+     f.USER_NAME
+FROM V_M_FACTURAS f     
+LEFT JOIN V_PERSONAS_CLIENTES c on c.ID = f.ID_CLIENTE 
+LEFT JOIN V_PERSONAS p ON p.ID = f.ID_CLIENTE
+LEFT JOIN V_D_FACTURAS d on d.ID_FACTURA = f.ID 
+WHERE f.ESTADO_FACTURA = 't' 
+GROUP by f.ID, f.NOMBRE_TEMP, p.PNOMBRE, p.SNOMBRE, p.APELLIDOS, 
+          f.ID_TURNO, f.EFECTIVO, f.FECHA_HORA, f.ESTADO_FACTURA, f.ID_CLIENTE, f.USER_NAME;
+
+/* V_ALMACENES */
+CREATE OR ALTER VIEW V_ALMACENES (ID, NOMBRE, UBICACION, ESTADO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     NOMBRE, 
+     UBICACION, 
+     ESTADO
+FROM ALMACENES 
+WHERE ID >= 0;
+
+/* V_TURNOS */
+CREATE OR ALTER VIEW V_TURNOS (ID, ID_ALMACEN, TURNO_USUARIO, FECHA_HORA_INICIO, FECHA_HORA_FINAL, ESTADO, MONTO_FACTURADO, MONTO_DEVUELTO, MONTO_EFECTIVO, MONTO_CREDITO, ROL, USER_NAME) 
+AS 
+SELECT 
+     ID, 
+     ID_ALMACEN, 
+     TURNO_USUARIO, 
+     FECHA_HORA_INICIO, 
+     FECHA_HORA_FINAL, 
+     ESTADO, 
+     MONTO_FACTURADO, 
+     MONTO_DEVUELTO,
+     MONTO_EFECTIVO, 
+     MONTO_CREDITO, 
+     ROL, 
+     USER_NAME
+FROM TURNOS 
+WHERE ID >= 0;
+COMMENT ON VIEW V_TURNOS IS 'Tabla utilizada para guardar los turnos de los cajeros del sistema.';
+
+/* GET_TURNOS */
+CREATE OR ALTER VIEW GET_TURNOS (ID, ID_ALMACEN, TURNO_USUARIO, FECHA_HORA_INICIO, FECHA_HORA_FINAL, ESTADO, MONTO_FACTURADO, MONTO_DEVUELTO, MONTO_EFECTIVO, MONTO_CREDITO, NOMBRE_ALMACEN, ID_FACTURA) 
+AS 
+/*
+
+*/
+SELECT 
+     r.ID, 
+     r.ID_ALMACEN, 
+     r.TURNO_USUARIO, 
+     r.FECHA_HORA_INICIO,
+     r.FECHA_HORA_FINAL, 
+     r.ESTADO, 
+     r.MONTO_FACTURADO,
+     r.MONTO_DEVUELTO, 
+     r.MONTO_EFECTIVO, 
+     r.MONTO_CREDITO, 
+     a.NOMBRE, 
+     b.ID ID_FACTURA
+FROM V_TURNOS r
+INNER JOIN V_ALMACENES a ON a.ID = r.ID_ALMACEN 
+INNER JOIN V_M_FACTURAS b ON b.ID_TURNO = r.ID AND b.ESTADO_FACTURA = 'I'
+WHERE r.ID >= 0 AND a.ID >= 0 AND b.ID >= 0;
+COMMENT ON VIEW GET_TURNOS IS 'Vista que me permite tener los turnos habiertos en el sistema de la vista V_TURNOS, esta hace un INNER JOIN con V_ALMACENES.';
+
+/* VS_TRANSACCION_ACTUAL */
+CREATE OR ALTER VIEW VS_TRANSACCION_ACTUAL (TNIDENTIFICADORTRANSACCION, TNIDENTIFICADORCONEXION, TCESTADOTRANSACCION, TDFECHAHORA, TNULTIMATRANSACCION, TNOLDESTINTERESTINGTRANSACTION, TNOLDESTACTIVETRANSACTION, TCMODOAISLAMIENTO, TCTIEMPOESPERA, TCREADONLY, TCAUTOCOMMIT, TCAUTOUNDO, TNIDENTIFICADORESTADISTICAS) 
+AS 
+SELECT
+   MON$TRANSACTION_ID             AS tnIdentificadorTransaccion,
+   MON$ATTACHMENT_ID              AS tnIdentificadorConexion,
+   IIF(MON$STATE = 1, 'ACTIVA', 'INACTIVA') AS tcEstadoTransaccion,
+   MON$TIMESTAMP                  AS tdFechaHora,
+   MON$TOP_TRANSACTION            AS tnUltimaTransaccion,
+   MON$OLDEST_TRANSACTION         AS tnOldestInterestingTransaction,
+   MON$OLDEST_ACTIVE              AS tnOldestActiveTransaction,
+   DECODE(MON$ISOLATION_MODE, 
+   0, 'Acceso exclusivo', 
+   1, 'Lecturas repetidas', 
+   2, 'Lee filas confirmadas inmediatamente', 
+   3, 'No lee una fila si otra transacción la usa') AS tcModoAislamiento,
+   DECODE(MON$LOCK_TIMEOUT, 
+   -1, 'Espera por siempre', 
+   0, 'No espera', 
+   'Espera ' || MON$LOCK_TIMEOUT || ' segundos') AS tcTiempoEspera,
+   IIF(MON$READ_ONLY = 1, 'Read Only', 'Read Write')               AS tcReadOnly,
+   IIF(MON$AUTO_COMMIT = 1, 'Auto COMMIT', 'No auto COMMIT')       AS tcAutoCommit,
+   IIF(MON$AUTO_UNDO = 1, 'Tiene savepoint', 'No tiene savepoint') AS tcAutoUndo,
+   MON$STAT_ID                                                     AS tnIdentificadorEstadisticas
+FROM
+   MON$TRANSACTIONS
+WHERE
+   MON$ATTACHMENT_ID  = CURRENT_CONNECTION AND
+   MON$TRANSACTION_ID = CURRENT_TRANSACTION;
+
+/* VS_USUARIOS_TAGS */
+CREATE OR ALTER VIEW VS_USUARIOS_TAGS (LLAVE, VALOR, USUARIO, PLUGING) 
+AS 
+/*
+
+*/
+SELECT 
+     SEC$KEY, 
+     SEC$VALUE, 
+     SEC$USER_NAME, 
+     SEC$PLUGIN
+FROM SEC$USER_ATTRIBUTES;
+
+/* V_ANTECEDENTES */
+CREATE OR ALTER VIEW V_ANTECEDENTES (ID, ID_CONSULTA, DESCRIPCION) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_CONSULTA, 
+     DESCRIPCION
+FROM ANTECEDENTES 
+WHERE ID >= 0;
+
+/* V_ARS */
+CREATE OR ALTER VIEW V_ARS (ID, DESCRIPCION, COVERTURA_CONSULTA_PORCIENTO, ESTADO, CANTIDAD_REGISTRO, USER_NAME, ROL) 
+AS 
+/*
+
+*/SELECT 
+     ID, 
+     DESCRIPCION, 
+     COVERCONSULTAPORC, 
+     ESTADO, 
+     CANTIDAD_REGISTRO, 
+     USER_NAME, 
+     ROL
+FROM ARS
+WHERE ID >= 0;
+COMMENT ON VIEW V_ARS IS 'Tabla que almacenas las propiedades basicas de los seguros con lo que opera el sistema.
+
+Descripcion seria el nombre de la aseguradora, la converConsulta guardar el valor en porciento de lo que el seguro cubre por consulta.';
+
+/* V_CARTONES_BINGO */
+CREATE OR ALTER VIEW V_CARTONES_BINGO (ID, CARTON_HASH, FECHA_CREACCION, MATRIZ_OBJ, ESTADO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     CARTON_HASH, 
+     FECHA_CREACCION, 
+     MATRIZ_OBJ, 
+     ESTADO
+FROM CARTONES_BINGO 
+WHERE ID >= 0 AND CARTON_HASH <> 0;
+
+/* V_CATEGORIAS */
+CREATE OR ALTER VIEW V_CATEGORIAS (ID, DESCRIPCION, IMAGEN_TEXTO, FECHA_CREACION, ESTADO, USER_NAME) 
+AS 
+/*
+     
+*/
+SELECT 
+     ID, 
+     DESCRIPCION, 
+     IMAGEN_TEXTO,
+     FECHA_CREACION, 
+     ESTADO, 
+     USER_NAME
+FROM CATEGORIAS 
+WHERE ID >= 0;
+
+/* V_CONSULTAS */
+CREATE OR ALTER VIEW V_CONSULTAS (ID, ID_PACIENTE, ID_CONTROL_CONSULTA, FECHA, TURNO, ESTADO, USER_NAME) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_PACIENTE, 
+     ID_CONTROL_CONSULTA, 
+     FECHA, 
+     TURNO, 
+     ESTADO, 
+     USER_NAME
+FROM CONSULTAS
+WHERE ID >= 0;
+
+/* V_CONSULTAS_APROBADAS */
+CREATE OR ALTER VIEW V_CONSULTAS_APROBADAS (ID, COD_AUTORIZACION, COSTO, DESCUENTO, TOTALCOSTO, USER_NAME) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     COD_AUTORIZACION, 
+     COSTO, 
+     DESCUENTO, 
+     TOTALCOSTO, 
+     USER_NAME
+FROM CONSULTAS_APROBADAS 
+WHERE ID >= 0;
+
+/* V_CONTACTOS_EMAIL */
+CREATE OR ALTER VIEW V_CONTACTOS_EMAIL (ID, ID_PERSONA, EMAIL, FECHA, ESTADO, POR_DEFECTO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_PERSONA, 
+     EMAIL, 
+     FECHA, 
+     ESTADO, 
+     POR_DEFECTO
+FROM CONTACTOS_EMAIL
+WHERE ID >= 0;
+
+/* V_CONTACTOS_TEL */
+CREATE OR ALTER VIEW V_CONTACTOS_TEL (ID, ID_PERSONA, TELEFONO, TIPO, FECHA, ESTADO, POR_DEFECTO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_PERSONA, 
+     TELEFONO, 
+     TIPO, 
+     FECHA, 
+     ESTADO, 
+     POR_DEFECTO
+FROM CONTACTOS_TEL 
+WHERE ID >= 0;
+
+/* V_CONTROL_CONSULTA */
+CREATE OR ALTER VIEW V_CONTROL_CONSULTA (ID, USER_NAME, CANTIDAD_PACIENTE, DIA, INICIAL, FINAL, ESTADO, USER_NAME_) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     USER_NAME, 
+     CANTIDADPACIENTE, 
+     DIA, 
+     INICIAL, 
+     FINAL, 
+     ESTADO, 
+     USER_NAME_
+FROM CONTROL_CONSULTA
+WHERE ID >= 0;
+
+/* V_D_ANALISIS */
+CREATE OR ALTER VIEW V_D_ANALISIS (ID, ID_M_ANALISIS, LINEA, ID_T_ANALITICA, OTRO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_M_ANALISIS, 
+     LINEA, 
+     ID_T_ANALITICA, 
+     OTRO
+FROM D_ANALISIS 
+WHERE ID >= 0;
+
+/* V_D_DEUDAS_PAGAS */
+CREATE OR ALTER VIEW V_D_DEUDAS_PAGAS (ID, ID_DEUDAS, MONTO_PAGO, FECHA_HORA) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_DEUDAS, 
+     MONTO_PAGO, 
+     FECHA_HORA
+FROM D_DEUDAS_PAGAS 
+WHERE ID >= 0;
+
+/* V_D_ENTRADA_PRODUCTO */
+CREATE OR ALTER VIEW V_D_ENTRADA_PRODUCTO (ID_M_ENTRADA_PRODUCTO, LINEA, ID_PRODUCTO, ENTRADA, COSTO, PRECIO, FECHA_VECIMIENTO, OBSERVACION) 
+AS 
+/*
+
+*/
+SELECT 
+     ID_M_ENTRADA_PRODUCTO, 
+     LINEA, 
+     ID_PRODUCTO, 
+     ENTRADA, 
+     COSTO, 
+     PRECIO, 
+     FECHA_VECIMIENTO, 
+     OBSERVACION
+FROM D_ENTRADA_PRODUCTO
+WHERE ID_M_ENTRADA_PRODUCTO >= 0;
+
+/* V_D_GUIA_VIGILANCIA_DESARROLLO */
+CREATE OR ALTER VIEW V_D_GUIA_VIGILANCIA_DESARROLLO (ID_GVD, ID_PACIENTE, FECHA) 
+AS 
+/*
+
+*/
+SELECT 
+     ID_GVD, 
+     ID_PACIENTE, 
+     FECHA
+FROM D_GUIA_VIGILANCIA_DESARROLLO 
+WHERE ID_GVD >= 0;
+
+/* V_D_MOTIVO_CONSULTA */
+CREATE OR ALTER VIEW V_D_MOTIVO_CONSULTA (IDCONSULTA, IDMCONSULTA) 
+AS 
+/*
+
+*/
+SELECT 
+     IDCONSULTA, 
+     IDMCONSULTA
+FROM D_MOTIVO_CONSULTA 
+WHERE IDCONSULTA >= 0 AND IDMCONSULTA >= 0;
+
+/* V_D_RECETAS */
+CREATE OR ALTER VIEW V_D_RECETAS (ID_RECETA, LINEA, ID_MEDICAMENTO, CANTIDAD, D_DOSIS) 
+AS 
+/*
+*/
+SELECT 
+     ID_RECETA, 
+     LINEA, 
+     ID_MEDICAMENTO, 
+     CANTIDAD, 
+     D_DOSIS
+FROM D_RECETAS 
+WHERE ID_RECETA >= 0;
+
+/* V_E_S_SYS */
+CREATE OR ALTER VIEW V_E_S_SYS (ID, NOMBRE_EMPRESA, FCHI, FCHA, FCHV, DIAS_RESTANTES, TELEFONOS, DIRECCION, MENSAJE_FOOTER, LOGO) 
+AS 
+/*
+     TODO esta vista debe ser analizada, pues contiene un campo con una funcion. 
+     Debe darsele otro nombre.
+*/
+SELECT 
+     ID, 
+     NOMBRE_EMPRESA, 
+     FCHI, 
+     FCHA, 
+     FCHV, 
+     DATEDIFF(DAY FROM CURRENT_DATE TO FCHV), 
+     TELEFONOS, 
+     DIRECCION, 
+     MENSAJE_FOOTER, 
+     LOGO
+FROM E_S_SYS
+WHERE ID >= 0;
+
+/* V_GUIA_VIGILANCIA_DESARROLLO */
+CREATE OR ALTER VIEW V_GUIA_VIGILANCIA_DESARROLLO (ID, EDAD, CARACT_DESARR_EVALUAR) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     EDAD, 
+     CARACT_DESARR_EVALUAR
+FROM GUIA_VIGILANCIA_DESARROLLO
+WHERE ID >= 0;
+
+/* V_HUELLAS */
+CREATE OR ALTER VIEW V_HUELLAS (ID, TIPO_DEDO, IMAGEN_TEXTO) 
+AS 
+/*
+*/
+SELECT 
+     ID, 
+     TIPO_DEDO, 
+     IMAGEN_TEXTO
+FROM HUELLAS
+WHERE ID >= 0;
+
+/* V_INSCRIPCION */
+CREATE OR ALTER VIEW V_INSCRIPCION (ID, ID_ESTUDIANTE, ID_TANDA, PAGO, FECHA_INSCRIPCION, ROL, USER_NAME) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_ESTUDIANTE, 
+     ID_TANDA, 
+     PAGO, 
+     FECHA_INSCRIPCION, 
+     ROL, 
+     USER_NAME
+FROM INSCRIPCIONES
+WHERE ID >= 0;
+
+/* V_MENSAJES */
+CREATE OR ALTER VIEW V_MENSAJES (ID, ID_DOCTOR, ID_PACIENTE, HORA, FECHA, MENSAJE, ESTADO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_DOCTOR, 
+     ID_PACIENTE, 
+     HORA, 
+     FECHA, 
+     MENSAJE, 
+     ESTADO
+FROM MENSAJES 
+WHERE ID >= 0;
+
+/* V_METRICAS */
+CREATE OR ALTER VIEW V_METRICAS (ID, IDCONSULTA, FECHA, PESOKG, ESTATURAMETRO, ESCEFALO, NF_DETECT, HALLAZGOS_POS, ID_DIAG, TX, COMPLEMENTO, IMAGEN_TEXTO, USER_NAME) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     IDCONSULTA, 
+     FECHA, 
+     PESOKG, 
+     ESTATURAMETRO, 
+     ESCEFALO, 
+     ENF_DETECT, 
+     HALLAZGOS_POS, 
+     ID_DIAG, 
+     TX, 
+     COMPLEMENTO,
+     IMAGEN_TEXTO, 
+     USER_NAME
+FROM METRICAS 
+WHERE ID >= 0
+/*
+
+*/;
+
+/* V_MOTIVO_CONSULTA */
+CREATE OR ALTER VIEW V_MOTIVO_CONSULTA (ID, DESCRIPCION) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     DESCRIPCION
+FROM MOTIVO_CONSULTA
+WHERE ID >= 0;
+
+/* V_M_ANALISIS */
+CREATE OR ALTER VIEW V_M_ANALISIS (ID, ID_PACIENTE, FECHA_HORA_CREADA, FECHA_HORA_VISTA, ROL, USER_NAME) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_PACIENTE, 
+     FECHA_HORA_CREADA, 
+     FECHA_HORA_VISTA, 
+     ROL, 
+     USER_NAME
+FROM M_ANALISIS 
+WHERE ID >= 0;
+
+/* V_M_ENTRADA_PRODUCTOS */
+CREATE OR ALTER VIEW V_M_ENTRADA_PRODUCTOS (ID, ID_PROVEDOR, ID_ALMACEN, COD_FACTURA, FECHA_ENTRADA, ROL, USER_NAME) 
+AS 
+SELECT 
+     ID, 
+     IDPROVEDOR, 
+     ID_ALMACEN, 
+     COD_FACTURA, 
+     FECHA_ENTRADA, 
+     ROL, 
+     USER_NAME
+FROM M_ENTRADA_PRODUCTOS 
+WHERE ID >= 0;
+
+/* V_PERSONAS_CLIENTES_ATR */
+CREATE OR ALTER VIEW V_PERSONAS_CLIENTES_ATR (ID, TOTAL_FACTURADO, TOTAL_DEUDA, CANTIDAD_FACTURA, FECHA_ULTIMA_COMPRA, SALDO) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     TOTAL_FACTURADO, 
+     TOTAL_DEUDA, 
+     CANTIDAD_FACTURA, 
+     FECHA_ULTIMA_COMPRA, 
+     SALDO
+FROM PERSONAS_CLIENTES_ATR
+WHERE ID >= 0
+/*
+
+*/;
+
+/* V_PERSONAS_PACIENTES_ART */
+CREATE OR ALTER VIEW V_PERSONAS_PACIENTES_ART (ID, PESO_NACIMIENTO_KG, ALTURA, PERIMETRO_CEFALICO, CESAREA, TIEMPO_GESTACION, MASA_CEFALICA, USER_NAME) 
+AS 
+/*
+
+*/
+SELECT 
+     ID_PACIENTE, 
+     PESO_NACIMIENTO_KG, 
+     ALTURA, 
+     PERIMETRO_CEFALICO, 
+     CESAREA, 
+     TIEMPO_GESTACION, 
+     MASA_CEFALICA, 
+     USER_NAME
+FROM PERSONAS_PACIENTES_ATR
+WHERE ID_PACIENTE >= 0
+/*
+
+*/;
+COMMENT ON VIEW V_PERSONAS_PACIENTES_ART IS 'Vista que permite obtener los resultados de los paciente de aquellos atributos que lo caracterizan.';
+
+/* V_PERSONAS_PADRES */
+CREATE OR ALTER VIEW V_PERSONAS_PADRES (ID) 
+AS 
+/*
+
+*/
+SELECT 
+     ID 
+FROM PERSONAS_PADRES
+WHERE ID >= 0;
+
+/* V_PLAN_CUENTA_CONTABLE */
+CREATE OR ALTER VIEW V_PLAN_CUENTA_CONTABLE (ID, PAIS, CODIGO_CUENTA_CONTABLE, NOMBRE_CUENTA, TIPO_CUENTA, NIVEL_CUENTA, USA_TERCERO, CENTRO_COSTOS, PORCENTAJE_BASE, MONTO_BASE_MIN, DETALLE_CUENTA) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     PAIS, 
+     CODIGO_CUENTA_CONTABLE, 
+     NOMBRE_CUENTA, 
+     TIPO_CUENTA, 
+     NIVEL_CUENTA, 
+     USA_TERCERO,
+     CENTRO_COSTOS, 
+     PORCENTAJE_BASE, 
+     MONTO_BASE_MIN, 
+     DETALLE_CUENTA
+FROM PLAN_CUENTA_CONTABLE
+/*
+
+*/;
+
+/* V_RECCOUNT */
+CREATE OR ALTER VIEW V_RECCOUNT (ID, TABLA, CANTIDAD) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     TABLA, 
+     CANTIDAD
+FROM RECCOUNT
+WHERE ID >= 0;
+
+/* V_RECETAS */
+CREATE OR ALTER VIEW V_RECETAS (ID, IDCONSULTA, FECHA, USER_NAME) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     IDCONSULTA, 
+     FECHA, 
+     USER_NAME
+FROM RECETAS 
+WHERE ID >= 0;
+
+/* V_RELACION_PADRE_ESTUDIANTE */
+CREATE OR ALTER VIEW V_RELACION_PADRE_ESTUDIANTE (ID_PADRE_O_MADRE, ID_ESTUDIANTE) 
+AS 
+/*
+
+*/
+SELECT 
+     ID_PADRE_O_MADRE, 
+     ID_ESTUDIANTE
+FROM RELACION_PADRE_ESTUDIANTE;
+
+/* V_RELACION_PADRE_PACIENTE */
+CREATE OR ALTER VIEW V_RELACION_PADRE_PACIENTE (ID_PADRE_O_MADRE, ID_PACIENTE) 
+AS 
+/*
+
+*/
+SELECT 
+     ID_PADRE_O_MADRE, 
+     ID_PACIENTE
+FROM RELACION_PADRE_PACIENTE;
+
+/* V_SINTOMAS */
+CREATE OR ALTER VIEW V_SINTOMAS (ID, ID_PACIENTE, SINTOMAS, FECHA, HORA, NOTA, USER_NAME) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     ID_PACIENTE, 
+     SINTOMAS, 
+     FECHA, 
+     HORA, 
+     NOTA, 
+     USER_NAME
+FROM SINTOMAS
+WHERE ID >= 0
+/*
+
+*/;
+
+/* V_TIPOS_SANGRE */
+CREATE OR ALTER VIEW V_TIPOS_SANGRE (ID, DESCRIPCION) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     DESCRIPCION
+FROM TIPOS_SANGRE 
+WHERE ID >= 0;
+
+/* V_T_ANALISIS */
+CREATE OR ALTER VIEW V_T_ANALISIS (ID, NOMBRE_CORTO_ANALISIS, NOMBRE_ANALISIS, NOTA) 
+AS 
+/*
+
+*/
+SELECT 
+     ID, 
+     NOMBRE_CORTO_ANALISIS, 
+     NOMBRE_ANALISIS, 
+     NOTA
+FROM T_ANALISIS 
+WHERE ID >= 0
+/*
+
+*/;
+
+/* ----- Creating Indices ----- */
+
+/* CODIGO_POSTAL_IDX */
+CREATE INDEX CODIGO_POSTAL_IDX ON CODIGOS_POSTALES (CODIGO_POSTAL);
+/* IDX_ANTECEDENTES1 */
+CREATE UNIQUE INDEX IDX_ANTECEDENTES1 ON ANTECEDENTES (ID,ID_CONSULTA);
+/* IDX_DEUDAS1 */
+CREATE INDEX IDX_DEUDAS1 ON DEUDAS (ESTADO);
+/* IDX_M_FACTURAS1 */
+CREATE INDEX IDX_M_FACTURAS1 ON M_FACTURAS (ID_TURNO,ESTADO_FACTURA);
+/* IDX_PERSONAS1 */
+CREATE INDEX IDX_PERSONAS1 ON PERSONAS (PNOMBRE);
+/* IDX_PERSONAS2 */
+CREATE INDEX IDX_PERSONAS2 ON PERSONAS (SNOMBRE);
+/* IDX_PERSONAS3 */
+CREATE INDEX IDX_PERSONAS3 ON PERSONAS (APELLIDOS);
+/* IDX_PERSONAS4 */
+CREATE INDEX IDX_PERSONAS4 ON PERSONAS (FECHA_NACIMIENTO);
+/* IDX_PERSONAS5 */
+CREATE INDEX IDX_PERSONAS5 ON PERSONAS (FECHA_INGRESO);
+/* IDX_PERSONAS6 */
+CREATE INDEX IDX_PERSONAS6 ON PERSONAS (PERSONA);
+/* IDX_PERSONAS7 */
+CREATE INDEX IDX_PERSONAS7 ON PERSONAS (SEXO);
+/* IDX_TURNOS1 */
+CREATE INDEX IDX_TURNOS1 ON TURNOS (TURNO_USUARIO);
+/* RECCOUNT_IDX1 */
+CREATE UNIQUE INDEX RECCOUNT_IDX1 ON RECCOUNT (TABLA);
+/* ----- Creating Sequences ----- */
+
+/* GEN_ALMACENES_ID */
+CREATE OR ALTER SEQUENCE GEN_ALMACENES_ID START WITH 1 INCREMENT BY 1;
+
+/* GEN_D_ENTRADA_PRODUCTO_ID */
+CREATE OR ALTER SEQUENCE GEN_D_ENTRADA_PRODUCTO_ID START WITH 1 INCREMENT BY 1;
+
+/* GEN_FACTURAS_ID */
+CREATE OR ALTER SEQUENCE GEN_FACTURAS_ID START WITH 1 INCREMENT BY 1;
+
+/* GEN_M_FACTURAS_ID */
+CREATE OR ALTER SEQUENCE GEN_M_FACTURAS_ID START WITH 1 INCREMENT BY 1;
+
+/* GEN_T_ANALISIS_ID */
+CREATE OR ALTER SEQUENCE GEN_T_ANALISIS_ID START WITH 1 INCREMENT BY 1;
+
+/* G_ID_CONTACTOS_DIRECCIONES */
+CREATE OR ALTER SEQUENCE G_ID_CONTACTOS_DIRECCIONES START WITH 1 INCREMENT BY 1;
+
+/* SEQ_ANTECEDENTES_ID */
+CREATE OR ALTER SEQUENCE SEQ_ANTECEDENTES_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_ARS_ID */
+CREATE OR ALTER SEQUENCE SEQ_ARS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_CARTONES_BINGO_ID */
+CREATE OR ALTER SEQUENCE SEQ_CARTONES_BINGO_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_CATEGORIAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_CATEGORIAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_CODIGOS_POSTALES_ID */
+CREATE OR ALTER SEQUENCE SEQ_CODIGOS_POSTALES_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_CONSULTAS_APROBADAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_CONSULTAS_APROBADAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_CONSULTAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_CONSULTAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_CONTACTOS_DIRECCIONES_ID */
+CREATE OR ALTER SEQUENCE SEQ_CONTACTOS_DIRECCIONES_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_CONTACTOS_EMAIL_ID */
+CREATE OR ALTER SEQUENCE SEQ_CONTACTOS_EMAIL_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_CONTACTOS_TEL_ID */
+CREATE OR ALTER SEQUENCE SEQ_CONTACTOS_TEL_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_CONTROL_CONSULTA_ID */
+CREATE OR ALTER SEQUENCE SEQ_CONTROL_CONSULTA_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_DEUDAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_DEUDAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_DISTRITOS_MUNICIPALES_ID */
+CREATE OR ALTER SEQUENCE SEQ_DISTRITOS_MUNICIPALES_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_D_ANALISIS_ID */
+CREATE OR ALTER SEQUENCE SEQ_D_ANALISIS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_D_DEUDAS_PAGAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_D_DEUDAS_PAGAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_E_S_SYS_ID */
+CREATE OR ALTER SEQUENCE SEQ_E_S_SYS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_GUIA_VIGILANCIA_DESARROLLO_ID */
+CREATE OR ALTER SEQUENCE SEQ_GUIA_VIGILANCIA_DESARROLLO_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_HUELLAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_HUELLAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_INSCRIPCIONES_ID */
+CREATE OR ALTER SEQUENCE SEQ_INSCRIPCIONES_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_MENSAJES_ID */
+CREATE OR ALTER SEQUENCE SEQ_MENSAJES_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_METRICAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_METRICAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_MOTIVO_CONSULTA_ID */
+CREATE OR ALTER SEQUENCE SEQ_MOTIVO_CONSULTA_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_MUNICIPIOS_ID */
+CREATE OR ALTER SEQUENCE SEQ_MUNICIPIOS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_M_ANALISIS_ID */
+CREATE OR ALTER SEQUENCE SEQ_M_ANALISIS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_M_ENTRADA_PRODUCTOS_ID */
+CREATE OR ALTER SEQUENCE SEQ_M_ENTRADA_PRODUCTOS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_PERSONAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_PERSONAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_PLAN_CUENTA_CONTABLE_ID */
+CREATE OR ALTER SEQUENCE SEQ_PLAN_CUENTA_CONTABLE_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_PRODUCTOS_ID */
+CREATE OR ALTER SEQUENCE SEQ_PRODUCTOS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_PROVINCIAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_PROVINCIAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_RECCOUNT_ID */
+CREATE OR ALTER SEQUENCE SEQ_RECCOUNT_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_RECETAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_RECETAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_SINTOMAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_SINTOMAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_TANDAS_ID */
+CREATE OR ALTER SEQUENCE SEQ_TANDAS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_TIPOS_SANGRE_ID */
+CREATE OR ALTER SEQUENCE SEQ_TIPOS_SANGRE_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_TURNOS_ID */
+CREATE OR ALTER SEQUENCE SEQ_TURNOS_ID START WITH 1 INCREMENT BY 1;
+
+/* SEQ_T_ANALISIS_ID */
+CREATE OR ALTER SEQUENCE SEQ_T_ANALISIS_ID START WITH 1 INCREMENT BY 1;
+
+/* ----- Creating Exceptions ----- */
+
+/* E_CAJERO_NO_REGISTRADO */
+CREATE EXCEPTION E_CAJERO_NO_REGISTRADO
+'Este usuario no cuenta con el rol de cajero.';
+
+/* E_CAJERO_TURNO_ACTIVO */
+CREATE EXCEPTION E_CAJERO_TURNO_ACTIVO
+'Este cajero cuenta con un turno activo actualmente.';
+
+/* E_CAJERO_TURNO_INACTIVO */
+CREATE EXCEPTION E_CAJERO_TURNO_INACTIVO
+'Cajero no tiene turno Activo.';
+
+/* E_CATEGORIAS_INACTIVA */
+CREATE EXCEPTION E_CATEGORIAS_INACTIVA
+'La categoria se encuentra inactiva.';
+
+/* E_CLIENTE_ENCONTRADO */
+CREATE EXCEPTION E_CLIENTE_ENCONTRADO
+'Este cliente se encuentra registrado en el sistema.';
+
+/* E_CLIENTE_GENERICO */
+CREATE EXCEPTION E_CLIENTE_GENERICO
+'El cliente generico no puede ser tocado en el sistema.';
+
+/* E_CLIENTE_NO_ENCONTRADO */
+CREATE EXCEPTION E_CLIENTE_NO_ENCONTRADO
+'El identificador de cliente no es valido. Codigo del cliente [ @1 ]';
+
+/* E_CODIGO_P_NO_DEFINIDO */
+CREATE EXCEPTION E_CODIGO_P_NO_DEFINIDO
+'Dicho codigo postal no se encuentra en la base de datos.';
+
+/* E_CODIGO_P_NO_PROVINCIA */
+CREATE EXCEPTION E_CODIGO_P_NO_PROVINCIA
+'Dicho codigo postal no esta definido para la provincia.';
+
+/* E_CONSULTA_NO_ENCONTRADA */
+CREATE EXCEPTION E_CONSULTA_NO_ENCONTRADA
+'No existe registro de consulta.';
+
+/* E_CONTACTO_TEL_DUPLICADO */
+CREATE EXCEPTION E_CONTACTO_TEL_DUPLICADO
+'La persona ya cuenta con este numero telefonico. ID Cliente [ @1 ]';
+
+/* E_CONTROL_CONSULTA_NO_ENCONTRADA */
+CREATE EXCEPTION E_CONTROL_CONSULTA_NO_ENCONTRADA
+'Dicha consulta no ha sido registrada en el sistema.';
+
+/* E_CORREO_INACTIVO */
+CREATE EXCEPTION E_CORREO_INACTIVO
+'Correo inactivo del cliente';
+
+/* E_DELETE_GENERICO */
+CREATE EXCEPTION E_DELETE_GENERICO
+'Registro generico no puede ser eliminado.';
+
+/* E_DEUDA_NO_ENCONTRADA */
+CREATE EXCEPTION E_DEUDA_NO_ENCONTRADA
+'Deuda no encontrada...!';
+
+/* E_DIRECCION_EN_USO */
+CREATE EXCEPTION E_DIRECCION_EN_USO
+'La direccion se encuentra registrada en facturas.';
+
+/* E_DIRECCION_INACTIVO */
+CREATE EXCEPTION E_DIRECCION_INACTIVO
+'Direccion del cliente inactiva';
+
+/* E_DIRECCION_NO_ENCONTRADA */
+CREATE EXCEPTION E_DIRECCION_NO_ENCONTRADA
+'El codigo de la direccion no existe.';
+
+/* E_DISTRITO_M_NO_DEFINIDO */
+CREATE EXCEPTION E_DISTRITO_M_NO_DEFINIDO
+'El codigo del distrito municipal, no ha sido definido.';
+
+/* E_DISTRITO_M_NO_MUNICIPIO */
+CREATE EXCEPTION E_DISTRITO_M_NO_MUNICIPIO
+'Codigo de municipio no coinciden con el distrito seleccionado.';
+
+/* E_DUPLICADO_CARTON_BINGO */
+CREATE EXCEPTION E_DUPLICADO_CARTON_BINGO
+'Este HASH ha sido encontrado.';
+
+/* E_DUPLICADO_CEDULA */
+CREATE EXCEPTION E_DUPLICADO_CEDULA
+'Cedula registrada en el sistema.';
+
+/* E_DUPLICADO_NOMBRE */
+CREATE EXCEPTION E_DUPLICADO_NOMBRE
+'Nombre duplicado en el sistema.';
+
+/* E_EFECTIVO_MENOR_TOTAL */
+CREATE EXCEPTION E_EFECTIVO_MENOR_TOTAL
+'Efectivo es menor que el total de la factura.';
+
+/* E_EQUIPO_NO_REGISTRADO */
+CREATE EXCEPTION E_EQUIPO_NO_REGISTRADO
+'El equipo no se encuentra registrado en nuestro sistema.';
+
+/* E_FACTURA_NO_NULA */
+CREATE EXCEPTION E_FACTURA_NO_NULA
+'La factura no puede ser eliminada porque su estado no es nula.';
+
+/* E_FECHA_ACTUAL_INCORRECTA */
+CREATE EXCEPTION E_FECHA_ACTUAL_INCORRECTA
+'La fecha actual que intenta registrar es mayor que la actual en el servidor.';
+
+/* E_FECHA_INCORRECTA */
+CREATE EXCEPTION E_FECHA_INCORRECTA
+'Existe problemas con la fecha de registro.';
+
+/* E_FECHA_INICIAL_INCORRECTA */
+CREATE EXCEPTION E_FECHA_INICIAL_INCORRECTA
+'La fecha inicial registrada es mayor que la actual en el servidor.';
+
+/* E_FECHA_VENCIMIENTO */
+CREATE EXCEPTION E_FECHA_VENCIMIENTO
+'La fecha del producto se ha vencido';
+
+/* E_LICENCIA_VENCIDA */
+CREATE EXCEPTION E_LICENCIA_VENCIDA
+'La licencia del software ha vencido. Llamar al 829-297-2015';
+
+/* E_MUNICIPIO_NO_DEFINIDO */
+CREATE EXCEPTION E_MUNICIPIO_NO_DEFINIDO
+'Municipio no definido en el sistema.';
+
+/* E_MUNICIPIO_NO_PROVINCIA */
+CREATE EXCEPTION E_MUNICIPIO_NO_PROVINCIA
+'El municipio no pertenece a la pronvincia.';
+
+/* E_OFNI */
+CREATE EXCEPTION E_OFNI
+'Objecto volador no identificado';
+
+/* E_OPER_NO_DEFINIDA */
+CREATE EXCEPTION E_OPER_NO_DEFINIDA
+'Operacion no definida';
+
+/* E_PACIENTE_NO_ENCONTRADO */
+CREATE EXCEPTION E_PACIENTE_NO_ENCONTRADO
+'Identificador del paciente no encontrada.';
+
+/* E_PROVINCIA_NO_DEFINIDA */
+CREATE EXCEPTION E_PROVINCIA_NO_DEFINIDA
+'El codigo de la provincia no está definido en el sistema.';
+
+/* E_REGISTRO_CERO */
+CREATE EXCEPTION E_REGISTRO_CERO
+'No se permite Modificar o Eliminar registro cero.';
+
+/* E_ROL_NO_ENCONTRADO */
+CREATE EXCEPTION E_ROL_NO_ENCONTRADO
+'Rol no encontrado en el sistema.!';
+
+/* E_TELEFONO_INACTIVO */
+CREATE EXCEPTION E_TELEFONO_INACTIVO
+'Telefono inactivo del cliente';
+
+/* E_TURNO_CERRADO */
+CREATE EXCEPTION E_TURNO_CERRADO
+'Este turno ya se encuentra cerrado';
+
+/* E_USUARIO_INACTIVO */
+CREATE EXCEPTION E_USUARIO_INACTIVO
+'Usuario Inactivo';
+
+/* E_USUARIO_NO_AUTORIZADO */
+CREATE EXCEPTION E_USUARIO_NO_AUTORIZADO
+'Accion no puede ser realizada por el usaurio [ @1 ]';
+
+/* E_USUARIO_NO_ENCONTRADO */
+CREATE EXCEPTION E_USUARIO_NO_ENCONTRADO
+'No es un usuario del sistema.';
+
+/* E_USUARIO_REGISTRADO */
+CREATE EXCEPTION E_USUARIO_REGISTRADO
+'Usuario registrado!';
+
+/* ----- Creating Roles ----- */
+
+/* CAJERO */
+CREATE ROLE CAJERO;
+
+/* DOCTOR */
+CREATE ROLE DOCTOR;
+
+/* GERENTE */
+CREATE ROLE GERENTE;
+
+/* PADRE */
+CREATE ROLE PADRE;
+
+/* RRHH */
+CREATE ROLE RRHH;
+
+/* RRR_SOFTSURENA */
+CREATE ROLE RRR_SOFTSURENA;
+
+/* SECRETARIA */
+CREATE ROLE SECRETARIA;
+
+/* VENDEDOR */
+CREATE ROLE VENDEDOR;
+
+/* ----- Creating Users ----- */
+
+/* REGISTRADOR */
+CREATE USER REGISTRADOR
+ACTIVE;
+
+/* SYSDBA */
+CREATE USER SYSDBA
+ACTIVE;
+
+/* ----- Creating Functions stubs ----- */
+
+/* F_OBJECTOS (STUB) */
+SET TERM ^;
+CREATE OR ALTER FUNCTION F_OBJECTOS (
+	ID_OBJ D_ID
+) RETURNS VARCHAR(45)
+AS BEGIN return null; END^
+
+SET TERM ;^
+
+/* F_PRIVILEGIO (STUB) */
+SET TERM ^;
+CREATE OR ALTER FUNCTION F_PRIVILEGIO (
+	ABREV D_ABREVIATURA
+) RETURNS VARCHAR(15)
+AS BEGIN return null; END^
+
+SET TERM ;^
+
+/* F_PROCEDIMIENTOS_SHOW (STUB) */
+SET TERM ^;
+CREATE OR ALTER FUNCTION F_PROCEDIMIENTOS_SHOW (
+	SUFIJO D_VARCHAR_15
+) RETURNS BOOLEAN
+AS BEGIN return null; END^
+
+SET TERM ;^
+
+/* F_TIPO_USUARIO (STUB) */
+SET TERM ^;
+CREATE OR ALTER FUNCTION F_TIPO_USUARIO (
+	ID_TIPO D_ID
+) RETURNS VARCHAR(45)
+AS BEGIN return null; END^
+
+SET TERM ;^
+
+/* ----- Creating Procedures stubs ----- */
+
+/* ACTUALIZAR_ESTADISTICAS_INDICES (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ACTUALIZAR_ESTADISTICAS_INDICES
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ACTUALIZAR_TABLA_PIVOT (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ACTUALIZAR_TABLA_PIVOT (
+	TCTABLAPIVOT VARCHAR(28),
+	TCVISTA VARCHAR(28),
+	TCPRIMERACOLUMNACABECERA VARCHAR(64),
+	TCOTRASCOLUMNASCABECERA VARCHAR(4096),
+	TCCOLUMNADATOS VARCHAR(28),
+	TCVALORESDATOS VARCHAR(1024)
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_AGREGAR_PERMISO_ADMIN_PROCE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_AGREGAR_PERMISO_ADMIN_PROCE (
+	I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+	I_NOMBREROL D_VARCHAR_70
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_AGREGAR_PERMISO_ADMIN_ROLE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_AGREGAR_PERMISO_ADMIN_ROLE (
+	I_ROLE D_VARCHAR_70,
+	I_USUARIO D_VARCHAR_70
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_ALTER_ROLE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_ALTER_ROLE (
+	I_NOMBRE_ACTUAL D_VARCHAR_70,
+	I_NOMBRE_NUEVO D_VARCHAR_70
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_BORRAR_PERMISO_ADMIN_PROCE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_BORRAR_PERMISO_ADMIN_PROCE (
+	I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+	I_NOMBREROL D_VARCHAR_70
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_BORRAR_ROLE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_BORRAR_ROLE (
+	I_ROLE D_VARCHAR_70
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_CAMBIAR_CLAVE_USUARIO_ACTUAL (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_CAMBIAR_CLAVE_USUARIO_ACTUAL (
+	I_USUARIO D_USER_NAME,
+	I_CLAVE D_CLAVE
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_CERRAR_TURNO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_CERRAR_TURNO (
+	I_ID D_ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_CREATE_ROLE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_CREATE_ROLE (
+	I_ROLE D_ROL
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_DAR_ROL_USUARIO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_DAR_ROL_USUARIO (
+	I_ROL D_VARCHAR_70,
+	I_USUARIO D_VARCHAR_70,
+	I_ADMIN D_BOOLEAN_F
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_HABILITAR_TURNO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_HABILITAR_TURNO (
+	I_ID D_ID,
+	I_USER_NAME D_USER_NAME
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_QUITAR_PERMISO_ADMIN_PROCE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_QUITAR_PERMISO_ADMIN_PROCE (
+	I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+	I_NOMBREROL D_VARCHAR_70
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_QUITAR_PERMISO_ADMIN_ROL (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_QUITAR_PERMISO_ADMIN_ROL (
+	I_ROLE D_VARCHAR_70,
+	I_USUARIO D_VARCHAR_70
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_QUITAR_ROL_USUARIO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_QUITAR_ROL_USUARIO (
+	I_ROL D_VARCHAR_70,
+	I_USUARIO D_VARCHAR_70
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ADMIN_SET_ROLE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_SET_ROLE (
+	I_ROLE D_VARCHAR_70
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* CREAR_TABLA_PIVOT (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE CREAR_TABLA_PIVOT (
+	TCNOMBRETABLA VARCHAR(28),
+	TCVISTA VARCHAR(28),
+	TCPRIMERACOLUMNACABECERA VARCHAR(64),
+	TCOTRASCOLUMNASCABECERA VARCHAR(4096),
+	TCCOLUMNADATOS VARCHAR(28),
+	TCTIPODATOS VARCHAR(64)
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* PARSER (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE PARSER (
+	TCTEXTO D_BLOB_TEXTO,
+	TCSEPARADOR D_VARCHAR_15
+) RETURNS (
+	FTCNOMBRE D_VARCHAR_1024
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* PERM_BASICOS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE PERM_BASICOS (
+	I_ROL D_ROL,
+	I_CON_ADMIN D_BOOLEAN_F,
+	I_OTORGAR D_BOOLEAN_F
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* PERM_CREAR_FACTURAS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE PERM_CREAR_FACTURAS (
+	I_ROL D_ROL,
+	I_CON_ADMIN D_BOOLEAN_F,
+	I_OTORGAR D_BOOLEAN_F
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* PERM_PANEL_USUARIO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE PERM_PANEL_USUARIO (
+	I_ROL D_ROL,
+	I_CON_ADMIN D_BOOLEAN_F,
+	I_OTORGAR D_BOOLEAN_F
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_DELETE_ALL (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_ALL
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_DELETE_ALMACEN (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_ALMACEN (
+	ID TYPE OF COLUMN V_ALMACENES.ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_DELETE_ANTECEDENTE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_ANTECEDENTE (
+	I_ID D_ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_DELETE_ARS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_ARS (
+	V_ID D_ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_DELETE_CATEGORIAS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_CATEGORIAS (
+	V_ID D_ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_DELETE_CLIENTE_SB (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_CLIENTE_SB (
+	V_ID D_ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_DELETE_ESTUDIANTE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_ESTUDIANTE (
+	V_ID D_ID,
+	I_ESTADO D_BOOLEAN_T
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_DELETE_PACIENTE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_PACIENTE (
+	V_ID D_ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_DELETE_PRODUCTO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_PRODUCTO (
+	I_ID_PRODUCTO D_ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_DELETE_USUARIO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_USUARIO (
+	I_USER_NAME D_USER_NAME
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_HALLAR_PALABRAS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_HALLAR_PALABRAS (
+	FTCTEXTO D_BLOB_TEXTO
+) RETURNS (
+	FTCPALABRA D_VARCHAR_45
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_ALMACEN (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_ALMACEN (
+	NOMBRE TYPE OF COLUMN V_ALMACENES.NOMBRE,
+	UBICACION TYPE OF COLUMN V_ALMACENES.UBICACION,
+	ESTADO TYPE OF COLUMN V_ALMACENES.ESTADO
+) RETURNS (
+	O_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_ANTECEDENTE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_ANTECEDENTE (
+	I_ID_CONSULTA D_ID,
+	I_DESCRIPCION D_VARCHAR_1024
+) RETURNS (
+	O_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_ARS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_ARS (
+	DESCRIPCION D_VARCHAR_45,
+	COVER_CONSULTA_POR_C D_DESCUENTO,
+	ESTADO D_BOOLEAN_T
+) RETURNS (
+	O_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_CARTON_BINGO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_CARTON_BINGO (
+	I_CARTON_HASH D_ID,
+	I_MATRIZ_OBJ D_BLOB_TEXTO
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_CATEGORIAS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_CATEGORIAS (
+	DESCRIPCION D_VARCHAR_25,
+	IMAGEN_TEXTO D_BLOB_TEXTO,
+	ESTADO D_BOOLEAN_T
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_CLIENTE_SB (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_CLIENTE_SB (
+	I_PERSONA D_PERSONA,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T,
+	I_ESTADO_CIVIL D_ESTADO_CIVIL
+) RETURNS (
+	V_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_CONSULTA (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_CONSULTA (
+	ID_PACIENTE TYPE OF COLUMN CONSULTAS.ID_PACIENTE,
+	ID_CONTROL_CONSULTA TYPE OF COLUMN CONSULTAS.ID_CONTROL_CONSULTA,
+	ID_TURNO TYPE OF COLUMN CONSULTAS.TURNO,
+	FECHA TYPE OF COLUMN CONSULTAS.FECHA
+) RETURNS (
+	O_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_CONTACTOS_TEL (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_CONTACTOS_TEL (
+	I_ID_PERSONA D_ID,
+	I_TELEFONO D_TELEFONO,
+	I_TIPO D_VARCHAR_15,
+	I_POR_DEFECTO D_BOOLEAN_T
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_DETALLE_RECETAS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_DETALLE_RECETAS (
+	I_ID_RECETA D_ID,
+	I_LINEA D_ID,
+	I_ID_MEDICAMENTO D_ID,
+	I_CANTIDAD D_DINERO,
+	I_D_DOSIS D_VARCHAR_255
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_DOCTOR (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_DOCTOR (
+	I_USER_NAME D_USER_NAME,
+	I_CLAVE D_CLAVE,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_ROL D_ROL,
+	I_COD_EXEQUATUR D_VARCHAR_70,
+	I_ESPECIALIDAD D_VARCHAR_70,
+	I_ESTADO D_BOOLEAN_T,
+	I_ADMINISTRADOR D_BOOLEAN_F
+) RETURNS (
+	O_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_ENTRADA_PRODUCTOS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_ENTRADA_PRODUCTOS (
+	ID_PROVEEDOR D_ID,
+	COD_FACTURA D_CODIGO,
+	LINEA D_ID,
+	ID_PRODUCTO D_ID,
+	ENTRADA D_DINERO,
+	FECHA_VECIMIENTO D_FECHA
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_ESTUDIANTE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_ESTUDIANTE (
+	I_ID_ARS D_ID,
+	I_NO_NSS D_VARCHAR_25,
+	I_ID_TIPO_SANGRE D_ID,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T,
+	I_MATRICULA D_VARCHAR_15,
+	I_ID_PADRE D_ID,
+	I_ID_MADRE D_ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_FACTURA (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_FACTURA (
+	I_ID D_ID,
+	I_ID_CLIENTE D_ID,
+	I_ID_CONTACTOS_TEL D_ID,
+	I_ID_CONTACTOS_DIRECCIONES D_ID,
+	I_ID_CONTACTOS_EMAIL D_ID,
+	I_ID_TURNO D_ID,
+	I_TOTAL D_DINERO,
+	I_EFECTIVO D_DINERO,
+	I_ESTADO_FACTURA D_ESTADO_C_I_P_A_N_T,
+	I_NOMBRE_TEMP D_NOMBRES
+) RETURNS (
+	O_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_PACIENTE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PACIENTE (
+	I_ID_PADRE D_ID,
+	I_ID_MADRE D_ID,
+	I_ID_ARS D_ID,
+	I_NO_NSS D_VARCHAR_25,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ID_TIPO_SANGRE D_ID,
+	I_ESTADO D_BOOLEAN_T
+) RETURNS (
+	V_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_PADRES (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PADRES (
+	I_ID_HIJO D_ID,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ID_TIPO_SANGRE D_ID,
+	I_ESTADO_CIVIL D_ESTADO_CIVIL,
+	I_ESTADO D_BOOLEAN_T
+) RETURNS (
+	O_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_PERSONA (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PERSONA (
+	I_PERSONA D_PERSONA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T
+) RETURNS (
+	V_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_PERSONA_CLIENTES_ID (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PERSONA_CLIENTES_ID (
+	I_ID D_ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_PRODUCTO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PRODUCTO (
+	I_ID_CATEGORIA D_ID,
+	I_CODIGO D_VARCHAR_25,
+	I_DESCRIPCION D_VARCHAR_70,
+	I_IMAGEN_TEXTO D_BLOB_TEXTO,
+	I_NOTA D_VARCHAR_1024,
+	I_ESTADO D_BOOLEAN_T
+) RETURNS (
+	O_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_PROVEEDOR (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PROVEEDOR (
+	I_ID_PROVINCIA D_ID,
+	I_ID_MUNICIPIO D_ID,
+	I_PERSONA D_PERSONA,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_DIRECCION D_VARCHAR_255,
+	I_ESTADO D_BOOLEAN_T,
+	I_CODIGO_PROVEEDOR D_CODIGO
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_TEST (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_TEST
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_TURNO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_TURNO (
+	I_TURNO_USUARIO D_USER_NAME
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_INSERT_USUARIO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_USUARIO (
+	I_USER_NAME D_USER_NAME,
+	I_CLAVE D_CLAVE,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_ESTADO D_BOOLEAN_T,
+	I_ADMINISTRADOR D_BOOLEAN_F,
+	I_DESCRIPCION D_BLOB_TEXTO,
+	I_TAGS D_VARCHAR_1024
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_ALMACEN (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_ALMACEN (
+	ID TYPE OF COLUMN V_ALMACENES.ID,
+	NOMBRE TYPE OF COLUMN V_ALMACENES.NOMBRE,
+	UBICACION TYPE OF COLUMN V_ALMACENES.UBICACION,
+	ESTADO TYPE OF COLUMN V_ALMACENES.ESTADO
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_ANTECEDENTE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_ANTECEDENTE (
+	I_ID D_ID,
+	I_DESCRIPCION D_VARCHAR_1024
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_ARS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_ARS (
+	I_ID D_ID,
+	I_DESCRIPCION D_VARCHAR_45,
+	I_COVERTURA D_DESCUENTO,
+	I_ESTADO D_BOOLEAN_T
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_CANTIDAD_FILAS (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_CANTIDAD_FILAS (
+	TNCODSUC D_ID
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_CLIENTE_SB (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_CLIENTE_SB (
+	I_ID D_ID,
+	I_PERSONA D_PERSONA,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T,
+	I_ESTADO_CIVIL D_ESTADO_CIVIL
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_DEUDA_ESTADO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_DEUDA_ESTADO (
+	E_ID_DEUDA D_ID NOT NULL,
+	E_OBJ D_ESTADO_C_I_P_A_N_T NOT NULL
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_ESTUDIANTE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_ESTUDIANTE (
+	I_ID D_ID,
+	I_ID_PADRE D_ID,
+	I_ID_MADRE D_ID,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_FACTURA (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_FACTURA (
+	I_ID D_ID,
+	I_ID_CONTACTOS_TEL D_ID,
+	I_ID_CONTACTOS_DIRECCIONES D_ID,
+	I_ID_CONTACTOS_EMAIL D_ID,
+	I_ESTADO_FACTURA D_ESTADO_C_I_P_A_N_T,
+	I_NOMBRE_TEMP D_NOMBRES
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_OR_INSERT_DIRECCION (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_OR_INSERT_DIRECCION (
+	I_ID_DIRECCION TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID,
+	I_ID_PERSONA TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID_PERSONA,
+	I_ID_PROVINCIA TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID_PROVINCIA,
+	I_ID_MUNICIPIO TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID_MUNICIPIO,
+	I_ID_DISTRITO_MUNICIPAL TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID_DISTRITO_MUNICIPAL,
+	I_ID_CODIGO_POSTAL TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID_CODIGO_POSTAL,
+	I_DIRECCION TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.DIRECCION,
+	I_ESTADO TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ESTADO,
+	I_POR_DEFECTO TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.POR_DEFECTO
+) RETURNS (
+	O_ID D_ID
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_PACIENTE (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_PACIENTE (
+	I_ID_PACIENTE D_ID,
+	I_ID_PADRE D_ID,
+	I_ID_MADRE D_ID,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ID_TIPO_SANGRE D_ID,
+	I_ID_ARS D_ID,
+	I_NONSS D_VARCHAR_25,
+	I_ESTADO D_BOOLEAN_T,
+	I_ESTADO_ARS D_BOOLEAN_T
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_PADRES (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_PADRES (
+	I_ID D_ID,
+	I_ID_PROVINCIA D_ID,
+	I_ID_MUNICIPIO D_ID,
+	I_ID_DISTRITO_MUNICIPAL D_ID,
+	I_ID_CODIGOPOSTAL D_ID,
+	I_ID_TIPO_SANGRE D_ID,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_DIRECCION D_VARCHAR_70,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T,
+	I_ESTADO_CIVIL D_ESTADO_CIVIL
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_PRODUCTO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_PRODUCTO (
+	I_ID D_ID,
+	I_ID_CATEGORIA D_ID,
+	I_CODIGO D_VARCHAR_25,
+	I_DESCRIPCION D_VARCHAR_70,
+	I_IMAGEN_TEXTO D_BLOB_TEXTO,
+	I_NOTA D_VARCHAR_1024,
+	I_ESTADO D_BOOLEAN_T
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_PROVEEDORES (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_PROVEEDORES (
+	I_ID D_ID,
+	I_CODIGO_PROVEEDOR D_CODIGO,
+	I_PERSONA D_PERSONA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SP_UPDATE_USUARIO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_USUARIO (
+	I_USER_NAME TYPE OF COLUMN SEC$USERS.SEC$USER_NAME,
+	I_CLAVE D_CLAVE,
+	I_PNOMBRE TYPE OF COLUMN SEC$USERS.SEC$FIRST_NAME,
+	I_SNOMBRE TYPE OF COLUMN SEC$USERS.SEC$MIDDLE_NAME,
+	I_APELLIDOS TYPE OF COLUMN SEC$USERS.SEC$LAST_NAME,
+	I_ESTADO TYPE OF COLUMN SEC$USERS.SEC$ACTIVE,
+	I_ADMINISTRADOR TYPE OF COLUMN SEC$USERS.SEC$ADMIN,
+	I_DESCRIPCION TYPE OF COLUMN SEC$USERS.SEC$DESCRIPTION
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SYSTEM_ENCRIPTAR (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SYSTEM_ENCRIPTAR (
+	TCTEXTO D_VARCHAR_MAX,
+	TCACCION CHAR(1),
+	TCNUMEROENCRIPTACION D_VARCHAR_255,
+	TCNUMEROREPETICION D_VARCHAR_255
+) RETURNS (
+	FTCNUEVOTEXTO D_VARCHAR_MAX
+)
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SYS_RECCOUNT (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SYS_RECCOUNT (
+	TCOPERAC TYPE OF D_INSERT_DELETE,
+	TCTABLAX TYPE OF D_VARCHAR_45
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SYS_RECCOUNT_ESTADO (STUB) */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SYS_RECCOUNT_ESTADO (
+	TCOPERAC TYPE OF D_INSERT_DELETE,
+	TCTABLAX TYPE OF D_VARCHAR_45,
+	ESTADO TYPE OF D_BOOLEAN_F
+) 
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ----- Creating Triggers for Table stubs ----- */
+
+/* ALMACENES_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER ALMACENES_BI
+	FOR ALMACENES BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ANTECEDENTES_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER ANTECEDENTES_BI
+	FOR ANTECEDENTES BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ARS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER ARS_BI
+	FOR ARS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* CARTONES_BINGO_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CARTONES_BINGO_BI
+	FOR CARTONES_BINGO BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* CATEGORIAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CATEGORIAS_BI
+	FOR CATEGORIAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* CODIGOS_POSTALES_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CODIGOS_POSTALES_BI
+	FOR CODIGOS_POSTALES BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* CONSULTAS_APROBADAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONSULTAS_APROBADAS_BI
+	FOR CONSULTAS_APROBADAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* CONSULTAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONSULTAS_BI
+	FOR CONSULTAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* CONTACTOS_DIRECCIONES_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONTACTOS_DIRECCIONES_BI
+	FOR CONTACTOS_DIRECCIONES BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* CONTACTOS_EMAIL_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONTACTOS_EMAIL_BI
+	FOR CONTACTOS_EMAIL BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* CONTACTOS_TEL_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONTACTOS_TEL_BI
+	FOR CONTACTOS_TEL BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* CONTROL_CONSULTA_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONTROL_CONSULTA_BI
+	FOR CONTROL_CONSULTA BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* DEUDAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER DEUDAS_BI
+	FOR DEUDAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* DISTRITOS_MUNICIPALES_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER DISTRITOS_MUNICIPALES_BI
+	FOR DISTRITOS_MUNICIPALES BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* D_ANALISIS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER D_ANALISIS_BI
+	FOR D_ANALISIS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* D_DEUDAS_PAGAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER D_DEUDAS_PAGAS_BI
+	FOR D_DEUDAS_PAGAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* D_ENTRADA_PRODUCTO_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER D_ENTRADA_PRODUCTO_BI
+	FOR D_ENTRADA_PRODUCTO BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* E_S_SYS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER E_S_SYS_BI
+	FOR E_S_SYS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* GUIA_VIGILANCIA_DESARROLLO_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER GUIA_VIGILANCIA_DESARROLLO_BI
+	FOR GUIA_VIGILANCIA_DESARROLLO BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* HUELLAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER HUELLAS_BI
+	FOR HUELLAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* INSCRIPCIONES_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER INSCRIPCIONES_BI
+	FOR INSCRIPCIONES BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* MENSAJES_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER MENSAJES_BI
+	FOR MENSAJES BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* METRICAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER METRICAS_BI
+	FOR METRICAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* MOTIVO_CONSULTA_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER MOTIVO_CONSULTA_BI
+	FOR MOTIVO_CONSULTA BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* MUNICIPIOS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER MUNICIPIOS_BI
+	FOR MUNICIPIOS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* M_ANALISIS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER M_ANALISIS_BI
+	FOR M_ANALISIS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* M_ENTRADA_PRODUCTOS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER M_ENTRADA_PRODUCTOS_BI
+	FOR M_ENTRADA_PRODUCTOS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* M_FACTURAS_BD (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER M_FACTURAS_BD
+	FOR M_FACTURAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* M_FACTURAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER M_FACTURAS_BI
+	FOR M_FACTURAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* PERSONAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER PERSONAS_BI
+	FOR PERSONAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* PLAN_CUENTA_CONTABLE_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER PLAN_CUENTA_CONTABLE_BI
+	FOR PLAN_CUENTA_CONTABLE BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* PRODUCTOS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER PRODUCTOS_BI
+	FOR PRODUCTOS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* PROVINCIAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER PROVINCIAS_BI
+	FOR PROVINCIAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* RECCOUNT_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER RECCOUNT_BI
+	FOR RECCOUNT BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* RECETAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER RECETAS_BI
+	FOR RECETAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* SINTOMAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER SINTOMAS_BI
+	FOR SINTOMAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* TANDAS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER TANDAS_BI
+	FOR TANDAS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* TIPOS_SANGRE_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER TIPOS_SANGRE_BI
+	FOR TIPOS_SANGRE BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* TURNOS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER TURNOS_BI
+	FOR TURNOS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* T_ANALISIS_BI (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER T_ANALISIS_BI
+	FOR T_ANALISIS BEFORE INSERT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ----- Creating Triggers for Database stubs ----- */
+
+/* SYSTEM_SHAREWARE (STUB) */
+SET TERM ^;
+CREATE OR ALTER TRIGGER SYSTEM_SHAREWARE ON CONNECT
+AS BEGIN END^
+
+SET TERM ;^
+
+/* ----- Creating Functions ----- */
+
+/* F_OBJECTOS */
+SET TERM ^;
+CREATE OR ALTER FUNCTION F_OBJECTOS (
+	ID_OBJ D_ID
+) 
+RETURNS VARCHAR(45)
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE resultado D_VARCHAR_45; 
+BEGIN
+     resultado = '';
+     
+     IF(ID_OBJ = 0) THEN
+          resultado = 'table';
+     IF(ID_OBJ = 1) THEN
+          resultado = 'view';
+     IF(ID_OBJ = 2) THEN
+          resultado = 'trigger';
+     IF(ID_OBJ = 3) THEN
+          resultado = '';
+     IF(ID_OBJ = 4) THEN
+          resultado = '';
+     IF(ID_OBJ = 5) THEN
+          resultado = 'procedure';
+     IF(ID_OBJ = 6) THEN
+          resultado = '';
+     IF(ID_OBJ = 7) THEN
+          resultado = 'exception';
+     IF(ID_OBJ = 8) THEN
+          resultado = 'user';
+     IF(ID_OBJ = 9) THEN
+          resultado = 'domain';
+     IF(ID_OBJ = 10) THEN
+          resultado = '';
+     IF(ID_OBJ = 11) THEN
+          resultado = 'character set';
+     IF(ID_OBJ = 12) THEN
+          resultado = '';
+     IF(ID_OBJ = 13) THEN
+          resultado = 'role';
+     IF(ID_OBJ = 14) THEN
+          resultado = 'generator (sequence)';
+     IF(ID_OBJ = 15) THEN
+          resultado = 'function';
+     IF(ID_OBJ = 16) THEN
+          resultado = 'BLOB filter';
+     IF(ID_OBJ = 17) THEN
+          resultado = 'collation';
+     IF(ID_OBJ = 18) THEN
+          resultado = 'package';
+     IF(ID_OBJ < 0 OR ID_OBJ > 18)THEN
+          EXCEPTION E_OFNI;
+     
+     RETURN resultado;
+END
+^
+COMMENT ON FUNCTION F_OBJECTOS IS 'Permite decodificar los identificadores numericos de los campos RDB$OBJECT_TYPE en la tabla RDB$USER_PRIVILEGES'^
+SET TERM ;^
+
+/* F_PRIVILEGIO */
+SET TERM ^;
+CREATE OR ALTER FUNCTION F_PRIVILEGIO (
+	ABREV D_ABREVIATURA
+) 
+RETURNS VARCHAR(15)
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE resultado D_VARCHAR_15; 
+BEGIN
+     resultado = '';
+     
+     ABREV = UPPER(:ABREV);
+ 
+     IF(ABREV = 'S') THEN 
+          resultado = 'SELECT';
+          
+     IF(ABREV = 'I') THEN
+          resultado = 'INSERT';
+          
+     IF(ABREV = 'U') THEN
+          resultado = 'UPDATE';
+          
+     IF(ABREV = 'D') THEN
+          resultado = 'DELETE';
+          
+     IF(ABREV = 'G') THEN
+          resultado = 'USAGE';
+          
+     IF(ABREV = 'M') THEN
+          resultado = 'MEMBERSHIP';
+          
+     IF(ABREV = 'X') THEN
+          resultado = 'EXECUTE';
+          
+     IF(ABREV = 'R') THEN
+          resultado = 'REFERENCES';
+          
+     IF(ABREV = '')THEN
+          EXCEPTION E_OFNI;
+          
+     RETURN resultado;
+END
+^
+COMMENT ON FUNCTION F_PRIVILEGIO IS 'Permite decodificar las abreviatura de los campos RDB$PRIVILEGE en la tabla RDB$USER_PRIVILEGES'^
+SET TERM ;^
+
+/* F_PROCEDIMIENTOS_SHOW */
+SET TERM ^;
+CREATE OR ALTER FUNCTION F_PROCEDIMIENTOS_SHOW (
+	SUFIJO D_VARCHAR_15
+) 
+RETURNS BOOLEAN
+SQL SECURITY DEFINER
+AS
+BEGIN
+     
+     IF(SUFIJO = 'ADMIN') THEN
+          RETURN TRUE;
+          
+     IF(SUFIJO = 'SP_') THEN
+          RETURN TRUE;
+          
+     IF(SUFIJO = 'RP_') THEN
+          RETURN TRUE;
+          
+     IF(SUFIJO = '') THEN
+          RETURN TRUE;
+          
+     RETURN FALSE;
+     
+END
+^
+SET TERM ;^
+
+/* F_TIPO_USUARIO */
+SET TERM ^;
+CREATE OR ALTER FUNCTION F_TIPO_USUARIO (
+	ID_TIPO D_ID
+) 
+RETURNS VARCHAR(45)
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE resultado D_VARCHAR_45; 
+BEGIN
+     resultado = '';
+     
+     IF(ID_TIPO = 8) THEN
+          resultado = 'USUARIO';
+          
+     IF(ID_TIPO = 13) THEN
+          resultado = 'ROLE';
+     
+     IF(ID_TIPO = 20)THEN
+          resultado = 'OTRO';
+          
+     IF(resultado = '')THEN
+          EXCEPTION E_OFNI;
+          
+     RETURN resultado;
+END
+^
+SET TERM ;^
+
+/* ----- Creating Procedures ----- */
+
+/* ACTUALIZAR_ESTADISTICAS_INDICES */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ACTUALIZAR_ESTADISTICAS_INDICES
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE o_index_name D_VARCHAR_70;
+BEGIN
+ 
+     FOR SELECT RDB$INDEX_NAME
+          FROM RDB$INDICES 
+          INTO :o_index_name DO 
+               EXECUTE STATEMENT 'SET STATISTICS INDEX ' || :o_index_name || ';' ;
+END
+^
+
+^
+SET TERM ;^
+/* PARSER */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE PARSER (
+	TCTEXTO D_BLOB_TEXTO,
+	TCSEPARADOR D_VARCHAR_15
+) 
+RETURNS (
+	FTCNOMBRE D_VARCHAR_1024
+)
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE lnPosicion D_EDAD;
+BEGIN
+ 
+   lnPosicion = Position(tcSeparador IN tcTexto);
+ 
+   ftcNombre = Left(tcTexto, lnPosicion - 1) ;
+   SUSPEND;
+ 
+END
+^
+COMMENT ON PROCEDURE PARSER IS 'Su misión es extraer un subtexto dentro de un texto.'^
+
+^
+SET TERM ;^
+/* ACTUALIZAR_TABLA_PIVOT */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ACTUALIZAR_TABLA_PIVOT (
+	TCTABLAPIVOT VARCHAR(28),
+	TCVISTA VARCHAR(28),
+	TCPRIMERACOLUMNACABECERA VARCHAR(64),
+	TCOTRASCOLUMNASCABECERA VARCHAR(4096),
+	TCCOLUMNADATOS VARCHAR(28),
+	TCVALORESDATOS VARCHAR(1024)
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE lcOtrasColumnasCabecera VARCHAR(4096);
+DECLARE VARIABLE lcSelect VARCHAR(4096);
+DECLARE VARIABLE lcColumna VARCHAR(28);
+DECLARE VARIABLE lcGrupo VARCHAR(4096);
+DECLARE VARIABLE lcInto1 VARCHAR(1024);
+DECLARE VARIABLE lcInto2 VARCHAR(1024);
+DECLARE VARIABLE lcInto3 VARCHAR(1024);
+DECLARE VARIABLE lcActualizar VARCHAR(1024);
+DECLARE VARIABLE lcTipoDatos VARCHAR(64);
+BEGIN
+   
+   lcOtrasColumnasCabecera = tcOtrasColumnasCabecera;
+   
+   lcSelect = 'SELECT ' ||
+              Left(tcPrimeraColumnaCabecera, Position(' ', tcPrimeraColumnaCabecera) - 1) || ', ' ;
+   
+   lcGrupo  = Left(tcPrimeraColumnaCabecera, Position(' ', tcPrimeraColumnaCabecera) - 1) || ', ' ;
+   
+   IF (Char_Length(lcOtrasColumnasCabecera) > 0) THEN BEGIN
+     lcOtrasColumnasCabecera = lcOtrasColumnasCabecera || ',' ;
+     WHILE (Char_Length(lcOtrasColumnasCabecera) > 0) DO BEGIN
+        EXECUTE PROCEDURE Parser(lcOtrasColumnasCabecera, ',') RETURNING_VALUES :lcColumna;
+        lcGrupo  = lcGrupo  || Left(lcColumna, Position(' ', lcColumna) - 1) || ',' ;
+        lcOtrasColumnasCabecera = Replace(lcOtrasColumnasCabecera, lcColumna || ',', '') ;
+     END
+   END
+   
+   lcSelect = lcSelect || 
+              tcColumnaDatos || ', ' ||
+              tcValoresDatos ||
+              ' FROM ' || tcVista || 
+              ' GROUP BY ' || lcGrupo || 
+              tcColumnaDatos ;
+   
+   FOR EXECUTE STATEMENT
+      lcSelect 
+   INTO 
+      :lcInto1, 
+      :lcInto2,
+      :lcInto3
+   DO BEGIN
+      -- Aquí se insertan o actualizan la primera columna y los datos agrupados
+      lcTipoDatos = SUBSTRING(tcPrimeraColumnaCabecera FROM Position(' ', tcPrimeraColumnaCabecera));
+      lcTipoDatos = Upper(Trim(lcTipoDatos));
+      IF (lcTipoDatos CONTAINING 'CHAR') THEN
+         lcInto1 = '''' || lcInto1 || '''';
+      lcInto2 = Left(lcInto2, 28);
+      lcInto2 = Replace(lcInto2, ' ', '_');
+      lcInto2 = Replace(lcInto2, '.', '_');
+      lcInto2 = Replace(lcInto2, '/', '_');
+      lcInto2 = Replace(lcInto2, '%', '_');
+      lcActualizar = 'UPDATE OR INSERT INTO ' || 
+                     tcTablaPivot || ' (' || 
+                     Left(tcPrimeraColumnaCabecera, Position(' ', tcPrimeraColumnaCabecera) - 1) || ',' ||
+                     lcInto2 || 
+                     ') VALUES(' ||
+                     lcInto1 || ',' ||
+                     lcInto3 || ')' ;
+      EXECUTE STATEMENT lcActualizar;
+      IF (Char_Length(Trim(tcOtrasColumnasCabecera)) > 0) THEN BEGIN
+        lcOtrasColumnasCabecera = tcOtrasColumnasCabecera || ',' ;
+        lcActualizar = 'UPDATE ' || tcTablaPivot || ' SET ' ;
+         WHILE (Char_Length(lcOtrasColumnasCabecera) > 0) DO BEGIN
+            -- Aquí se actualizan todas las demás columnas de la cabecera
+            EXECUTE PROCEDURE Parser(lcOtrasColumnasCabecera, ',') RETURNING_VALUES :lcColumna;
+            lcActualizar = lcActualizar ||
+                           Left(lcColumna, Position(' ', lcColumna) - 1) ||
+                           ' = (SELECT ' || Left(lcColumna, Position(' ', lcColumna) - 1) || 
+                           ' FROM ' || tcVista || 
+                           ' WHERE ' ||
+                           Left(tcPrimeraColumnaCabecera, Position(' ', tcPrimeraColumnaCabecera) - 1) || 
+                           '=' || lcInto1 || 
+                           ' ROWS 1),' ;
+           lcOtrasColumnasCabecera = Replace(lcOtrasColumnasCabecera, lcColumna || ',', '') ;
+         END
+         lcActualizar = Left(lcActualizar, Char_Length(lcActualizar) - 1) ||
+                        ' WHERE ' || 
+                        Left(tcPrimeraColumnaCabecera, Position(' ', tcPrimeraColumnaCabecera) - 1) || '=' ||
+                        lcInto1;
+         EXECUTE STATEMENT lcActualizar;
+      END
+   END
+   
+END
+^
+COMMENT ON PROCEDURE ACTUALIZAR_TABLA_PIVOT IS 'Este procedimiento en Firebird parece estar diseñado para actualizar una tabla pivot en función de los datos de una vista y algunas otras columnas especificadas. Aquí está el desglose de lo que hace:
+
+1. **Declaración de Variables**: Comienza declarando varias variables que se utilizarán en el procedimiento.
+
+2. **Construcción de Consulta SELECT**: El procedimiento construye una consulta SELECT dinámica utilizando los parámetros de entrada, 
+	como `TCVISTA`, `TCPRIMERACOLUMNACABECERA`, `TCOTRASCOLUMNASCABECERA`, `TCCOLUMNADATOS`, y `TCVALORESDATOS`. La consulta se construye para agrupar datos en función de las columnas especificadas.
+
+3. **Ejecución de la Consulta SELECT**: Luego, se ejecuta la consulta SELECT construida y los resultados se almacenan en las variables `lcInto1`, `lcInto2`, y `lcInto3`.
+
+4. **Actualización o Inserción de Datos en la Tabla Pivot**: Se realiza una serie de manipulaciones en las variables y se construye una consulta de actualización o inserción (`UPDATE OR INSERT`) 
+	en la tabla pivot (`tcTablaPivot`). Esto se hace en función de los resultados de la consulta SELECT. Los datos de la columna de la cabecera se tratan de acuerdo con su tipo de datos y se reemplazan 
+	algunos caracteres especiales en el nombre de la columna.
+
+5. **Actualización de Otras Columnas de la Cabecera**: Si `tcOtrasColumnasCabecera` contiene datos adicionales, el procedimiento también actualiza estas columnas en la tabla pivot. Para cada columna adicional, 
+	se ejecuta una subconsulta para obtener el valor correspondiente de la vista y se actualiza en la tabla pivot.
+
+6. **Concesión de Permiso**: Finalmente, se otorgan permisos de ejecución en el procedimiento a los roles `RDB$ADMIN` y `SYSDBA` con la opción de otorgar permisos.
+
+En resumen, este procedimiento se utiliza para mantener actualizada una tabla pivot en función de los datos de una vista y otras columnas especificadas. Realiza operaciones de inserción y actualización en la 
+	tabla pivot según los resultados de la consulta SELECT. También permite otorgar permisos de ejecución a roles específicos.'^
+
+^
+SET TERM ;^
+/* ADMIN_AGREGAR_PERMISO_ADMIN_PROCE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_AGREGAR_PERMISO_ADMIN_PROCE (
+	I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+	I_NOMBREROL D_VARCHAR_70
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+                            ..........ROLE UTILIZADO..........
+        Clase: Permiso
+        Metodo: agregarPermisoAdminProcedimiento(String procedimiento, String rol) 
+        
+        NOTAS:
+            1) Validar si el procedimiento y el rol existen.
+            2) Se podria validar que no este en uso?
+     */
+     EXECUTE STATEMENT 'GRANT EXECUTE ON PROCEDURE '||:i_nombreProcedimiento||' TO '||:i_nombreRol||' WITH GRANT OPTION;';
+END
+^
+COMMENT ON PROCEDURE ADMIN_AGREGAR_PERMISO_ADMIN_PROCE IS 'Este es un SP que permite agregar el permiso de administracion a los SP.'^
+
+^
+SET TERM ;^
+/* ADMIN_AGREGAR_PERMISO_ADMIN_ROLE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_AGREGAR_PERMISO_ADMIN_ROLE (
+	I_ROLE D_VARCHAR_70,
+	I_USUARIO D_VARCHAR_70
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     EXECUTE STATEMENT 'GRANT '||:i_role||' TO '||:i_usuario||' WITH ADMIN OPTION';
+END
+^
+
+^
+SET TERM ;^
+/* ADMIN_ALTER_ROLE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_ALTER_ROLE (
+	I_NOMBRE_ACTUAL D_VARCHAR_70,
+	I_NOMBRE_NUEVO D_VARCHAR_70
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE privilegio D_VARCHAR_15;
+DECLARE VARIABLE object_name D_VARCHAR_70;
+DECLARE VARIABLE grant_opcion D_TURNO;
+DECLARE VARIABLE miembro D_VARCHAR_70;
+BEGIN
+     /* Paso 1: Crear un nuevo rol con el nuevo nombre */
+     EXECUTE STATEMENT 'CREATE ROLE ' || :I_NOMBRE_NUEVO;
+     
+     /* Paso 2: Transferir los privilegios del rol original al nuevo rol */
+     FOR SELECT 
+          r.NOMBRE_ABREV, 
+          r.GRANT_OPTION, 
+          r.NOMBRE_RELACION
+     FROM VS_PRIVILEGIO r
+     WHERE TRIM(r.USUARIO) STARTING WITH :I_NOMBRE_ACTUAL
+     INTO :privilegio, :object_name, :grant_opcion
+     DO
+     BEGIN
+          IF(:privilegio = 'MEMBERSHIP') THEN BEGIN
+                EXECUTE STATEMENT 'GRANT ' || :privilegio || ' ON ' || :object_name || ' TO ' || :I_NOMBRE_NUEVO || IIF(:grant_opcion <> '0', ' WITH GRANT OPTION;', ';');
+          END
+          IF(:privilegio = 'EXECUTE') THEN BEGIN
+                EXECUTE STATEMENT 'GRANT ' || :privilegio || ' ON PROCEDURE ' || :object_name || ' TO ' || :I_NOMBRE_NUEVO || IIF(:grant_opcion <> '0', ' WITH GRANT OPTION;', ';');
+          END
+     END
+
+     /* Paso 3: Transferir miembros de rol */
+     FOR SELECT 
+          r.USUARIO, 
+          r.GRANT_OPTION
+     FROM VS_PRIVILEGIO r
+     WHERE r.NOMBRE_RELACION STARTING WITH :I_NOMBRE_ACTUAL
+     INTO :miembro, :grant_opcion
+     DO BEGIN
+          EXECUTE STATEMENT 'GRANT ' || :I_NOMBRE_NUEVO || ' TO ' || :miembro ||IIF(:grant_opcion <> '0',' WITH ADMIN OPTION;',';');
+     END
+
+     /* Paso 4: Opcionalmente, eliminar el rol original */
+     EXECUTE STATEMENT 'DROP ROLE ' || :I_NOMBRE_ACTUAL;
+END
+^
+COMMENT ON PROCEDURE ADMIN_ALTER_ROLE IS '/**
+* SP que permite a los administradores modificar los nombres de los roles y
+* pasar los permisos y asignaciones de los roles al nuevo rol creado.
+* 
+* @param actual recibe el nombre de un rol existente. 
+* @param nuevo recibe el nuevo nombre del rol a crear. 
+* 
+* @return devuelve un objecto Resultados para obtener informacion de la op.
+*/'^
+
+^
+SET TERM ;^
+/* ADMIN_BORRAR_PERMISO_ADMIN_PROCE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_BORRAR_PERMISO_ADMIN_PROCE (
+	I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+	I_NOMBREROL D_VARCHAR_70
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          Validar si el procedimiento y el rol existen. Se podria validar que no este en uso.
+     */
+     EXECUTE STATEMENT 'REVOKE EXECUTE ON PROCEDURE '||:i_nombreProcedimiento||' FROM '||:i_nombreRol||';';
+END
+^
+COMMENT ON PROCEDURE ADMIN_BORRAR_PERMISO_ADMIN_PROCE IS 'Este es un SP que permite BORRAR el permiso de SP al rol.'^
+
+^
+SET TERM ;^
+/* ADMIN_BORRAR_ROLE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_BORRAR_ROLE (
+	I_ROLE D_VARCHAR_70
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+
+     /*
+                        _____UTILIZADO____
+        Clase: Roles
+        Metodo: dropRole(String i_role)
+     Deberia validarse que no exista usuario conectado usando este rol.
+     */
+     EXECUTE STATEMENT 'DROP ROLE '||:i_role;
+END
+^
+
+^
+SET TERM ;^
+/* ADMIN_CAMBIAR_CLAVE_USUARIO_ACTUAL */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_CAMBIAR_CLAVE_USUARIO_ACTUAL (
+	I_USUARIO D_USER_NAME,
+	I_CLAVE D_CLAVE
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+    /*
+        Este procedimiento deberia de leer cierta caracteristica que deberian 
+        tener las claves y los nombres de usuarios. 
+    */
+     EXECUTE STATEMENT 'ALTER USER '||I_USUARIO||' PASSWORD '''||I_CLAVE||'''';
+END
+^
+COMMENT ON PROCEDURE ADMIN_CAMBIAR_CLAVE_USUARIO_ACTUAL IS 'Este procedimiento es de uso publico, para que el usuario cambie su 
+clave de acceso. Solo recibe la clave.'^
+
+^
+SET TERM ;^
+/* ADMIN_CERRAR_TURNO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_CERRAR_TURNO (
+	I_ID D_ID
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     IF((SELECT (1) 
+          FROM V_TURNOS t 
+          WHERE t.ID = :I_ID AND t.ESTADO IS FALSE) = 1)THEN 
+          EXCEPTION E_TURNO_CERRADO;
+     
+     UPDATE TURNOS a
+     SET 
+          a.FECHA_HORA_FINAL = CURRENT_TIMESTAMP, 
+          a.ESTADO = FALSE
+     WHERE
+          a.ID = :I_ID;
+END
+^
+
+^
+SET TERM ;^
+/* ADMIN_CREATE_ROLE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_CREATE_ROLE (
+	I_ROLE D_ROL
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          Podriamos validar si el ROLE ya se encuentra registrado
+     para enviar un excepcion.
+     */
+     EXECUTE STATEMENT 'CREATE ROLE '||:I_ROLE; 
+END
+^
+COMMENT ON PROCEDURE ADMIN_CREATE_ROLE IS 'Permitir al usuario crear roles en el sistema.'^
+
+^
+SET TERM ;^
+/* ADMIN_DAR_ROL_USUARIO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_DAR_ROL_USUARIO (
+	I_ROL D_VARCHAR_70,
+	I_USUARIO D_VARCHAR_70,
+	I_ADMIN D_BOOLEAN_F
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+    --Si el ROLE esta vacio, pasa a obtener el ROLE del usuario actual.
+     IF(:i_rol = '')THEN
+        i_rol = CURRENT_ROLE;
+        
+     --Si el usuario esta vacio, pasa a ser el usuario actual.
+     IF(:i_usuario = '')THEN
+         i_usuario= CURRENT_USER;
+    
+     /*Deberia validarse el usuario y el rol que exista.*/
+     EXECUTE STATEMENT 'GRANT '|| UPPER(:i_rol) ||' TO '|| UPPER(:i_usuario) ||IIF(i_admin,' WITH ADMIN OPTION;','');
+END
+^
+
+^
+SET TERM ;^
+/* ADMIN_HABILITAR_TURNO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_HABILITAR_TURNO (
+	I_ID D_ID,
+	I_USER_NAME D_USER_NAME
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          El siguiente select nos permite saber si un usuaio esta registrado en el sistema.
+     */
+     IF((SELECT (1) 
+          FROM VS_USUARIOS u 
+          WHERE TRIM(u.USERNAME) LIKE TRIM(:I_USER_NAME)) IS NULL)THEN
+               EXCEPTION E_USUARIO_NO_ENCONTRADO;
+     
+     /*
+          La siguiente validación permite saber si es un usuario tiene el rol de cajero. 
+     */
+     IF((SELECT (1) 
+          FROM GET_CAJEROS 
+          WHERE USER_NAME STARTING WITH :I_USER_NAME) IS NULL)THEN BEGIN
+          EXCEPTION E_CAJERO_NO_REGISTRADO;
+     END
+     
+     /*
+          El siguiente SELECT no permite saber si el usuario tiene un turno activo, 
+          el turno es activo si el estado es verdadero del campo. 
+     */
+     IF((SELECT (1)
+          FROM V_TURNOS
+          WHERE TURNO_USUARIO STARTING WITH :I_USER_NAME AND ESTADO) = 1)THEN BEGIN
+          EXCEPTION E_CAJERO_TURNO_ACTIVO;
+     END
+     
+     INSERT INTO V_TURNOS (
+          ID_ALMACEN, 
+          TURNO_USUARIO, 
+          MONTO_FACTURADO, 
+          MONTO_DEVUELTO, 
+          MONTO_EFECTIVO, 
+          MONTO_CREDITO)
+     VALUES (:I_ID, UPPER(:I_USER_NAME),0,0,0,0);
+END
+^
+
+^
+SET TERM ;^
+/* ADMIN_QUITAR_PERMISO_ADMIN_PROCE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_QUITAR_PERMISO_ADMIN_PROCE (
+	I_NOMBREPROCEDIMIENTO D_VARCHAR_70,
+	I_NOMBREROL D_VARCHAR_70
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*Validar si el procedimiento y el rol existen. Se podria validar que no este en uso.*/
+     EXECUTE STATEMENT 'REVOKE GRANT OPTION FOR EXECUTE ON PROCEDURE '||:i_nombreProcedimiento||' FROM '||:i_nombreRol||';';
+END
+^
+COMMENT ON PROCEDURE ADMIN_QUITAR_PERMISO_ADMIN_PROCE IS 'Este es un SP que permite quitar el permiso de administracion a los SP.'^
+
+^
+SET TERM ;^
+/* ADMIN_QUITAR_PERMISO_ADMIN_ROL */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_QUITAR_PERMISO_ADMIN_ROL (
+	I_ROLE D_VARCHAR_70,
+	I_USUARIO D_VARCHAR_70
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*Pensar en las validaciones.*/
+     EXECUTE STATEMENT 'REVOKE ADMIN OPTION FOR '||:I_ROLE||' FROM '||:I_USUARIO;
+END
+^
+
+^
+SET TERM ;^
+/* ADMIN_QUITAR_ROL_USUARIO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_QUITAR_ROL_USUARIO (
+	I_ROL D_VARCHAR_70,
+	I_USUARIO D_VARCHAR_70
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     EXECUTE STATEMENT 'REVOKE '||:I_ROL||' FROM '||:I_USUARIO;
+END
+^
+
+^
+SET TERM ;^
+/* ADMIN_SET_ROLE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE ADMIN_SET_ROLE (
+	I_ROLE D_VARCHAR_70
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     --Validando que el Role sea del sistema y que la variable sea diferente de NONE.
+     if((SELECT 1 FROM GET_ROLES WHERE rol STARTING WITH UPPER(:i_role)) IS NULL AND UPPER(:i_role) <> 'NONE')THEN
+        EXCEPTION E_ROL_NO_ENCONTRADO; 
+        
+     EXECUTE STATEMENT 'SET ROLE '|| UPPER(:i_role);
+END
+^
+COMMENT ON PROCEDURE ADMIN_SET_ROLE IS '/**
+* Este metodo nos permite establecer el rol que el usuario usará en el
+* sistema, puede ser ejecutado una vez que el usuario haya iniciado
+* session.
+* 
+* Es un procedimiento de uso publico, ya que todos van a cambiar su rol en 
+* el sistema.
+*
+* @param i_role Nombre del rol que va a establecerse al usuario que ejecute
+* el metodo.
+* @return
+*/'^
+
+^
+SET TERM ;^
+/* CREAR_TABLA_PIVOT */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE CREAR_TABLA_PIVOT (
+	TCNOMBRETABLA VARCHAR(28),
+	TCVISTA VARCHAR(28),
+	TCPRIMERACOLUMNACABECERA VARCHAR(64),
+	TCOTRASCOLUMNASCABECERA VARCHAR(4096),
+	TCCOLUMNADATOS VARCHAR(28),
+	TCTIPODATOS VARCHAR(64)
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE lcCreate VARCHAR(4096);
+DECLARE VARIABLE lcColumna VARCHAR(28);
+DECLARE VARIABLE lcMensajeError VARCHAR(1024);
+BEGIN
+   
+   -- Primero, creamos la tabla
+   
+   lcCreate = 'CREATE TABLE ' || tcNombreTabla || ' (';
+   
+   lcCreate = lcCreate || tcPrimeraColumnaCabecera || ' NOT NULL, ';
+   
+   IF (Char_Length(tcOtrasColumnasCabecera) > 0) THEN BEGIN
+      tcOtrasColumnasCabecera = tcOtrasColumnasCabecera || ',';
+      WHILE (Char_Length(tcOtrasColumnasCabecera) > 0) DO BEGIN
+         EXECUTE PROCEDURE Parser(tcOtrasColumnasCabecera, ',') RETURNING_VALUES :lcColumna;
+         lcCreate = lcCreate || Trim(lcColumna) || ' , ' ;
+         tcOtrasColumnasCabecera = Replace(tcOtrasColumnasCabecera, lcColumna || ',', '');
+      END
+   END
+   
+   FOR EXECUTE STATEMENT
+      'SELECT DISTINCT ' || tcColumnaDatos || ' FROM ' || tcVista
+   INTO 
+      :lcColumna 
+   DO BEGIN
+      lcColumna = Left(lcColumna, 28);
+      lcColumna = Replace(lcColumna, ' ', '_');
+      lcColumna = Replace(lcColumna, '.', '_');
+      lcColumna = Replace(lcColumna, '/', '_');
+      lcColumna = Replace(lcColumna, '%', '_');
+      lcCreate  = lcCreate || lcColumna || ' ' || tcTipoDatos || ', ' ;
+   END
+   
+   lcCreate = Left(lcCreate, Char_Length(lcCreate) - 2);
+   
+   lcCreate = lcCreate || ');';
+   
+   EXECUTE STATEMENT lcCreate;
+   
+   -- Segundo, le agregamos una Primary Key
+   
+   EXECUTE STATEMENT 
+      'ALTER TABLE ' || tcNombreTabla || 
+      ' ADD CONSTRAINT PK_' || tcNombreTabla || 
+      ' PRIMARY KEY (' || Left(:tcPrimeraColumnaCabecera, Position(' ', :tcPrimeraColumnaCabecera)) || ')';
+   
+END
+^
+
+^
+SET TERM ;^
+/* PERM_BASICOS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE PERM_BASICOS (
+	I_ROL D_ROL,
+	I_CON_ADMIN D_BOOLEAN_F,
+	I_OTORGAR D_BOOLEAN_F
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE V_SQL D_VARCHAR_MAX;
+BEGIN
+     IF(I_OTORGAR)THEN BEGIN
+          --Vistas
+          V_SQL = 'GRANT SELECT ON V_E_S_SYS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON GET_ROL TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON GET_PRIVILEGIOS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON V_DISTRITOS_MUNICIPALES TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON V_MUNICIPIOS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON V_PROVINCIAS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          
+          
+          --Procedimientos
+          V_SQL = 'GRANT EXECUTE ON PROCEDURE ADMIN_SET_ROLE TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          
+          --Este mismo procedimiento
+          V_SQL = 'GRANT EXECUTE ON PROCEDURE PERM_BASICOS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+     END ELSE BEGIN 
+          --Vistas
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON V_E_S_SYS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON GET_ROL FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON GET_PRIVILEGIOS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON V_DISTRITOS_MUNICIPALES FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON V_MUNICIPIOS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON V_PROVINCIAS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          
+          --Procedimientos
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' EXECUTE ON PROCEDURE ADMIN_SET_ROLE FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          
+          --Este mismo procedimiento
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' EXECUTE ON PROCEDURE PERM_BASICOS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+     END
+END
+^
+COMMENT ON PROCEDURE PERM_BASICOS IS 'Aqui se colocan los permisos mas basicos de los usuarios del sistema. 
+
+Asi tendremos un control de acceso mas ajustado, el cual nos evita 
+usar el usuario PUBLIC.'^
+
+^
+SET TERM ;^
+/* PERM_CREAR_FACTURAS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE PERM_CREAR_FACTURAS (
+	I_ROL D_ROL,
+	I_CON_ADMIN D_BOOLEAN_F,
+	I_OTORGAR D_BOOLEAN_F
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE V_SQL D_VARCHAR_MAX;
+BEGIN 
+     IF(I_OTORGAR)THEN BEGIN 
+          --Procedimientos
+          --V_SQL = 'GRANT EXECUTE ON PROCEDURE <PROCEDIMIENTO> TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          --EXECUTE STATEMENT V_SQL;
+          
+          --Vistas
+          V_SQL = 'GRANT SELECT ON GET_PRODUCTOS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON GET_TURNOS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON GET_CLIENTES_SB TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON GET_CATEGORIA_ACTIVAS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON V_CATEGORIAS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'GRANT SELECT ON GET_TEMPORALES TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          
+          --Procedimiento mismo
+          V_SQL = 'GRANT EXECUTE ON PROCEDURE PERM_CREAR_FACTURAS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+     END ELSE BEGIN 
+          --Procedimientos
+          --V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' EXECUTE ON PROCEDURE <PROCEDIMIENTO> FROM '||:I_ROL;
+          --EXECUTE STATEMENT V_SQL;
+          
+          --Vistas
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON GET_PRODUCTOS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON GET_TURNOS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON GET_CLIENTES_SB FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON GET_CATEGORIA_ACTIVAS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON V_CATEGORIAS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON GET_TEMPORALES FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          
+          --Procedimiento mismo
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' EXECUTE ON PROCEDURE PERM_CREAR_FACTURAS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+     END
+END
+^
+COMMENT ON PROCEDURE PERM_CREAR_FACTURAS IS 'Permite a los usuarios del sistema crear facturas.'^
+
+^
+SET TERM ;^
+/* PERM_PANEL_USUARIO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE PERM_PANEL_USUARIO (
+	I_ROL D_ROL,
+	I_CON_ADMIN D_BOOLEAN_F,
+	I_OTORGAR D_BOOLEAN_F
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE V_SQL D_VARCHAR_MAX;
+BEGIN
+     IF(I_OTORGAR)THEN BEGIN
+          --Procedimientos
+          --V_SQL = 'GRANT EXECUTE ON PROCEDURE <PROCEDIMIENTO> TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          --EXECUTE STATEMENT V_SQL;
+          
+          --Vistas
+          V_SQL = 'GRANT SELECT ON GET_TURNOS TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+          
+          --El propio procedimiento...
+          V_SQL = 'GRANT EXECUTE ON PROCEDURE PERM_PANEL_USUARIO TO '||:I_ROL||(IIF(:I_CON_ADMIN,' WITH GRANT OPTION;', ';'));
+          EXECUTE STATEMENT V_SQL;
+     END ELSE BEGIN 
+          --Procedimientos
+          --V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' EXECUTE ON PROCEDURE <PROCEDIMIENTO> FROM '||:I_ROL;
+          --EXECUTE STATEMENT V_SQL;
+          
+          --Vistas
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' SELECT ON GET_TURNOS FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+          
+          --El propio procedimiento...
+          V_SQL = 'REVOKE '||(IIF(:I_CON_ADMIN,' GRANT OPTION FOR ', ''))||' EXECUTE ON PROCEDURE PERM_PANEL_USUARIO FROM '||:I_ROL;
+          EXECUTE STATEMENT V_SQL;
+     END
+END
+^
+
+^
+SET TERM ;^
+/* SP_DELETE_ALL */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_ALL
+SQL SECURITY DEFINER
+AS
+BEGIN
+    IF(CURRENT_USER <> 'SYSDBA' AND CURRENT_ROLE <> 'RDB$ADMIN')THEN
+        EXCEPTION E_USUARIO_NO_AUTORIZADO USING (CURRENT_USER);
+        
+    DELETE FROM ALMACENES;
+    DELETE FROM ANTECEDENTES;
+    DELETE FROM ARS;
+    DELETE FROM ASEGURADOS;
+    DELETE FROM CARTONES_BINGO;
+    DELETE FROM CATEGORIAS;
+    DELETE FROM CONSULTAS;
+    DELETE FROM CONSULTAS_APROBADAS;
+    DELETE FROM CONTACTOS_DIRECCIONES;
+    DELETE FROM CONTACTOS_EMAIL;
+    DELETE FROM CONTACTOS_TEL;
+    DELETE FROM CONTROL_CONSULTA;
+    DELETE FROM DEUDAS;
+    DELETE FROM D_ANALISIS;
+    DELETE FROM D_DEUDAS_PAGAS;
+    DELETE FROM D_ENTRADA_PRODUCTO;
+    DELETE FROM D_FACTURAS;
+    DELETE FROM D_GUIA_VIGILANCIA_DESARROLLO;
+    DELETE FROM D_MOTIVO_CONSULTA;
+    DELETE FROM D_RECETAS;
+    DELETE FROM GENERALES;
+    DELETE FROM HUELLAS;
+    DELETE FROM INSCRIPCIONES;
+    DELETE FROM MENSAJES;
+    DELETE FROM METRICAS;
+    DELETE FROM M_ANALISIS;
+    DELETE FROM M_ENTRADA_PRODUCTOS;
+    DELETE FROM M_FACTURAS;
+    DELETE FROM PERSONAS;
+    DELETE FROM PERSONAS_CLIENTES;
+    DELETE FROM PERSONAS_CLIENTES_ATR;
+    DELETE FROM PERSONAS_ESTUDIANTES;
+    DELETE FROM PERSONAS_ESTUDIANTES_ATR;
+    DELETE FROM PERSONAS_PACIENTES;
+    DELETE FROM PERSONAS_PACIENTES_ATR;
+    DELETE FROM PERSONAS_PADRES;
+    DELETE FROM PERSONAS_PROVEEDORES;
+    DELETE FROM PERSONAS_PROVEEDORES_ATR;
+    DELETE FROM PRODUCTOS;
+    DELETE FROM RECCOUNT;
+    DELETE FROM RECETAS;
+    DELETE FROM RELACION_PADRE_ESTUDIANTE;
+    DELETE FROM RELACION_PADRE_PACIENTE;
+    DELETE FROM SINTOMAS;
+    DELETE FROM TANDAS;
+    DELETE FROM TURNOS;
+    DELETE FROM T_ANALISIS;
+    DELETE FROM T_PRUEBA;
+    
+END
+^
+
+^
+SET TERM ;^
+/* SYS_RECCOUNT_ESTADO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SYS_RECCOUNT_ESTADO (
+	TCOPERAC TYPE OF D_INSERT_DELETE,
+	TCTABLAX TYPE OF D_VARCHAR_45,
+	ESTADO TYPE OF D_BOOLEAN_F
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE LCCOMANDO D_VARCHAR_255;
+DECLARE VARIABLE LNCANTIDADFILAS D_ID;
+BEGIN
+/*
+     Este RECCOUNT agrega la tabla tomando encuentra el estado del registro.
+*/
+     --Nos aseguramos que sea una operacion definida
+     IF (tcOperac NOT IN('I', 'D')) THEN
+      EXCEPTION E_OPER_NO_DEFINIDA;--FIN
+
+     --Se trata de actualizar la tabla de RECCOUNT
+     UPDATE V_RECCOUNT r SET
+       r.CANTIDAD = r.CANTIDAD + IIF(:tcOperac = 'I', 1, -1)
+     WHERE r.TABLA = :tcTablax||' '||:ESTADO;--FIN
+
+     -- No se encontró la tabla en RECCOUNT, por lo tanto hay que agregarla
+     IF (ROW_COUNT = 0) THEN BEGIN 
+           lcComando = 'SELECT COUNT(*) FROM ' || tcTablax ||' WHERE ESTADO IS '||ESTADO;
+           EXECUTE STATEMENT (lcComando) INTO :lnCantidadFilas;
+           INSERT INTO V_RECCOUNT(tabla, cantidad)
+               VALUES (:tcTablax||' '||:ESTADO , :lnCantidadFilas);
+     END
+ 
+END
+^
+
+^
+SET TERM ;^
+/* SYS_RECCOUNT */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SYS_RECCOUNT (
+	TCOPERAC TYPE OF D_INSERT_DELETE,
+	TCTABLAX TYPE OF D_VARCHAR_45
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE LCCOMANDO D_VARCHAR_255;
+DECLARE VARIABLE LNCANTIDADFILAS D_ID;
+DECLARE VARIABLE v_id D_ID;
+BEGIN
+/*
+     Este RECCOUNT agrega la tabla tomando encuentra el estado del registro.
+*/
+     --Nos aseguramos que sea una operacion definida
+     IF (UPPER(tcOperac) NOT IN('I', 'D')) THEN
+      EXCEPTION E_OPER_NO_DEFINIDA;--FIN
+     
+     --Se trata de actualizar la tabla de RECCOUNT
+     UPDATE V_RECCOUNT r
+     SET
+       r.CANTIDAD = r.CANTIDAD + IIF(:tcOperac = 'I', 1, -1)
+     WHERE r.TABLA = :tcTablax;
+
+     -- No se encontró la tabla en RECCOUNT, por lo tanto hay que agregarla
+     IF (ROW_COUNT = 0) THEN BEGIN 
+           lcComando = 'SELECT COUNT(*) FROM ' || tcTablax;
+           EXECUTE STATEMENT (lcComando) INTO :lnCantidadFilas;
+           INSERT INTO V_RECCOUNT(tabla, cantidad)
+               VALUES (:tcTablax, :lnCantidadFilas);
+     END
+ 
+END
+^
+
+^
+SET TERM ;^
+/* SP_DELETE_ALMACEN */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_ALMACEN (
+	ID TYPE OF COLUMN V_ALMACENES.ID
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE v_estado D_BOOLEAN_T;
+BEGIN
+     /*
+          TODO hacer las validaciones antes de eliminar un registro.
+     */
+     v_estado = (SELECT a.ESTADO FROM V_ALMACENES a WHERE a.ID = :ID);
+     
+     
+     DELETE FROM V_ALMACENES WHERE ID = :ID;
+     
+     /*Guardamos cantidad de registros por estado*/
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('D', 'V_ALMACENES', :v_estado);
+     
+     /*Guardamos cantidad total de los registros en padres*/
+     EXECUTE PROCEDURE SYS_RECCOUNT('D', 'V_ALMACENES');
+END
+^
+
+^
+SET TERM ;^
+/* SP_DELETE_ANTECEDENTE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_ANTECEDENTE (
+	I_ID D_ID
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          En este procedimiento debemos verificar si este antecedente no debe ser eliminado.
+     */
+     DELETE FROM V_ANTECEDENTES WHERE ID = :I_ID;
+END
+^
+
+^
+SET TERM ;^
+/* SP_DELETE_ARS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_ARS (
+	V_ID D_ID
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE v_estado D_BOOLEAN_T;
+BEGIN
+     
+     v_estado = (SELECT a.ESTADO FROM V_ARS a WHERE a.ID = :V_ID);
+     
+     DELETE FROM V_ARS a WHERE a.ID = :V_ID;
+
+     /*Guardamos cantidad de registros por estado*/
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('D', 'V_ARS', :v_estado);
+     
+     /*Guardamos cantidad total de los registros en padres*/
+     EXECUTE PROCEDURE SYS_RECCOUNT('D', 'V_ARS');
+END
+^
+COMMENT ON PROCEDURE SP_DELETE_ARS IS 'Permite eliminar las ars del sistema.'^
+
+^
+SET TERM ;^
+/* SP_DELETE_CATEGORIAS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_CATEGORIAS (
+	V_ID D_ID
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE V_ESTADO D_BOOLEAN_F;
+BEGIN
+     /*Obtener el estado de la categoria*/
+     V_ESTADO = (SELECT c.ESTADO 
+                    FROM V_CATEGORIAS c 
+                    WHERE c.ID = :V_ID
+               );
+               
+     /*Procedimiento revizado el 22 de abril 2022*/
+     DELETE FROM V_CATEGORIAS a WHERE a.ID = :V_ID;
+
+     
+     /*Guardamos cantidad de registros por estado*/
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('D', 'V_CATEGORIAS', :V_ESTADO);
+     
+     /*Guardamos cantidad total de los registros en padres*/
+     EXECUTE PROCEDURE SYS_RECCOUNT('D', 'V_CATEGORIAS');
+END
+^
+
+^
+SET TERM ;^
+/* SP_DELETE_CLIENTE_SB */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_CLIENTE_SB (
+	V_ID D_ID
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     --No pueden eliminarse el cliente generico del sistema.
+     IF (:V_ID = 0) THEN
+          EXCEPTION E_DELETE_GENERICO;
+     
+     /*
+          Antes de eliminar un cliente de la tabla de clientes, 
+          deberia de investigarse si se puede. 
+          
+          Eliminando el cliente de la tabla. 
+     */
+     DELETE FROM V_PERSONAS_CLIENTES a WHERE a.ID = :V_ID;
+     
+     /*
+          Si no hubo registros afectos, lanzar la siguiente EXCEPTION. 
+     */
+     IF(ROW_COUNT < 1)THEN
+          EXCEPTION E_CLIENTE_NO_ENCONTRADO USING(V_ID);
+     
+     IF(( SELECT CANTIDAD 
+          FROM V_RECCOUNT 
+          WHERE TABLA LIKE 'V_PERSONAS_CLIENTES') > 0)THEN
+               EXECUTE PROCEDURE SYS_RECCOUNT('D', 'V_PERSONAS_CLIENTES');
+     
+     --Notificar eventos de eliminacion de registros. 
+     POST_EVENT 'del_persona_clientes';
+END
+^
+
+^
+SET TERM ;^
+/* SP_DELETE_ESTUDIANTE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_ESTUDIANTE (
+	V_ID D_ID,
+	I_ESTADO D_BOOLEAN_T
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     DELETE FROM V_PERSONAS_ESTUDIANTES WHERE ID = :V_ID;
+     
+     /*Guardamos cantidad de registros por estado*/
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('D', 'V_PERSONAS', :I_ESTADO);
+     
+     /*Guardamos cantidad total de los registros en padres*/
+     EXECUTE PROCEDURE SYS_RECCOUNT('D', 'V_PERSONAS');
+     EXECUTE PROCEDURE SYS_RECCOUNT('D', 'V_PERSONAS_ESTUDIANTES');
+     
+     
+END
+^
+
+^
+SET TERM ;^
+/* SP_DELETE_PACIENTE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_PACIENTE (
+	V_ID D_ID
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE v_estado D_BOOLEAN_T;
+BEGIN
+    /*
+         TODO hacer las validaciones antes de eliminar un registro.
+    */
+    v_estado = (SELECT a.ESTADO FROM V_PERSONAS a WHERE a.ID = :V_ID);
+          
+    DELETE FROM V_PERSONAS_PACIENTES WHERE ID = :V_ID;
+     
+    /*Guardamos cantidad de registros por estado*/
+    EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_PERSONAS', v_estado);
+     
+    /*Guardamos cantidad total de los registros en padres*/
+    EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS_PACIENTES');
+END
+^
+
+^
+SET TERM ;^
+/* SP_DELETE_PRODUCTO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_PRODUCTO (
+	I_ID_PRODUCTO D_ID
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          Debe crearse validaciones antes de eliminar el producto.
+          
+          Un ejemplo de porque no eliminar producto.
+          
+          Cuando este tenga existencia en el inventario.
+          Cuando el producto ya se encuentra facturado.
+     */
+     DELETE FROM V_PRODUCTOS p WHERE p.ID = :I_ID_PRODUCTO;
+     
+     --Notificar eventos de eliminacion en la base de datos. 
+     POST_EVENT 'del_Producto';
+END
+^
+
+^
+SET TERM ;^
+/* SP_DELETE_USUARIO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_DELETE_USUARIO (
+	I_USER_NAME D_USER_NAME
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          A medida que se va desarrollando, se debe cuestionar
+          ¿cuando un usuario no debe ser borrado?
+     */
+     IF((SELECT (1) 
+          FROM V_TURNOS t 
+          WHERE UPPER(TRIM(t.TURNO_USUARIO)) LIKE TRIM(:I_USER_NAME) AND t.ESTADO ) = 1)THEN
+          EXCEPTION E_CAJERO_TURNO_ACTIVO;
+     
+     EXECUTE STATEMENT 'DROP USER '||:I_USER_NAME;
+     
+     --Noticar evento de eliminacion de registro.
+     POST_EVENT 'DELETE_USUARIOS';
+END
+^
+COMMENT ON PROCEDURE SP_DELETE_USUARIO IS 'Permite eliminar un usuario del sistema, pero antes de eliminarlo este realiza la siguientes comprobaciones:
+	1) Verifica que el usuario no tenga un turno abierto.'^
+
+^
+SET TERM ;^
+/* SP_HALLAR_PALABRAS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_HALLAR_PALABRAS (
+	FTCTEXTO D_BLOB_TEXTO
+) 
+RETURNS (
+	FTCPALABRA D_VARCHAR_45
+)
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE lnI D_ID;
+DECLARE VARIABLE lnInicio D_ID;
+DECLARE VARIABLE lnLongitud D_ID;
+BEGIN
+ 
+   lnI        = 1;
+   lnInicio   = 1;
+   ftcTexto   = ftcTexto || ' ';
+   lnLongitud = CHARACTER_LENGTH(ftcTexto);
+ 
+   WHILE (lnI <= lnLongitud) DO BEGIN
+      IF(CAST(SUBSTRING(ftcTexto FROM lnI FOR 1) AS D_VARCHAR_45) NOT SIMILAR TO '[[:ALNUM:]]' AND POSITION(SUBSTRING(ftcTexto FROM lnI FOR 1) IN 'áéíóúñÁÉÍÓÚÑ') = 0) THEN BEGIN
+         IF(lnI > lnInicio) THEN BEGIN
+            ftcPalabra = SUBSTRING(ftcTexto FROM lnInicio FOR lnI - lnInicio);
+            SUSPEND;
+         END
+         lnInicio = lnI + 1;
+      END
+      lnI = lnI + 1;
+   END
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_ALMACEN */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_ALMACEN (
+	NOMBRE TYPE OF COLUMN V_ALMACENES.NOMBRE,
+	UBICACION TYPE OF COLUMN V_ALMACENES.UBICACION,
+	ESTADO TYPE OF COLUMN V_ALMACENES.ESTADO
+) 
+RETURNS (
+	O_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+BEGIN
+     IF((SELECT 1 FROM V_ALMACENES WHERE NOMBRE LIKE :NOMBRE) = 1)THEN
+        EXCEPTION E_DUPLICADO_NOMBRE;
+     
+     INSERT INTO V_ALMACENES (ID, NOMBRE, UBICACION, ESTADO)
+     VALUES (NULL, :NOMBRE, :UBICACION, :ESTADO)
+     RETURNING ID
+     INTO O_ID;
+     
+     SUSPEND;
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_ANTECEDENTE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_ANTECEDENTE (
+	I_ID_CONSULTA D_ID,
+	I_DESCRIPCION D_VARCHAR_1024
+) 
+RETURNS (
+	O_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+        Deberia validarse que la consulta este activa y que exista primeramente.
+     */
+     IF((SELECT 1 FROM V_CONSULTAS WHERE ID = :I_ID_CONSULTA AND ESTADO) IS NULL)THEN
+        EXCEPTION E_CONSULTA_NO_ENCONTRADA;
+     
+     
+     INSERT INTO V_ANTECEDENTES (ID, ID_CONSULTA, DESCRIPCION) 
+     VALUES (NULL, :I_ID_CONSULTA, :I_DESCRIPCION)
+     RETURNING ID
+     INTO O_ID;
+     
+     /*Guardamos cantidad total de los registros en padres*/
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_ANTECEDENTES');
+     
+     SUSPEND;
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_ARS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_ARS (
+	DESCRIPCION D_VARCHAR_45,
+	COVER_CONSULTA_POR_C D_DESCUENTO,
+	ESTADO D_BOOLEAN_T
+) 
+RETURNS (
+	O_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE V_ID D_ID;
+BEGIN
+     --Validar que la descripcion no se encuentra en el registro.
+     IF((SELECT 1 FROM V_ARS r WHERE r.DESCRIPCION STARTING WITH :DESCRIPCION) = 1)THEN
+        EXCEPTION E_DUPLICADO_NOMBRE;
+
+     --Insertando el registro.
+     INSERT INTO V_ARS (ID, DESCRIPCION, COVERTURA_CONSULTA_PORCIENTO, ESTADO)
+     VALUES (NULL, :DESCRIPCION, :COVER_CONSULTA_POR_C, :ESTADO)
+     RETURNING ID 
+     INTO O_ID;
+     
+     /*Guardamos cantidad de registros por estado*/
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_ARS', :ESTADO);
+     
+     /*Guardamos cantidad total de los registros en padres*/
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_ARS');
+     
+     SUSPEND;
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_CARTON_BINGO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_CARTON_BINGO (
+	I_CARTON_HASH D_ID,
+	I_MATRIZ_OBJ D_BLOB_TEXTO
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     IF((SELECT (1) 
+          FROM V_CARTONES_BINGO 
+          WHERE CARTON_HASH = :I_CARTON_HASH) = 1)THEN
+          EXCEPTION E_DUPLICADO_CARTON_BINGO;
+          
+     INSERT INTO V_CARTONES_BINGO (CARTON_HASH, MATRIZ_OBJ)
+     VALUES (:I_CARTON_HASH, :I_MATRIZ_OBJ);
+     
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_CATEGORIAS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_CATEGORIAS (
+	DESCRIPCION D_VARCHAR_25,
+	IMAGEN_TEXTO D_BLOB_TEXTO,
+	ESTADO D_BOOLEAN_T
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     --Procedimiento revizado el 22 de abril 2022
+     INSERT INTO V_CATEGORIAS (DESCRIPCION, IMAGEN_TEXTO, ESTADO)
+     VALUES (:DESCRIPCION, :IMAGEN_TEXTO, :ESTADO);
+     
+     --Guardamos cantidad de registros por estado
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_CATEGORIAS', :ESTADO);
+     
+     --Guardamos cantidad total de los registros en padres
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_CATEGORIAS');
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_CLIENTE_SB */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_CLIENTE_SB (
+	I_PERSONA D_PERSONA,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T,
+	I_ESTADO_CIVIL D_ESTADO_CIVIL
+) 
+RETURNS (
+	V_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+BEGIN
+     
+     /*Validaciones de insercion*/
+     INSERT INTO V_PERSONAS (ID, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, 
+                              SEXO, FECHA_NACIMIENTO, ESTADO) 
+     VALUES (NULL, :I_PERSONA, :I_PNOMBRE, :I_SNOMBRE, :I_APELLIDOS,
+               :I_SEXO, :I_FECHA_NACIMIENTO, :I_ESTADO)
+     RETURNING ID
+     INTO V_ID;
+       
+     /*Guardamos cantidad de registros por estado*/
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_PERSONAS', :I_ESTADO);   
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS');
+     
+     --Ingresando el cliente
+     INSERT INTO V_PERSONAS_CLIENTES(ID) VALUES(:V_ID);
+     
+     --Guardamos cantidad de registros por estado
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS_CLIENTES');
+     
+     IF(I_CEDULA <> NULL)THEN
+     BEGIN
+          --Ingresando el cliente
+          INSERT INTO V_GENERALES(ID_PERSONA, CEDULA, ID_TIPO_SANGRE, ESTADO_CIVIL) 
+          VALUES(:V_ID, :I_CEDULA, 0, :I_ESTADO_CIVIL);
+          
+          --Guardamos cantidad de registros por estado
+          EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_GENERALES');
+     END
+     
+     
+     
+     SUSPEND;
+END
+^
+COMMENT ON PROCEDURE SP_INSERT_CLIENTE_SB IS 'Es el procedimiento utilizado para almacenar un cliente en el sb.'^
+
+^
+SET TERM ;^
+/* SP_INSERT_CONSULTA */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_CONSULTA (
+	ID_PACIENTE TYPE OF COLUMN CONSULTAS.ID_PACIENTE,
+	ID_CONTROL_CONSULTA TYPE OF COLUMN CONSULTAS.ID_CONTROL_CONSULTA,
+	ID_TURNO TYPE OF COLUMN CONSULTAS.TURNO,
+	FECHA TYPE OF COLUMN CONSULTAS.FECHA
+) 
+RETURNS (
+	O_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+BEGIN
+    IF((SELECT 1 FROM V_PERSONAS_PACIENTES WHERE ID = :ID_PACIENTE) IS NULL)THEN
+        EXCEPTION E_PACIENTE_NO_ENCONTRADO;
+    
+    IF((SELECT 1 FROM V_CONTROL_CONSULTA WHERE ID = :ID_CONTROL_CONSULTA) IS NULL)THEN
+        EXCEPTION E_CONTROL_CONSULTA_NO_ENCONTRADA;
+        
+    IF(:FECHA > CURRENT_DATE)THEN
+        EXCEPTION E_FECHA_INCORRECTA;
+
+    --Hay que definir bien el campo turno... No se cual es su objetivo aqui. 
+
+    INSERT INTO V_CONSULTAS (ID, ID_PACIENTE, ID_CONTROL_CONSULTA, TURNO, FECHA)
+    VALUES (NULL, :ID_PACIENTE, :ID_CONTROL_CONSULTA, :ID_TURNO, :FECHA)
+    RETURNING ID
+    INTO O_ID;
+    
+    SUSPEND;
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_CONTACTOS_TEL */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_CONTACTOS_TEL (
+	I_ID_PERSONA D_ID,
+	I_TELEFONO D_TELEFONO,
+	I_TIPO D_VARCHAR_15,
+	I_POR_DEFECTO D_BOOLEAN_T
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+    --Se valida el id de la persona que este registrado en la tabla persona.
+    IF((SELECT 1 FROM V_PERSONAS WHERE ID = :I_ID_PERSONA) IS NULL)THEN
+        EXCEPTION E_CLIENTE_NO_ENCONTRADO;
+    
+    --Se valida que id de la persona y el telefono no este duplicado.
+    IF((SELECT 1 FROM V_CONTACTOS_TEL WHERE ID_PERSONA = :I_ID_PERSONA AND TELEFONO STARTING WITH :I_TELEFONO) = 1)THEN
+        EXCEPTION E_CONTACTO_TEL_DUPLICADO USING (:I_ID_PERSONA);
+    
+    --Se modifican los registros de la base de datos si este registro actual esta por defecto. 
+    IF(:I_POR_DEFECTO)THEN BEGIN
+        UPDATE CONTACTOS_TEL
+        SET 
+            POR_DEFECTO = FALSE 
+        WHERE
+            ID_PERSONA = :I_ID_PERSONA;
+    END
+    
+    --Se realiza la insercion del registro. 
+    INSERT INTO V_CONTACTOS_TEL (ID_PERSONA, TELEFONO, TIPO, POR_DEFECTO)
+    VALUES(:I_ID_PERSONA, :I_TELEFONO, :I_TIPO, :I_POR_DEFECTO);
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_DETALLE_RECETAS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_DETALLE_RECETAS (
+	I_ID_RECETA D_ID,
+	I_LINEA D_ID,
+	I_ID_MEDICAMENTO D_ID,
+	I_CANTIDAD D_DINERO,
+	I_D_DOSIS D_VARCHAR_255
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          Debe Validarse si ID_MEDICAMENTO tiene estado activo,
+          que tenga existencia, Cosas asi que me vienen a la cabeza.
+     */
+     INSERT INTO V_D_RECETAS(ID_RECETA, LINEA, ID_MEDICAMENTO, CANTIDAD, D_DOSIS)
+     VALUES (:I_ID_RECETA, :I_LINEA, :I_ID_MEDICAMENTO, :I_CANTIDAD, :I_D_DOSIS);
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_DOCTOR */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_DOCTOR (
+	I_USER_NAME D_USER_NAME,
+	I_CLAVE D_CLAVE,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_ROL D_ROL,
+	I_COD_EXEQUATUR D_VARCHAR_70,
+	I_ESPECIALIDAD D_VARCHAR_70,
+	I_ESTADO D_BOOLEAN_T,
+	I_ADMINISTRADOR D_BOOLEAN_F
+) 
+RETURNS (
+	O_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE V_ID D_ID; 
+DECLARE VARIABLE V_SQL D_VARCHAR_255;
+BEGIN
+     IF(EXISTS(SELECT (1)
+               FROM VS_USUARIOS  
+               WHERE USERNAME STARTING WITH (TRIM(:I_USER_NAME))))THEN
+                    EXCEPTION E_USUARIO_REGISTRADO;
+     
+     IF((SELECT r.ROL 
+          FROM GET_ROLES r 
+          WHERE TRIM(r.ROL) like TRIM(:i_rol)) IS NULL)THEN
+          EXCEPTION E_ROL_NO_ENCONTRADO;
+     
+     V_ID = GEN_ID(SEQ_PERSONAS_ID, 1);
+          
+     V_SQL = 'CREATE USER '||:I_USER_NAME||
+               ' PASSWORD '''||i_clave||
+               ''' FIRSTNAME '''||i_pnombre||
+               ''' MIDDLENAME '''||i_snombre||
+               ''' LASTNAME '''||i_apellidos||''''||
+     
+     iif(i_estado, ' ACTIVE',' INACTIVE') ||
+     
+     iif(i_administrador, ' GRANT ',' REVOKE ') || 
+     ' ADMIN ROLE USING PLUGIN Srp '||
+     'TAGS(id='''||v_id||
+     ''', gui=''0'', uid=''0'', rol='''||TRIM(i_rol)||
+     ''', exe='''||i_cod_exequatur||''', esp='''||i_especialidad||''');';
+     
+     EXECUTE STATEMENT V_SQL;
+     
+     O_ID = :V_ID;
+     SUSPEND;
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_ENTRADA_PRODUCTOS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_ENTRADA_PRODUCTOS (
+	ID_PROVEEDOR D_ID,
+	COD_FACTURA D_CODIGO,
+	LINEA D_ID,
+	ID_PRODUCTO D_ID,
+	ENTRADA D_DINERO,
+	FECHA_VECIMIENTO D_FECHA
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     
+     /*
+     Que pasa chaval usa la vista
+     INSERT INTO ENTRADA_PRODUCTOS (IDPROVEDOR, COD_FACTURA, LINEA, IDPRODUCTO,
+     ENTRADA, FECHAVECIMIENTO)
+     VALUES (:ID_PROVEEDOR, :COD_FACTURA, :LINEA, :ID_PRODUCTO, :ENTRADA, 
+          :FECHA_VECIMIENTO
+     );*/
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_ESTUDIANTE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_ESTUDIANTE (
+	I_ID_ARS D_ID,
+	I_NO_NSS D_VARCHAR_25,
+	I_ID_TIPO_SANGRE D_ID,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T,
+	I_MATRICULA D_VARCHAR_15,
+	I_ID_PADRE D_ID,
+	I_ID_MADRE D_ID
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE V_ID D_ID; 
+BEGIN
+     --Campos de quedeberia de tener los estudiantes agregado.
+     -- ID_ARS, NONSS, :I_ID_ARS, :I_NO_NSS, 
+     
+     INSERT INTO V_PERSONAS (ID, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, 
+           FECHA_NACIMIENTO, ESTADO)
+     VALUES (
+          NULL, 
+          :I_PNOMBRE, 
+          :I_SNOMBRE, 
+          :I_APELLIDOS, 
+          :I_SEXO, 
+          :I_FECHA_NACIMIENTO, 
+          :I_ESTADO
+     )
+     RETURNING ID
+     INTO :V_ID;
+     
+     INSERT INTO V_GENERALES (ID_PERSONA, CEDULA, ID_TIPO_SANGRE)
+     VALUES (
+          :V_ID, 
+          :I_CEDULA, 
+          :I_ID_TIPO_SANGRE
+     );
+
+     
+     INSERT INTO V_ASEGURADOS (ID_PERSONA, ID_ARS, NO_NSS)
+     VALUES (
+          :V_ID, 
+          :I_ID_ARS,
+          :I_NO_NSS
+     );
+     
+     /*Ingresar identificador en ESTUDIANTE*/
+     INSERT INTO V_PERSONAS_ESTUDIANTES (ID)
+     VALUES (
+          :V_ID
+     );
+     
+     INSERT INTO V_PERSONAS_ESTUDIANTES_ATR (ID, MATRICULA)
+     VALUES (
+          :V_ID, 
+          :I_MATRICULA
+     );
+     
+     /*
+          Debe de obtenerse las relaciones entre padre he hijo de la tabla RELACION_FAMILIAR.
+     */
+     IF(:I_ID_PADRE > 0)THEN
+          --INSERT INTO V_PADRES(ID, ID_HIJO) VALUES(:I_ID_PADRE, :V_ID);
+     
+     IF(:I_ID_MADRE > 0)THEN
+          --INSERT INTO V_PADRES(ID, ID_HIJO) VALUES(:I_ID_MADRE, :V_ID);
+     /*
+          Debe de obtenerse las relaciones entre padre he hijo de la tabla RELACION_FAMILIAR.
+     */
+
+     /*Guardamos cantidad de registros por estado*/
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_PERSONAS', :I_ESTADO);
+     
+     /*Guardamos cantidad total de los registros en padres*/
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS');
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS_ESTUDIANTES');
+     
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_FACTURA */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_FACTURA (
+	I_ID D_ID,
+	I_ID_CLIENTE D_ID,
+	I_ID_CONTACTOS_TEL D_ID,
+	I_ID_CONTACTOS_DIRECCIONES D_ID,
+	I_ID_CONTACTOS_EMAIL D_ID,
+	I_ID_TURNO D_ID,
+	I_TOTAL D_DINERO,
+	I_EFECTIVO D_DINERO,
+	I_ESTADO_FACTURA D_ESTADO_C_I_P_A_N_T,
+	I_NOMBRE_TEMP D_NOMBRES
+) 
+RETURNS (
+	O_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          * Validaciones del SP la cual debe validar que:
+          
+          Antes de validar un campo como son Telefono, Correo o Direccion estos deben ser diferente de 0;
+          
+          1) La factura se registre con un turno valido.
+          2) Que el numero telefonico este asignado al cliente de la factura.
+          3) Que el correo electronico este asignado al cliente de la factura.
+          4) Que la direccion sea valida para dicho cliente.
+          
+          Nota: Cuando se registra una factura debe de llevarse un control de la facturas que se van guardando 
+          en el sistema. Por ejemplo, Cantidad de total facturas, las cantidades de la facturas que se realizan en
+          un dia, en una semana, en un mes y en un año para el sistema analitico, cantidad de facturas por estado.
+     */
+     --Validando que el turno este activo.
+     IF(( SELECT (1) 
+          FROM V_TURNOS t 
+          WHERE t.ID = :I_ID_TURNO AND t.ESTADO) IS NULL)THEN
+          EXCEPTION E_CAJERO_TURNO_INACTIVO;
+     
+     --Validando que el id de contacto es diferente de cero y que se encuentre en la tabla de CONTACTOS_TEL y
+     --el codigo de cliente este relacionado a ese contacto y que el estado sea activo.
+     IF(:I_ID_CONTACTOS_TEL <> 0 AND (SELECT (1) 
+          FROM V_CONTACTOS_TEL t 
+          WHERE t.ID = :I_ID_CONTACTOS_TEL AND 
+                t.ID_PERSONA = :I_ID_CLIENTE AND 
+                t.ESTADO) IS NULL) THEN
+          EXCEPTION E_TELEFONO_INACTIVO;
+     
+     --Por igual.
+     IF(:I_ID_CONTACTOS_EMAIL <> 0 AND (SELECT (1) 
+          FROM V_CONTACTOS_EMAIL e 
+          WHERE e.ID = :I_ID_CONTACTOS_EMAIL AND 
+                e.ID_PERSONA = :I_ID_CLIENTE AND 
+                e.ESTADO) IS NULL) THEN
+          EXCEPTION E_CORREO_INACTIVO;
+          
+     --Por igual.
+     IF(:I_ID_CONTACTOS_DIRECCIONES <> 0 AND 
+          (SELECT (1) 
+               FROM V_CONTACTOS_DIRECCIONES e
+               WHERE e.ID = :I_ID_CONTACTOS_DIRECCIONES AND 
+                e.ID_PERSONA = :I_ID_CLIENTE AND 
+                e.ESTADO) IS NULL) THEN
+          EXCEPTION E_DIRECCION_INACTIVO;
+          
+     UPDATE OR INSERT INTO V_M_FACTURAS (ID, ID_CLIENTE, ID_CONTACTOS_TEL, ID_CONTACTOS_DIRECCIONES, ID_CONTACTOS_EMAIL,
+                ID_TURNO, TOTAL, EFECTIVO, ESTADO_FACTURA, NOMBRE_TEMP)
+     VALUES (:I_ID, :I_ID_CLIENTE, :I_ID_CONTACTOS_TEL, :I_ID_CONTACTOS_DIRECCIONES, :I_ID_CONTACTOS_EMAIL, 
+                :I_ID_TURNO, :I_TOTAL, :I_EFECTIVO, :I_ESTADO_FACTURA, :I_NOMBRE_TEMP)
+     MATCHING (ID)
+     RETURNING ID
+     INTO O_ID;
+     
+     
+     SUSPEND;
+     
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_PACIENTE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PACIENTE (
+	I_ID_PADRE D_ID,
+	I_ID_MADRE D_ID,
+	I_ID_ARS D_ID,
+	I_NO_NSS D_VARCHAR_25,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ID_TIPO_SANGRE D_ID,
+	I_ESTADO D_BOOLEAN_T
+) 
+RETURNS (
+	V_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+BEGIN
+     
+     /*Ingresando los datos general en persona...*/
+     INSERT INTO V_PERSONAS (ID,  PNOMBRE, SNOMBRE, APELLIDOS, SEXO, 
+          FECHA_NACIMIENTO, ESTADO)
+     VALUES (
+          :V_ID,
+          :I_PNOMBRE, 
+          :I_SNOMBRE, 
+          :I_APELLIDOS, 
+          :I_SEXO, 
+          :I_FECHA_NACIMIENTO,
+          :I_ESTADO
+     )
+     RETURNING ID
+     INTO :V_ID ;
+     
+     /*Ingresando las generales del paciente*/
+     INSERT INTO V_GENERALES (ID_PERSONA, ID_TIPO_SANGRE, CEDULA) 
+     VALUES (
+          :V_ID,
+          :I_ID_TIPO_SANGRE, 
+          :I_CEDULA
+     );
+     
+     /*Datos del seguro medico.*/
+     INSERT INTO V_ASEGURADOS (ID_PERSONA, ID_ARS, NO_NSS)
+     VALUES (
+          :V_ID, 
+          :I_ID_ARS, 
+          :I_NO_NSS
+     );
+     
+     /*Actualizamos la cantidad de seguros medicos registrados por paciente.*/
+     UPDATE ARS a
+     SET 
+          a.CANTIDAD_REGISTRO = COALESCE(a.CANTIDAD_REGISTRO, 0) + 1
+     WHERE
+          a.ID = :I_ID_ARS;
+     
+     
+     /*Insertamos en la vista de pacientes*/
+     INSERT INTO V_PERSONAS_PACIENTES (ID)
+     VALUES (:V_ID);
+     
+     
+     IF(:I_ID_PADRE > 0)THEN BEGIN
+          INSERT INTO V_RELACION_PADRE_PACIENTE(ID_PADRE_O_MADRE, ID_PACIENTE) VALUES(:I_ID_PADRE, :V_ID);
+          EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_RELACION_PADRE_PACIENTE');
+     END
+     
+     IF(:I_ID_MADRE > 0)THEN BEGIN
+          INSERT INTO V_RELACION_PADRE_PACIENTE(ID_PADRE_O_MADRE, ID_PACIENTE) VALUES(:I_ID_MADRE, :V_ID);
+          EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_RELACION_PADRE_PACIENTE');
+     END
+
+     /*Guardamos cantidad de registros por estado*/
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_PERSONAS', :I_ESTADO);
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_ASEGURADOS', :I_ESTADO);
+     
+     /*Guardamos cantidad total de los registros en padres*/
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS');
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_GENERALES');
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_ASEGURADOS');
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS_PACIENTES');
+     
+     SUSPEND;
+
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_PADRES */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PADRES (
+	I_ID_HIJO D_ID,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ID_TIPO_SANGRE D_ID,
+	I_ESTADO_CIVIL D_ESTADO_CIVIL,
+	I_ESTADO D_BOOLEAN_T
+) 
+RETURNS (
+	O_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+     Validaciones del SP:
+          1) La cedula no puede repetirse en el sistema.
+     */
+     if((SELECT (1) FROM V_GENERALES WHERE CEDULA LIKE :I_CEDULA) IS NOT NULL) THEN
+          EXCEPTION E_DUPLICADO_CEDULA;
+     
+     
+     INSERT INTO V_PERSONAS(ID, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, 
+          FECHA_NACIMIENTO, ESTADO)
+     VALUES(-1, :I_PNOMBRE, :I_SNOMBRE, :I_APELLIDOS, :I_SEXO,
+          :I_FECHA_NACIMIENTO, :I_ESTADO)
+     RETURNING ID 
+     INTO :O_ID;
+     
+     
+     INSERT INTO V_GENERALES (ID_PERSONA, ID_TIPO_SANGRE, CEDULA, ESTADO_CIVIL)
+     VALUES ( :O_ID, :I_ID_TIPO_SANGRE,  :I_CEDULA, :I_ESTADO_CIVIL);
+     
+     
+
+     /*Ingresar identificador en padres*/
+     --INSERT INTO V_PADRES(ID, ID_HIJO) VALUES (:O_ID, :I_ID_HIJO);
+     /*
+          Debe de obtenerse las relaciones entre padre he hijo de la tabla RELACION_FAMILIAR.
+     */
+     SUSPEND;
+     
+     /*Guardamos cantidad de registros por estado
+          Se debe tener encuenta que la tabla debe tener un campo de estado booleano.
+     */
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_PERSONAS', :I_ESTADO);
+     
+     
+     /*Guardamos cantidad total de los registros en padres*/
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS');
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PADRES');
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_GENERALES');
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_PERSONA */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PERSONA (
+	I_PERSONA D_PERSONA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T
+) 
+RETURNS (
+	V_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*Validaciones de insercion*/
+     INSERT INTO V_PERSONAS (ID, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, 
+               FECHA_NACIMIENTO, ESTADO)
+     VALUES ( NULL, :i_PERSONA, :i_PNOMBRE, :i_SNOMBRE, :i_APELLIDOS, :i_SEXO,
+               :i_FECHA_NACIMIENTO, :i_ESTADO) 
+     RETURNING ID
+     INTO :V_ID ;
+     
+     /*Aqui se insertaba en la vista V_CLIENTES y en V_GENERALES*/
+     
+     
+     /*Guardamos cantidad de registros por estado*/
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_PERSONAS', :I_ESTADO);
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS');
+     
+     POST_EVENT 'ins_persona_clientes';
+     POST_EVENT 'ins_persona';
+     SUSPEND;
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_PERSONA_CLIENTES_ID */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PERSONA_CLIENTES_ID (
+	I_ID D_ID
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*Validamos que el id se encuentre en la vista V_PERSONAS*/
+     IF((SELECT (1) FROM V_PERSONAS c WHERE c.ID = :I_ID) IS NULL) THEN 
+          EXCEPTION E_CLIENTE_NO_ENCONTRADO USING(:I_ID);
+     
+     IF((SELECT (1) FROM V_PERSONAS_CLIENTES c WHERE c.ID = :I_ID) IS NULL) THEN 
+     BEGIN
+          --Insertamos el id en la siguiente vista o tabla.
+          INSERT INTO V_PERSONAS_CLIENTES (ID) VALUES (:I_ID);
+          
+          --Para asunto estadisticos
+          EXECUTE PROCEDURE SYS_RECCOUNT ('I', 'V_PERSONAS_CLIENTES');
+          --EXCEPTION E_CLIENTE_ENCONTRADO;
+     END
+     
+     --Notificar evento de registros nuevo. 
+     POST_EVENT 'ins_persona_clientes';
+     
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_PRODUCTO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PRODUCTO (
+	I_ID_CATEGORIA D_ID,
+	I_CODIGO D_VARCHAR_25,
+	I_DESCRIPCION D_VARCHAR_70,
+	I_IMAGEN_TEXTO D_BLOB_TEXTO,
+	I_NOTA D_VARCHAR_1024,
+	I_ESTADO D_BOOLEAN_T
+) 
+RETURNS (
+	O_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          Por el momento no contiene validaciones, 
+          Solo que con procedimiento los permisos son mas manejables.
+     */ 
+     INSERT INTO V_PRODUCTOS (ID_CATEGORIA, CODIGO, DESCRIPCION, IMAGEN_TEXTO, 
+            NOTA, ESTADO)
+     VALUES (:I_ID_CATEGORIA, :I_CODIGO, :I_DESCRIPCION, :I_IMAGEN_TEXTO, 
+            :I_NOTA, :I_ESTADO)
+     RETURNING ID 
+     INTO O_ID;
+     
+     --Notificar evento de registro a los oyentes.
+     POST_EVENT 'add_Producto';
+     
+     SUSPEND;
+     
+     
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_PROVEEDOR */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_PROVEEDOR (
+	I_ID_PROVINCIA D_ID,
+	I_ID_MUNICIPIO D_ID,
+	I_PERSONA D_PERSONA,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_DIRECCION D_VARCHAR_255,
+	I_ESTADO D_BOOLEAN_T,
+	I_CODIGO_PROVEEDOR D_CODIGO
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE V_ID D_ID;
+BEGIN
+     --La entidad persona que almacena datos generales.
+     INSERT INTO V_PERSONAS (ID, PERSONA, PNOMBRE, SNOMBRE, APELLIDOS, SEXO, 
+          ESTADO)
+     VALUES (
+          NULL, 
+          :i_persona, 
+          :i_pnombre, 
+          :i_snombre, 
+          :i_apellidos, 
+          :i_sexo, 
+          :i_estado
+     )
+     RETURNING ID
+     INTO :V_ID;
+          
+     INSERT INTO V_GENERALES (ID_PERSONA, CEDULA) 
+     VALUES (
+          :V_ID,
+          :i_cedula
+     );
+     
+     --Direcion del proveedor.
+     INSERT INTO V_CONTACTOS_DIRECCIONES (ID_PERSONA, ID_PROVINCIA, ID_MUNICIPIO, DIRECCION)
+     VALUES (:V_ID, :i_id_provincia, :i_id_municipio, :i_direccion);
+     
+     --Almacenamos datos solo del proveedor. 
+     INSERT INTO V_PERSONAS_PROVEEDORES (ID)
+     VALUES (:V_ID);
+
+      /*Guardamos cantidad de registros por estado*/
+     EXECUTE PROCEDURE SYS_RECCOUNT_ESTADO('I', 'V_PERSONAS', :I_ESTADO);
+     
+     /*Guardamos cantidad total de los registros en padres*/
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS');
+     EXECUTE PROCEDURE SYS_RECCOUNT('I', 'V_PERSONAS_PROVEEDORES');
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_TEST */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_TEST
+AS
+BEGIN
+    
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_TURNO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_TURNO (
+	I_TURNO_USUARIO D_USER_NAME
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     IF(NOT EXISTS(SELECT (1)
+               FROM VS_USUARIOS  
+               WHERE USERNAME STARTING WITH (TRIM(:I_TURNO_USUARIO))))THEN
+          EXCEPTION E_USUARIO_NO_ENCONTRADO;
+          
+     IF((SELECT ESTADO 
+          FROM VS_USUARIOS 
+          WHERE TRIM(USERNAME) STARTING WITH TRIM(:I_TURNO_USUARIO)) IS FALSE) THEN
+          EXCEPTION E_USUARIO_INACTIVO;
+     
+     INSERT INTO V_TURNOS (TURNO_USUARIO, FECHA_HORA_FINAL)
+     VALUES (
+          :I_TURNO_USUARIO, 
+          NULL
+     );
+END
+^
+
+^
+SET TERM ;^
+/* SP_INSERT_USUARIO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_INSERT_USUARIO (
+	I_USER_NAME D_USER_NAME,
+	I_CLAVE D_CLAVE,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_ESTADO D_BOOLEAN_T,
+	I_ADMINISTRADOR D_BOOLEAN_F,
+	I_DESCRIPCION D_BLOB_TEXTO,
+	I_TAGS D_VARCHAR_1024
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE V_SQL D_VARCHAR_1024;
+BEGIN
+     IF((SELECT (1) 
+          FROM VS_USUARIOS 
+          WHERE TRIM(USERNAME) STARTING WITH TRIM(:I_USER_NAME)) = 1)THEN
+               EXCEPTION E_USUARIO_REGISTRADO;
+          
+     V_SQL = 'CREATE USER '||I_USER_NAME 
+          ||' PASSWORD '''||I_CLAVE
+          ||''' FIRSTNAME '''||I_PNOMBRE
+          ||''' MIDDLENAME '''||I_SNOMBRE
+          ||''' LASTNAME '''||I_APELLIDOS
+          ||''''|| iif(I_ESTADO, ' ACTIVE ',' INACTIVE ') 
+          ||I_TAGS||' '
+          || iif(I_ADMINISTRADOR, ' GRANT ',' REVOKE ') 
+          || 'ADMIN ROLE USING PLUGIN Srp;';
+          
+     EXECUTE STATEMENT V_SQL;
+     
+     V_SQL = 'COMMENT ON USER '||I_USER_NAME||' is '''||I_DESCRIPCION||'''';
+     
+     EXECUTE STATEMENT V_SQL;
+     
+     POST_EVENT 'INSERT_USUARIOS';
+     
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_ALMACEN */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_ALMACEN (
+	ID TYPE OF COLUMN V_ALMACENES.ID,
+	NOMBRE TYPE OF COLUMN V_ALMACENES.NOMBRE,
+	UBICACION TYPE OF COLUMN V_ALMACENES.UBICACION,
+	ESTADO TYPE OF COLUMN V_ALMACENES.ESTADO
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          TODO hacer las validaciones antes de actualizar o cambiar de 
+          estado un almacen. 
+     */
+     UPDATE V_ALMACENES a
+     SET 
+          a.NOMBRE = :NOMBRE, 
+          a.UBICACION = :UBICACION, 
+          a.ESTADO = :ESTADO
+     WHERE
+          a.ID = :ID;
+
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_ANTECEDENTE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_ANTECEDENTE (
+	I_ID D_ID,
+	I_DESCRIPCION D_VARCHAR_1024
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          Antes de modificar un antecendete debe de verificarse que este antecendete no este en uso, ejemplo
+     */
+     UPDATE V_ANTECEDENTES 
+          SET DESCRIPCION = :I_DESCRIPCION
+     WHERE ID = :I_ID;
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_ARS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_ARS (
+	I_ID D_ID,
+	I_DESCRIPCION D_VARCHAR_45,
+	I_COVERTURA D_DESCUENTO,
+	I_ESTADO D_BOOLEAN_T
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     IF(:i_ID = 0)THEN
+        EXCEPTION E_REGISTRO_CERO;
+     
+     UPDATE ARS a
+     SET 
+          a.DESCRIPCION = :i_Descripcion, 
+          a.COVERCONSULTAPORC = :i_Covertura, 
+          a.ESTADO = :i_ESTADO
+     WHERE
+          a.ID = :i_ID;
+          
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_CANTIDAD_FILAS */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_CANTIDAD_FILAS (
+	TNCODSUC D_ID
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE lcNombreTabla D_VARCHAR_25;
+   DECLARE VARIABLE lnCantidadFilas D_ID;
+   DECLARE VARIABLE lcComando D_VARCHAR_255; 
+BEGIN
+  FOR
+      SELECT
+         RDB$RELATION_NAME
+      FROM
+         RDB$RELATIONS
+      WHERE
+         RDB$SYSTEM_FLAG = 0 AND
+         RDB$RELATION_TYPE = 0
+      ORDER BY
+         RDB$RELATION_NAME
+      INTO
+         :lcNombreTabla
+   DO BEGIN
+      lcComando = 'SELECT COUNT(*) FROM ' || lcNombreTabla ;
+      EXECUTE STATEMENT (lcComando) INTO :lnCantidadFilas ;
+      UPDATE OR INSERT INTO V_RECCOUNT
+               (ID, TABLA, CANTIDAD)
+        VALUES (:tnCodSuc , :lcNombreTabla, :lnCantidadFilas)
+      MATCHING (TABLA);
+   END
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_CLIENTE_SB */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_CLIENTE_SB (
+	I_ID D_ID,
+	I_PERSONA D_PERSONA,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T,
+	I_ESTADO_CIVIL D_ESTADO_CIVIL
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*Validamos que el id se encuentre en la vista V_PERSONAS_CLIENTES*/
+     IF((SELECT (1) 
+          FROM V_PERSONAS_CLIENTES c 
+          WHERE c.ID = :I_ID) IS NULL) THEN 
+               EXCEPTION E_CLIENTE_NO_ENCONTRADO USING(:I_ID);
+
+
+     IF(I_ID = 0)THEN
+          EXCEPTION E_CLIENTE_GENERICO;
+     
+     /*Entidad PERSONA*/
+     UPDATE V_PERSONAS a SET 
+          a.PERSONA = :I_PERSONA, 
+          a.PNOMBRE = :I_PNOMBRE, 
+          a.SNOMBRE = :I_SNOMBRE, 
+          a.APELLIDOS = :I_APELLIDOS, 
+          a.SEXO = :I_SEXO, 
+          a.FECHA_NACIMIENTO = :I_FECHA_NACIMIENTO, 
+          a.ESTADO = :I_ESTADO
+     WHERE
+          a.ID = :I_ID;
+     
+     --Atributo GENERALES
+          
+     UPDATE OR INSERT INTO V_GENERALES(ID_PERSONA, CEDULA, ID_TIPO_SANGRE, ESTADO_CIVIL)
+     VALUES (:I_ID, :I_CEDULA, 0, :I_ESTADO_CIVIL)
+     MATCHING (ID_PERSONA);
+     
+     --Notificar eventos de actualizacion de registros. 
+     POST_EVENT 'upd_persona_clientes';
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_DEUDA_ESTADO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_DEUDA_ESTADO (
+	E_ID_DEUDA D_ID NOT NULL,
+	E_OBJ D_ESTADO_C_I_P_A_N_T NOT NULL
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+    
+    IF((SELECT (1) 
+          FROM V_DEUDAS d 
+          WHERE d.ID = :e_id_Deuda) IS NULL)THEN
+    BEGIN
+          EXCEPTION E_DEUDA_NO_ENCONTRADA;
+    END
+    
+     UPDATE V_DEUDAS a
+     SET 
+          a.ESTADO = :e_obj
+     WHERE
+          a.ID = :e_id_Deuda;
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_ESTUDIANTE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_ESTUDIANTE (
+	I_ID D_ID,
+	I_ID_PADRE D_ID,
+	I_ID_MADRE D_ID,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     UPDATE V_PERSONAS a SET 
+          a.PNOMBRE = :I_PNOMBRE, 
+          a.SNOMBRE = :I_SNOMBRE, 
+          a.APELLIDOS = :I_APELLIDOS, 
+          a.SEXO = :I_SEXO, 
+          a.FECHA_NACIMIENTO = :I_FECHA_NACIMIENTO, 
+          a.ESTADO = :I_ESTADO
+     WHERE
+          a.ID = :I_ID;
+     
+     --Se actualizan los padres si es que estan registrados en la vista V_PADRES. 
+     --UPDATE V_PADRES a SET a.ID = :I_ID_PADRE WHERE a.ID_HIJO = :I_ID;
+     
+     --UPDATE V_PADRES a SET a.ID = :I_ID_MADRE WHERE a.ID_HIJO = :I_ID;
+     /*
+          Debe de obtenerse las relaciones entre padre he hijo de la tabla RELACION_FAMILIAR.
+     */
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_FACTURA */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_FACTURA (
+	I_ID D_ID,
+	I_ID_CONTACTOS_TEL D_ID,
+	I_ID_CONTACTOS_DIRECCIONES D_ID,
+	I_ID_CONTACTOS_EMAIL D_ID,
+	I_ESTADO_FACTURA D_ESTADO_C_I_P_A_N_T,
+	I_NOMBRE_TEMP D_NOMBRES
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*Si el efectivo es menor que el total mandar excepcion.*/
+     --IF(I_TOTAL < I_EFECTIVO)THEN
+     --     EXCEPTION E_EFECTIVO_MENOR_TOTAL;
+     
+     /*Validamos que el turno del usuario esté activo
+     IF(( SELECT (1) 
+          FROM V_TURNOS t 
+          WHERE t.ID = :I_ID_TURNO AND t.ESTADO) IS NULL)THEN
+          EXCEPTION E_CAJERO_TURNO_INACTIVO;*/
+     
+     /*Validamos que el telefono del usuario esté activo */
+     IF(:I_ID_CONTACTOS_TEL <> 0 AND 
+          (SELECT (1) 
+               FROM V_CONTACTOS_TEL t 
+               WHERE t.ID = :I_ID_CONTACTOS_TEL AND t.ESTADO) IS NULL)THEN
+                    EXCEPTION E_TELEFONO_INACTIVO;
+          
+     
+     
+     /*Validamos que el correo del usuario esté activo */
+     IF(:I_ID_CONTACTOS_EMAIL <> 0 AND 
+          (SELECT (1) 
+               FROM V_CONTACTOS_EMAIL e 
+               WHERE e.ID = :I_ID_CONTACTOS_EMAIL AND e.ESTADO) IS NULL)THEN
+                    EXCEPTION E_CORREO_INACTIVO;
+     
+     
+     /*Validamos que la direccion del usuario esté activa */
+     IF(:I_ID_CONTACTOS_DIRECCIONES <> 0 AND 
+          (SELECT (1) 
+               FROM V_CONTACTOS_DIRECCIONES e 
+               WHERE e.ID = :I_ID_CONTACTOS_DIRECCIONES AND e.ESTADO) IS NULL)THEN
+                    EXCEPTION E_DIRECCION_INACTIVO;
+     UPDATE V_M_FACTURAS 
+     SET 
+          ID_CONTACTOS_TEL = :I_ID_CONTACTOS_TEL, 
+          ID_CONTACTOS_DIRECCIONES = :I_ID_CONTACTOS_DIRECCIONES, 
+          ID_CONTACTOS_EMAIL = :I_ID_CONTACTOS_EMAIL, 
+          ESTADO_FACTURA = :I_ESTADO_FACTURA, 
+          NOMBRE_TEMP = :I_NOMBRE_TEMP, 
+          USER_NAME = CURRENT_USER
+     WHERE
+          ID = :I_ID;
+     
+     
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_OR_INSERT_DIRECCION */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_OR_INSERT_DIRECCION (
+	I_ID_DIRECCION TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID,
+	I_ID_PERSONA TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID_PERSONA,
+	I_ID_PROVINCIA TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID_PROVINCIA,
+	I_ID_MUNICIPIO TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID_MUNICIPIO,
+	I_ID_DISTRITO_MUNICIPAL TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID_DISTRITO_MUNICIPAL,
+	I_ID_CODIGO_POSTAL TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ID_CODIGO_POSTAL,
+	I_DIRECCION TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.DIRECCION,
+	I_ESTADO TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.ESTADO,
+	I_POR_DEFECTO TYPE OF COLUMN V_CONTACTOS_DIRECCIONES.POR_DEFECTO
+) 
+RETURNS (
+	O_ID D_ID
+)
+SQL SECURITY DEFINER
+AS
+BEGIN
+     --Verificando el codigo del cliente. INSERT
+     IF((SELECT (1) 
+          FROM V_PERSONAS_CLIENTES c 
+          WHERE c.ID = :I_ID_PERSONA) IS NULL OR  :I_ID_PERSONA = 0)THEN
+          EXCEPTION E_CLIENTE_NO_ENCONTRADO USING(:I_ID_PERSONA);
+     
+     --Verificando el codigo de la provincia.
+     IF((SELECT (1) 
+          FROM V_PROVINCIAS 
+          WHERE ID = :I_ID_PROVINCIA) IS NULL OR :I_ID_PROVINCIA < 0)THEN
+               EXCEPTION E_PROVINCIA_NO_DEFINIDA;
+     
+     --Verificando el codigo del MUNICIPIOS sea mayor o igual a cero
+     IF((SELECT (1) 
+          FROM V_MUNICIPIOS 
+          WHERE ID = :I_ID_MUNICIPIO) IS NULL OR :I_ID_MUNICIPIO < 0)THEN BEGIN
+               EXCEPTION E_MUNICIPIO_NO_DEFINIDO;
+     END ELSE BEGIN
+          --Verificamos que el codigo del MUNICIPIOS coincida con el codigo de la PROVINCIAS.
+          IF((SELECT (1) 
+          FROM V_MUNICIPIOS 
+          WHERE ID = :I_ID_MUNICIPIO AND 
+                IDPROVINCIA = :I_ID_PROVINCIA) IS NULL AND :I_ID_MUNICIPIO <> 0)THEN
+               EXCEPTION E_MUNICIPIO_NO_PROVINCIA;
+     END
+     
+     --Verificamos que el DISTRITOS_MUNICIPALES sea mayor o igual a cero     
+     IF((SELECT (1) 
+          FROM V_DISTRITOS_MUNICIPALES 
+          WHERE ID = :I_ID_DISTRITO_MUNICIPAL ) IS NULL OR :I_ID_DISTRITO_MUNICIPAL < 0)THEN BEGIN
+               EXCEPTION E_DISTRITO_M_NO_DEFINIDO;
+     END ELSE BEGIN
+          --Verificamos que el DISTRITOS_MUNICIPALES y MUNICIPIOS coincidan. 
+          IF((SELECT (1) 
+               FROM V_DISTRITOS_MUNICIPALES 
+               WHERE ID = :I_ID_DISTRITO_MUNICIPAL AND 
+                     IDMUNICIPIO = :I_ID_MUNICIPIO) IS NULL AND 
+                     :I_ID_DISTRITO_MUNICIPAL > 0 AND 
+                     :I_ID_MUNICIPIO > 0)THEN
+                    EXCEPTION E_DISTRITO_M_NO_MUNICIPIO;
+     END
+     
+     --Verificamos que el CODIGOS_POSTALES sea mayor o igual a cero.
+     IF((SELECT (1) 
+          FROM V_CODIGOS_POSTALES 
+          WHERE ID = :I_ID_CODIGO_POSTAL) IS NULL OR :I_ID_CODIGO_POSTAL < 0)THEN BEGIN
+          EXCEPTION E_CODIGO_P_NO_DEFINIDO;
+     END ELSE BEGIN
+          --Verificamos que el codigo de CODIGOS_POSTALES y PROVINCIAS coincidan. 
+          IF((SELECT (1) 
+               FROM V_CODIGOS_POSTALES 
+               WHERE ID = :I_ID_CODIGO_POSTAL AND 
+                     IDPROVINCIA = :I_ID_PROVINCIA) IS NULL AND
+                     :I_ID_CODIGO_POSTAL > 0 AND
+                     :I_ID_PROVINCIA > 0)THEN
+               EXCEPTION E_CODIGO_P_NO_PROVINCIA;
+     END
+     
+     IF(I_POR_DEFECTO)THEN BEGIN
+          UPDATE V_CONTACTOS_DIRECCIONES a
+          SET 
+               a.POR_DEFECTO = FALSE
+          WHERE
+               a.ID_PERSONA = :I_ID_PERSONA;
+     END
+     
+     
+     
+     UPDATE OR INSERT INTO V_CONTACTOS_DIRECCIONES(ID, ID_PERSONA, ID_PROVINCIA, ID_MUNICIPIO,
+          ID_DISTRITO_MUNICIPAL, ID_CODIGO_POSTAL, DIRECCION, ESTADO, POR_DEFECTO)
+     VALUES (:I_ID_DIRECCION, :I_ID_PERSONA, :I_ID_PROVINCIA, :I_ID_MUNICIPIO, :I_ID_DISTRITO_MUNICIPAL, 
+          :I_ID_CODIGO_POSTAL, :I_DIRECCION, :I_ESTADO, :I_POR_DEFECTO)
+     RETURNING ID
+     INTO O_ID;
+     
+     SUSPEND;
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_PACIENTE */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_PACIENTE (
+	I_ID_PACIENTE D_ID,
+	I_ID_PADRE D_ID,
+	I_ID_MADRE D_ID,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ID_TIPO_SANGRE D_ID,
+	I_ID_ARS D_ID,
+	I_NONSS D_VARCHAR_25,
+	I_ESTADO D_BOOLEAN_T,
+	I_ESTADO_ARS D_BOOLEAN_T
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     --Se actualizan los campos de la vista V_PERSONAS
+     UPDATE V_PERSONAS a
+     SET 
+          a.PNOMBRE = :I_PNOMBRE, 
+          a.SNOMBRE = :I_SNOMBRE, 
+          a.APELLIDOS = :I_APELLIDOS, 
+          a.SEXO = :I_SEXO, 
+          a.FECHA_NACIMIENTO = :I_FECHA_NACIMIENTO, 
+          a.ESTADO = :I_ESTADO
+     WHERE
+          a.ID = :I_ID_PACIENTE;
+          
+     --Se actualizan los padres si es que estan registrados en la vista V_PADRES. 
+     --UPDATE V_PADRES a SET a.ID = :I_ID_PADRE WHERE a.ID_HIJO = :I_ID_PACIENTE;
+     
+     --UPDATE V_PADRES a SET a.ID = :I_ID_MADRE WHERE a.ID_HIJO = :I_ID_PACIENTE;
+     /*
+          Debe de obtenerse las relaciones entre padre he hijo de la tabla RELACION_FAMILIAR.
+     */
+     
+     --Se actualizan los campos de la vista V_GENERALES
+     UPDATE V_GENERALES a
+     SET 
+          a.CEDULA = :I_CEDULA, 
+          a.ID_TIPO_SANGRE = :I_ID_TIPO_SANGRE 
+     WHERE
+          a.ID_PERSONA = :I_ID_PACIENTE;
+     
+     --Se actualizan los campos de la vista V_ASEGURADOS
+     UPDATE V_ASEGURADOS a
+     SET 
+          a.ID_ARS = :I_ID_ARS, 
+          a.NO_NSS = :I_NONSS, 
+          a.ESTADO = :I_ESTADO_ARS
+     WHERE
+          a.ID_PERSONA = :I_ID_PACIENTE;
+
+  
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_PADRES */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_PADRES (
+	I_ID D_ID,
+	I_ID_PROVINCIA D_ID,
+	I_ID_MUNICIPIO D_ID,
+	I_ID_DISTRITO_MUNICIPAL D_ID,
+	I_ID_CODIGOPOSTAL D_ID,
+	I_ID_TIPO_SANGRE D_ID,
+	I_CEDULA D_CEDULA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_DIRECCION D_VARCHAR_70,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T,
+	I_ESTADO_CIVIL D_ESTADO_CIVIL
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+
+     UPDATE V_PERSONAS a
+     SET  
+          a.PNOMBRE = :I_PNOMBRE, 
+          a.SNOMBRE = :I_SNOMBRE, 
+          a.APELLIDOS = :I_APELLIDOS, 
+          a.SEXO = :I_SEXO, 
+          a.FECHA_NACIMIENTO = :I_FECHA_NACIMIENTO, 
+          a.ESTADO = :I_ESTADO
+     WHERE
+          a.ID = :I_ID;
+          
+     UPDATE V_GENERALES a
+     SET
+          a.ID_TIPO_SANGRE = :I_ID_TIPO_SANGRE, 
+          a.CEDULA = :I_CEDULA, 
+          a.ESTADO_CIVIL = :I_ESTADO_CIVIL
+     WHERE
+          a.ID_PERSONA = :I_ID;
+          
+     UPDATE V_CONTACTOS_DIRECCIONES a
+     SET 
+          a.ID_PROVINCIA = :I_ID_PROVINCIA, 
+          a.ID_MUNICIPIO = :I_ID_MUNICIPIO, 
+          a.ID_DISTRITO_MUNICIPAL = :I_ID_DISTRITO_MUNICIPAL, 
+          a.ID_CODIGO_POSTAL = :I_ID_CODIGOPOSTAL,  
+          a.DIRECCION = :I_DIRECCION
+     WHERE
+          a.ID_PERSONA = :I_ID;
+     
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_PRODUCTO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_PRODUCTO (
+	I_ID D_ID,
+	I_ID_CATEGORIA D_ID,
+	I_CODIGO D_VARCHAR_25,
+	I_DESCRIPCION D_VARCHAR_70,
+	I_IMAGEN_TEXTO D_BLOB_TEXTO,
+	I_NOTA D_VARCHAR_1024,
+	I_ESTADO D_BOOLEAN_T
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     /*
+          Crear validaciones para modificar un producto.
+     */
+     
+     IF((SELECT (1) FROM V_CATEGORIAS c WHERE c.ID = :I_ID_CATEGORIA AND c.ESTADO IS FALSE) = 1)THEN
+          EXCEPTION E_CATEGORIAS_INACTIVA;
+     
+     UPDATE V_PRODUCTOS
+     SET 
+          ID_CATEGORIA = :I_ID_CATEGORIA, 
+          CODIGO = :I_CODIGO, 
+          DESCRIPCION = :I_DESCRIPCION, 
+          IMAGEN_TEXTO = :I_IMAGEN_TEXTO,
+          NOTA = :I_NOTA, 
+          ESTADO = :I_ESTADO
+     WHERE
+          ID = :I_ID;
+
+     POST_EVENT 'upd_Producto';
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_PROVEEDORES */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_PROVEEDORES (
+	I_ID D_ID,
+	I_CODIGO_PROVEEDOR D_CODIGO,
+	I_PERSONA D_PERSONA,
+	I_PNOMBRE D_NOMBRES,
+	I_SNOMBRE D_NOMBRES,
+	I_APELLIDOS D_APELLIDOS,
+	I_SEXO D_SEXO,
+	I_FECHA_NACIMIENTO D_FECHA,
+	I_ESTADO D_BOOLEAN_T
+) 
+SQL SECURITY DEFINER
+AS
+BEGIN
+     
+     UPDATE PERSONAS a
+     SET 
+          a.PERSONA = :I_PERSONA, 
+          a.PNOMBRE = :I_PNOMBRE, 
+          a.SNOMBRE = :I_SNOMBRE, 
+          a.APELLIDOS = :I_APELLIDOS, 
+          a.SEXO = :I_SEXO, 
+          a.FECHA_NACIMIENTO = :I_FECHA_NACIMIENTO, 
+          a.ESTADO = :I_ESTADO
+     WHERE
+          a.ID = :I_ID;
+     
+     /*UPDATE V_PROVEEDORES a
+     SET 
+          a.CODIGO_PROVEEDOR = :I_CODIGO_PROVEEDOR 
+     WHERE
+          a.ID = :I_ID;*/
+END
+^
+
+^
+SET TERM ;^
+/* SP_UPDATE_USUARIO */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SP_UPDATE_USUARIO (
+	I_USER_NAME TYPE OF COLUMN SEC$USERS.SEC$USER_NAME,
+	I_CLAVE D_CLAVE,
+	I_PNOMBRE TYPE OF COLUMN SEC$USERS.SEC$FIRST_NAME,
+	I_SNOMBRE TYPE OF COLUMN SEC$USERS.SEC$MIDDLE_NAME,
+	I_APELLIDOS TYPE OF COLUMN SEC$USERS.SEC$LAST_NAME,
+	I_ESTADO TYPE OF COLUMN SEC$USERS.SEC$ACTIVE,
+	I_ADMINISTRADOR TYPE OF COLUMN SEC$USERS.SEC$ADMIN,
+	I_DESCRIPCION TYPE OF COLUMN SEC$USERS.SEC$DESCRIPTION
+) 
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE V_ID D_ID; 
+DECLARE VARIABLE V_SQL D_VARCHAR_255;
+BEGIN
+     /*Validando que el usuario este registrado en la app*/
+     IF((SELECT (1) 
+          FROM VS_USUARIOS  
+          WHERE TRIM(USERNAME) STARTING WITH (TRIM(:I_USER_NAME))) IS NULL)THEN
+               EXCEPTION E_USUARIO_NO_ENCONTRADO;
+     
+          
+     V_SQL = 'ALTER USER '||I_USER_NAME||
+               ' FIRSTNAME '''||I_PNOMBRE||
+               ''' MIDDLENAME '''||I_SNOMBRE||
+               ''' LASTNAME '''||I_APELLIDOS||''' '||
+               iif(I_ESTADO, ' ACTIVE ',' INACTIVE ')||' '||
+               iif(I_ADMINISTRADOR, ' GRANT ',' REVOKE ')||' ADMIN ROLE USING PLUGIN Srp ';
+     
+     EXECUTE STATEMENT (V_SQL);
+     
+     IF(I_CLAVE != '')THEN
+     BEGIN
+          V_SQL = 'ALTER USER '||I_USER_NAME||' PASSWORD '''||I_CLAVE||'''';
+          EXECUTE STATEMENT V_SQL;
+     END
+     
+     V_SQL = 'COMMENT ON USER '||I_USER_NAME||' IS '''||I_DESCRIPCION||'''';
+     
+     EXECUTE STATEMENT V_SQL;
+     
+     POST_EVENT 'UPDATE_USUARIOS';
+END
+^
+
+^
+SET TERM ;^
+/* SYSTEM_ENCRIPTAR */
+SET TERM ^;
+CREATE OR ALTER PROCEDURE SYSTEM_ENCRIPTAR (
+	TCTEXTO D_VARCHAR_MAX,
+	TCACCION CHAR(1),
+	TCNUMEROENCRIPTACION D_VARCHAR_255,
+	TCNUMEROREPETICION D_VARCHAR_255
+) 
+RETURNS (
+	FTCNUEVOTEXTO D_VARCHAR_MAX
+)
+SQL SECURITY DEFINER
+AS
+DECLARE VARIABLE lnI          SMALLINT;
+DECLARE VARIABLE lnJ          SMALLINT;
+DECLARE VARIABLE lnK          SMALLINT;
+DECLARE VARIABLE lcCaracter   CHAR(1);
+DECLARE VARIABLE lnAscii      SMALLINT;
+DECLARE VARIABLE lnValor1     SMALLINT;
+DECLARE VARIABLE lnValor2     SMALLINT;
+DECLARE VARIABLE lnNuevoAscii SMALLINT;
+BEGIN 
+   ftcNuevoTexto = '';     -- El texto que se devolverá
+   lnI = 1;
+   lnJ = 1;
+   lnK = 1;
+ 
+   WHILE (:lnI <= CHAR_LENGTH(:tcTexto)) DO BEGIN
+      lcCaracter    = SUBSTRING(:tcTexto FROM lnI FOR 1);     -- Obtiene el caracter que está en la posición lnI
+      
+      lnAscii       = ASCII_VAL(:lcCaracter);                  -- Halla el código ASCII del caracter
+      
+      lnValor1      = CAST(SUBSTRING(:tcNumeroEncriptacion FROM :lnJ FOR 1) AS SMALLINT);
+      
+      lnValor2      = CAST(SUBSTRING(:tcNumeroRepeticion FROM :lnK FOR 1) AS SMALLINT);
+      
+      lnNuevoAscii  = MOD((:lnAscii + IIF(:tcAccion = 'E', 1, -1) * :lnValor1 * :lnValor2), 256);
+      
+      lnNuevoAscii  = :lnNuevoAscii + IIF(:lnNuevoAscii < 0, 256, 0);
+      
+      ftcNuevoTexto = :ftcNuevoTexto || ASCII_CHAR(:lnNuevoAscii);
+      
+      lnI = :lnI + 1;
+      
+      lnJ = :lnJ + 1;
+      
+      lnJ = IIF(:lnJ > CHAR_LENGTH(:tcNumeroEncriptacion), 1, :lnJ);
+      
+      lnK = :lnK + 1;
+      
+      lnK = IIF(:lnK > CHAR_LENGTH(:tcNumeroRepeticion), 1, :lnK);
+   END
+   SUSPEND;
+ 
+END
+^
+
+^
+SET TERM ;^
+/* ----- Creating Triggers for Table ----- */
+
+/* ALMACENES_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER ALMACENES_BI FOR ALMACENES
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+  IF (NEW.ID IS NULL) THEN
+    NEW.ID = GEN_ID(GEN_ALMACENES_ID, 1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(GEN_ALMACENES_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(GEN_ALMACENES_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* ANTECEDENTES_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER ANTECEDENTES_BI FOR ANTECEDENTES
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_ANTECEDENTES_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_ANTECEDENTES_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_ANTECEDENTES_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* ARS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER ARS_BI FOR ARS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_ARS_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_ARS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_ARS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* CARTONES_BINGO_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CARTONES_BINGO_BI FOR CARTONES_BINGO
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_CARTONES_BINGO_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_CARTONES_BINGO_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_CARTONES_BINGO_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* CATEGORIAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CATEGORIAS_BI FOR CATEGORIAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_CATEGORIAS_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_CATEGORIAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_CATEGORIAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* CODIGOS_POSTALES_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CODIGOS_POSTALES_BI FOR CODIGOS_POSTALES
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_CODIGOS_POSTALES_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_CODIGOS_POSTALES_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_CODIGOS_POSTALES_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* CONSULTAS_APROBADAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONSULTAS_APROBADAS_BI FOR CONSULTAS_APROBADAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_CONSULTAS_APROBADAS_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_CONSULTAS_APROBADAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_CONSULTAS_APROBADAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* CONSULTAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONSULTAS_BI FOR CONSULTAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_CONSULTAS_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_CONSULTAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_CONSULTAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* CONTACTOS_DIRECCIONES_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONTACTOS_DIRECCIONES_BI FOR CONTACTOS_DIRECCIONES
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_CONTACTOS_DIRECCIONES_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_CONTACTOS_DIRECCIONES_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_CONTACTOS_DIRECCIONES_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* CONTACTOS_EMAIL_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONTACTOS_EMAIL_BI FOR CONTACTOS_EMAIL
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_CONTACTOS_EMAIL_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_CONTACTOS_EMAIL_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_CONTACTOS_EMAIL_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* CONTACTOS_TEL_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONTACTOS_TEL_BI FOR CONTACTOS_TEL
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+	IF (NEW.ID IS NULL) THEN
+	    NEW.ID = GEN_ID(SEQ_CONTACTOS_TEL_ID, 1);
+	  ELSE
+	BEGIN
+		tmp = GEN_ID(SEQ_CONTACTOS_TEL_ID, 0);
+		if (tmp < new.ID) then
+		 tmp = GEN_ID(SEQ_CONTACTOS_TEL_ID, new.ID-tmp);
+	END
+END^
+SET TERM ;^
+
+/* CONTROL_CONSULTA_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER CONTROL_CONSULTA_BI FOR CONTROL_CONSULTA
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_CONTROL_CONSULTA_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_CONTROL_CONSULTA_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_CONTROL_CONSULTA_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* DEUDAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER DEUDAS_BI FOR DEUDAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_DEUDAS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_DEUDAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_DEUDAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* DISTRITOS_MUNICIPALES_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER DISTRITOS_MUNICIPALES_BI FOR DISTRITOS_MUNICIPALES
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_DISTRITOS_MUNICIPALES_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_DISTRITOS_MUNICIPALES_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_DISTRITOS_MUNICIPALES_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* D_ANALISIS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER D_ANALISIS_BI FOR D_ANALISIS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_D_ANALISIS_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_D_ANALISIS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_D_ANALISIS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* D_DEUDAS_PAGAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER D_DEUDAS_PAGAS_BI FOR D_DEUDAS_PAGAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_D_DEUDAS_PAGAS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_D_DEUDAS_PAGAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_D_DEUDAS_PAGAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* D_ENTRADA_PRODUCTO_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER D_ENTRADA_PRODUCTO_BI FOR D_ENTRADA_PRODUCTO
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+  IF (NEW.ID_M_ENTRADA_PRODUCTO IS NULL) THEN
+    NEW.ID_M_ENTRADA_PRODUCTO = GEN_ID(GEN_D_ENTRADA_PRODUCTO_ID, 1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(GEN_D_ENTRADA_PRODUCTO_ID, 0);
+    if (tmp < new.ID_M_ENTRADA_PRODUCTO) then
+      tmp = GEN_ID(GEN_D_ENTRADA_PRODUCTO_ID, new.ID_M_ENTRADA_PRODUCTO-tmp);
+  END
+END^
+SET TERM ;^
+
+/* E_S_SYS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER E_S_SYS_BI FOR E_S_SYS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_E_S_SYS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_E_S_SYS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_E_S_SYS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* GUIA_VIGILANCIA_DESARROLLO_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER GUIA_VIGILANCIA_DESARROLLO_BI FOR GUIA_VIGILANCIA_DESARROLLO
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_GUIA_VIGILANCIA_DESARROLLO_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_GUIA_VIGILANCIA_DESARROLLO_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_GUIA_VIGILANCIA_DESARROLLO_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* HUELLAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER HUELLAS_BI FOR HUELLAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_HUELLAS_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_HUELLAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_HUELLAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* INSCRIPCIONES_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER INSCRIPCIONES_BI FOR INSCRIPCIONES
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_INSCRIPCIONES_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_INSCRIPCIONES_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_INSCRIPCIONES_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* MENSAJES_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER MENSAJES_BI FOR MENSAJES
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_MENSAJES_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_MENSAJES_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_MENSAJES_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* METRICAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER METRICAS_BI FOR METRICAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_METRICAS_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_METRICAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_METRICAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* MOTIVO_CONSULTA_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER MOTIVO_CONSULTA_BI FOR MOTIVO_CONSULTA
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_MOTIVO_CONSULTA_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_MOTIVO_CONSULTA_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_MOTIVO_CONSULTA_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* MUNICIPIOS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER MUNICIPIOS_BI FOR MUNICIPIOS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_MUNICIPIOS_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_MUNICIPIOS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_MUNICIPIOS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* M_ANALISIS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER M_ANALISIS_BI FOR M_ANALISIS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_M_ANALISIS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_M_ANALISIS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_M_ANALISIS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* M_ENTRADA_PRODUCTOS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER M_ENTRADA_PRODUCTOS_BI FOR M_ENTRADA_PRODUCTOS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_M_ENTRADA_PRODUCTOS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_M_ENTRADA_PRODUCTOS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_M_ENTRADA_PRODUCTOS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* M_FACTURAS_BD */
+SET TERM ^;
+CREATE OR ALTER TRIGGER M_FACTURAS_BD FOR M_FACTURAS
+ACTIVE BEFORE DELETE POSITION 0
+AS
+BEGIN
+     IF ( old.ESTADO_FACTURA  <> 'n') THEN
+          EXCEPTION E_FACTURA_NO_NULA; 
+END^
+COMMENT ON TRIGGER M_FACTURAS_BD IS 'Este Trigger no permite que las facturas nulas no sean eliminadas.'^SET TERM ;^
+
+/* M_FACTURAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER M_FACTURAS_BI FOR M_FACTURAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+  IF (NEW.ID IS NULL) THEN
+    NEW.ID = GEN_ID(GEN_M_FACTURAS_ID, 1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(GEN_M_FACTURAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(GEN_M_FACTURAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* PERSONAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER PERSONAS_BI FOR PERSONAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_PERSONAS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_PERSONAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_PERSONAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* PLAN_CUENTA_CONTABLE_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER PLAN_CUENTA_CONTABLE_BI FOR PLAN_CUENTA_CONTABLE
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_PLAN_CUENTA_CONTABLE_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_PLAN_CUENTA_CONTABLE_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_PLAN_CUENTA_CONTABLE_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* PRODUCTOS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER PRODUCTOS_BI FOR PRODUCTOS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_PRODUCTOS_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_PRODUCTOS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_PRODUCTOS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* PROVINCIAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER PROVINCIAS_BI FOR PROVINCIAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_PROVINCIAS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_PROVINCIAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_PROVINCIAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* RECCOUNT_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER RECCOUNT_BI FOR RECCOUNT
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_RECCOUNT_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_RECCOUNT_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_RECCOUNT_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* RECETAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER RECETAS_BI FOR RECETAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_RECETAS_ID,1);
+ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_RECETAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_RECETAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* SINTOMAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER SINTOMAS_BI FOR SINTOMAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_SINTOMAS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_SINTOMAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_SINTOMAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* TANDAS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER TANDAS_BI FOR TANDAS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_TANDAS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_TANDAS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_TANDAS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* TIPOS_SANGRE_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER TIPOS_SANGRE_BI FOR TIPOS_SANGRE
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_TIPOS_SANGRE_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_TIPOS_SANGRE_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_TIPOS_SANGRE_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* TURNOS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER TURNOS_BI FOR TURNOS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_TURNOS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_TURNOS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_TURNOS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* T_ANALISIS_BI */
+SET TERM ^;
+CREATE OR ALTER TRIGGER T_ANALISIS_BI FOR T_ANALISIS
+ACTIVE BEFORE INSERT POSITION 0
+AS
+DECLARE VARIABLE tmp DECIMAL(18,0);
+BEGIN
+IF (NEW.ID IS NULL) THEN
+NEW.ID = GEN_ID(SEQ_T_ANALISIS_ID,1);
+  ELSE
+  BEGIN
+    tmp = GEN_ID(SEQ_T_ANALISIS_ID, 0);
+    if (tmp < new.ID) then
+      tmp = GEN_ID(SEQ_T_ANALISIS_ID, new.ID-tmp);
+  END
+END^
+SET TERM ;^
+
+/* ----- Creating Triggers for Database ----- */
+
+/* SYSTEM_SHAREWARE */
+SET TERM ^;
+CREATE OR ALTER TRIGGER SYSTEM_SHAREWARE
+ACTIVE ON CONNECT POSITION 0
+AS
+     DECLARE VARIABLE comando D_VARCHAR_1024;
+     DECLARE VARIABLE entrada D_BOOLEAN_T;
+     DECLARE VARIABLE c_Fchi D_FECHA;
+     DECLARE VARIABLE c_Fcha D_FECHA;
+     DECLARE VARIABLE c_Fchv D_FECHA;
+BEGIN
+     IF(CURRENT_ROLE <> 'RRR_SOFTSURENA')THEN
+     BEGIN
+          
+          --Armamos nuestro select que sera ejecutado en el servidor.
+          comando = 'SELECT FCHI, FCHA, FCHV FROM SP_V_E_S_SYS WHERE UUID_BASEDATOS LIKE ?;';
+          
+          --Bandera utilizada para validar que existe registro.
+          entrada = TRUE;
+          
+          FOR EXECUTE STATEMENT (comando) ((select RDB$GET_CONTEXT('SYSTEM', 'DB_GUID') from RDB$DATABASE))
+          ON EXTERNAL DATA SOURCE 'registros.db' AS
+           USER     'REGISTRADOR'
+           PASSWORD '123uasd'
+          INTO
+           :c_Fchi, c_Fcha, c_Fchv
+          DO BEGIN
+               --Si la fecha inicial es 
+               IF(CURRENT_DATE < c_Fchi)THEN
+                    EXCEPTION E_FECHA_INICIAL_INCORRECTA;
+
+               IF(CURRENT_DATE < c_Fcha)THEN
+                    EXCEPTION E_FECHA_ACTUAL_INCORRECTA;
+
+               IF(CURRENT_DATE > c_Fchv)THEN
+                    EXCEPTION E_FECHA_VENCIMIENTO;
+                 
+               UPDATE V_E_S_SYS SET 
+                    FCHI = :c_Fchi,
+                    FCHA = :c_Fcha,
+                    FCHV = :c_Fchv
+               ;
+               
+               entrada = FALSE;
+          END
+          IF(entrada) THEN
+               EXCEPTION E_EQUIPO_NO_REGISTRADO;
+     END
+END^
+SET TERM ;^
+
+/* ----- PRIMARY KEYs defining ----- */
+
+/* ALMACENES.PK_ALMACENES_0 */
+ALTER TABLE ALMACENES
+	ADD PRIMARY KEY (ID);
+
+/* ANTECEDENTES.PK_ANTECEDENTES_0 */
+ALTER TABLE ANTECEDENTES
+	ADD PRIMARY KEY (ID);
+
+/* ARS.PK_ARS_0 */
+ALTER TABLE ARS
+	ADD PRIMARY KEY (ID);
+
+/* ASEGURADOS.PK_ASEGURADOS_0 */
+ALTER TABLE ASEGURADOS
+	ADD PRIMARY KEY (ID_PERSONA);
+
+/* CARTONES_BINGO.PK_CARTONES_BINGO_0 */
+ALTER TABLE CARTONES_BINGO
+	ADD PRIMARY KEY (ID);
+
+/* CATEGORIAS.PK_CATEGORIAS_0 */
+ALTER TABLE CATEGORIAS
+	ADD PRIMARY KEY (ID);
+
+/* CODIGOS_POSTALES.PK_CODIGOS_POSTALES_0 */
+ALTER TABLE CODIGOS_POSTALES
+	ADD PRIMARY KEY (ID);
+
+/* CONSULTAS.PK_CONSULTAS_0 */
+ALTER TABLE CONSULTAS
+	ADD PRIMARY KEY (ID);
+
+/* CONSULTAS_APROBADAS.PK_CONSULTAS_APROBADAS_0 */
+ALTER TABLE CONSULTAS_APROBADAS
+	ADD PRIMARY KEY (ID);
+
+/* CONTACTOS_DIRECCIONES.PK_CONTACTOS_DIRECCIONES_0 */
+ALTER TABLE CONTACTOS_DIRECCIONES
+	ADD PRIMARY KEY (ID);
+
+/* CONTACTOS_EMAIL.PK_CONTACTOS_EMAIL_0 */
+ALTER TABLE CONTACTOS_EMAIL
+	ADD PRIMARY KEY (ID);
+
+/* CONTACTOS_TEL.PK_CONTACTOS_TEL_0 */
+ALTER TABLE CONTACTOS_TEL
+	ADD PRIMARY KEY (ID);
+
+/* CONTROL_CONSULTA.PK_CONTROL_CONSULTA_0 */
+ALTER TABLE CONTROL_CONSULTA
+	ADD PRIMARY KEY (ID);
+
+/* DEUDAS.PK_DEUDAS_0 */
+ALTER TABLE DEUDAS
+	ADD PRIMARY KEY (ID);
+
+/* DISTRITOS_MUNICIPALES.PK_DISTRITOS_MUNICIPALES_0 */
+ALTER TABLE DISTRITOS_MUNICIPALES
+	ADD PRIMARY KEY (ID);
+
+/* D_ANALISIS.PK_D_ANALISIS_0 */
+ALTER TABLE D_ANALISIS
+	ADD PRIMARY KEY (ID, ID_M_ANALISIS, LINEA, ID_T_ANALITICA);
+
+/* D_DEUDAS_PAGAS.PK_D_DEUDAS_PAGAS_0 */
+ALTER TABLE D_DEUDAS_PAGAS
+	ADD PRIMARY KEY (ID);
+
+/* D_ENTRADA_PRODUCTO.PK_D_ENTRADA_PRODUCTO_0 */
+ALTER TABLE D_ENTRADA_PRODUCTO
+	ADD PRIMARY KEY (ID_M_ENTRADA_PRODUCTO, LINEA, ID_PRODUCTO);
+
+/* D_FACTURAS.PK_D_FACTURAS_01 */
+ALTER TABLE D_FACTURAS
+	ADD PRIMARY KEY (ID_FACTURA, ID_LINEA);
+
+/* D_GUIA_VIGILANCIA_DESARROLLO.PK_D_GUIA_VIGILANCIA_DESARROLLO_0 */
+ALTER TABLE D_GUIA_VIGILANCIA_DESARROLLO
+	ADD PRIMARY KEY (ID_GVD, ID_PACIENTE);
+
+/* D_MOTIVO_CONSULTA.PK_D_MOTIVO_CONSULTA_0 */
+ALTER TABLE D_MOTIVO_CONSULTA
+	ADD PRIMARY KEY (IDCONSULTA, IDMCONSULTA);
+
+/* D_RECETAS.CON_DETALLERECETAS */
+ALTER TABLE D_RECETAS
+	ADD PRIMARY KEY (ID_RECETA, LINEA);
+
+/* E_S_SYS.PK_E_S_SYS_0 */
+ALTER TABLE E_S_SYS
+	ADD PRIMARY KEY (ID);
+
+/* GENERALES.PK_GENERALES_0 */
+ALTER TABLE GENERALES
+	ADD PRIMARY KEY (ID_PERSONA);
+
+/* GUIA_VIGILANCIA_DESARROLLO.PK_GUIA_VIGILANCIA_DESARROLLO_0 */
+ALTER TABLE GUIA_VIGILANCIA_DESARROLLO
+	ADD PRIMARY KEY (ID);
+
+/* HUELLAS.PK_HUELLAS_0 */
+ALTER TABLE HUELLAS
+	ADD PRIMARY KEY (ID);
+
+/* INSCRIPCIONES.PK_INSCRIPCIONES_0 */
+ALTER TABLE INSCRIPCIONES
+	ADD PRIMARY KEY (ID);
+
+/* MENSAJES.PK_MENSAJES_0 */
+ALTER TABLE MENSAJES
+	ADD PRIMARY KEY (ID);
+
+/* METRICAS.PK_METRICAS_0 */
+ALTER TABLE METRICAS
+	ADD PRIMARY KEY (ID);
+
+/* MOTIVO_CONSULTA.PK_MOTIVO_CONSULTA_0 */
+ALTER TABLE MOTIVO_CONSULTA
+	ADD PRIMARY KEY (ID);
+
+/* MUNICIPIOS.PK_MUNICIPIOS_0 */
+ALTER TABLE MUNICIPIOS
+	ADD PRIMARY KEY (ID);
+
+/* M_ANALISIS.PK_M_ANALISIS_0 */
+ALTER TABLE M_ANALISIS
+	ADD PRIMARY KEY (ID);
+
+/* M_ENTRADA_PRODUCTOS.PK_M_ENTRADA_PRODUCTOS_0 */
+ALTER TABLE M_ENTRADA_PRODUCTOS
+	ADD PRIMARY KEY (ID);
+
+/* M_FACTURAS.PK_M_FACTURAS_0 */
+ALTER TABLE M_FACTURAS
+	ADD PRIMARY KEY (ID);
+
+/* PERSONAS.PK_PERSONAS_0 */
+ALTER TABLE PERSONAS
+	ADD PRIMARY KEY (ID);
+
+/* PERSONAS_CLIENTES.PK_PERSONAS_CLIENTES_0 */
+ALTER TABLE PERSONAS_CLIENTES
+	ADD PRIMARY KEY (ID);
+
+/* PERSONAS_CLIENTES_ATR.PK_PERSONAS_CLIENTES_ATR_0 */
+ALTER TABLE PERSONAS_CLIENTES_ATR
+	ADD PRIMARY KEY (ID);
+
+/* PERSONAS_ESTUDIANTES.PK_PERSONAS_ESTUDIANTES_0 */
+ALTER TABLE PERSONAS_ESTUDIANTES
+	ADD PRIMARY KEY (ID);
+
+/* PERSONAS_ESTUDIANTES_ATR.PK_PERSONAS_ESTUDIANTES_ATR_0 */
+ALTER TABLE PERSONAS_ESTUDIANTES_ATR
+	ADD PRIMARY KEY (ID);
+
+/* PERSONAS_PACIENTES.PK_PERSONAS_PACIENTES_0 */
+ALTER TABLE PERSONAS_PACIENTES
+	ADD PRIMARY KEY (ID);
+
+/* PERSONAS_PACIENTES_ATR.PK_PERSONAS_PACIENTES_ART_0 */
+ALTER TABLE PERSONAS_PACIENTES_ATR
+	ADD PRIMARY KEY (ID_PACIENTE);
+
+/* PERSONAS_PADRES.PK_PERSONAS_PADRES_0 */
+ALTER TABLE PERSONAS_PADRES
+	ADD PRIMARY KEY (ID);
+
+/* PERSONAS_PROVEEDORES.PK_PERSONAS_PROVEEDORES_0 */
+ALTER TABLE PERSONAS_PROVEEDORES
+	ADD PRIMARY KEY (ID);
+
+/* PERSONAS_PROVEEDORES_ATR.PK_PERSONAS_PROVEEDORES_ATR_0 */
+ALTER TABLE PERSONAS_PROVEEDORES_ATR
+	ADD PRIMARY KEY (ID);
+
+/* PLAN_CUENTA_CONTABLE.PK_PLAN_CUENTA_CONTABLE_0 */
+ALTER TABLE PLAN_CUENTA_CONTABLE
+	ADD PRIMARY KEY (ID);
+
+/* PRODUCTOS.PK_PRODUCTOS_0 */
+ALTER TABLE PRODUCTOS
+	ADD PRIMARY KEY (ID);
+
+/* PROVINCIAS.PK_PROVINCIAS_0 */
+ALTER TABLE PROVINCIAS
+	ADD PRIMARY KEY (ID);
+
+/* RECCOUNT.PK_RECCOUNT_0 */
+ALTER TABLE RECCOUNT
+	ADD PRIMARY KEY (ID);
+
+/* RECETAS.PK_RECETAS_0 */
+ALTER TABLE RECETAS
+	ADD PRIMARY KEY (ID);
+
+/* RELACION_PADRE_ESTUDIANTE.PK_RELACION_PADRE_ESTUDIANTE_0 */
+ALTER TABLE RELACION_PADRE_ESTUDIANTE
+	ADD PRIMARY KEY (ID_PADRE_O_MADRE, ID_ESTUDIANTE);
+
+/* RELACION_PADRE_PACIENTE.PK_RELACION_PADRE_PACIENTE_0 */
+ALTER TABLE RELACION_PADRE_PACIENTE
+	ADD PRIMARY KEY (ID_PADRE_O_MADRE, ID_PACIENTE);
+
+/* SINTOMAS.PK_SINTOMAS_0 */
+ALTER TABLE SINTOMAS
+	ADD PRIMARY KEY (ID);
+
+/* TANDAS.PK_TANDAS_0 */
+ALTER TABLE TANDAS
+	ADD PRIMARY KEY (ID);
+
+/* TIPOS_SANGRE.PK_TIPOS_SANGRE_0 */
+ALTER TABLE TIPOS_SANGRE
+	ADD PRIMARY KEY (ID);
+
+/* TURNOS.PK_TURNOS_0 */
+ALTER TABLE TURNOS
+	ADD PRIMARY KEY (ID);
+
+/* T_ANALISIS.PK_T_ANALISIS_0 */
+ALTER TABLE T_ANALISIS
+	ADD PRIMARY KEY (ID);
+
+/* ----- UNIQUE KEYs defining ----- */
+
+/* ALMACENES.UNQ_ALMACENES_0 */
+ALTER TABLE ALMACENES
+	ADD UNIQUE (NOMBRE);
+
+/* ARS.UNQ_ARS_0 */
+ALTER TABLE ARS
+	ADD UNIQUE (DESCRIPCION);
+
+/* ASEGURADOS.UNQ_ASEGURADOS_0 */
+ALTER TABLE ASEGURADOS
+	ADD UNIQUE (NO_NSS);
+
+/* CARTONES_BINGO.UNQ_CARTONES_BINGO_0 */
+ALTER TABLE CARTONES_BINGO
+	ADD UNIQUE (CARTON_HASH);
+
+/* CATEGORIAS.UNQ_CATEGORIAS_0 */
+ALTER TABLE CATEGORIAS
+	ADD UNIQUE (DESCRIPCION);
+
+/* CONSULTAS_APROBADAS.UNQ_CONSULTAS_APROBADAS_0 */
+ALTER TABLE CONSULTAS_APROBADAS
+	ADD UNIQUE (COD_AUTORIZACION);
+
+/* CONTACTOS_EMAIL.UNQ_CONTACTOS_EMAIL_0 */
+ALTER TABLE CONTACTOS_EMAIL
+	ADD UNIQUE (ID_PERSONA, EMAIL);
+
+/* CONTACTOS_EMAIL.UNQ_CONTACTOS_EMAIL_1 */
+ALTER TABLE CONTACTOS_EMAIL
+	ADD UNIQUE (EMAIL);
+
+/* CONTACTOS_TEL.UNQ_CONTACTOS_TEL_0 */
+ALTER TABLE CONTACTOS_TEL
+	ADD UNIQUE (ID_PERSONA, TELEFONO);
+
+/* GENERALES.UNQ_GENERALES_0 */
+ALTER TABLE GENERALES
+	ADD UNIQUE (ID_PERSONA, CEDULA);
+
+/* MOTIVO_CONSULTA.UNQ_MOTIVO_CONSULTA_0 */
+ALTER TABLE MOTIVO_CONSULTA
+	ADD UNIQUE (DESCRIPCION);
+
+/* M_ENTRADA_PRODUCTOS.UNQ_M_ENTRADA_PRODUCTOS_0 */
+ALTER TABLE M_ENTRADA_PRODUCTOS
+	ADD UNIQUE (ID, IDPROVEDOR, ID_ALMACEN, COD_FACTURA);
+
+/* PERSONAS_ESTUDIANTES_ATR.UNQ_PERSONAS_ESTUDIANTES_0 */
+ALTER TABLE PERSONAS_ESTUDIANTES_ATR
+	ADD UNIQUE (MATRICULA);
+
+/* PERSONAS_PROVEEDORES_ATR.UNQ_PERSONAS_PROVEEDORES_ATR_0 */
+ALTER TABLE PERSONAS_PROVEEDORES_ATR
+	ADD UNIQUE (CODIGO);
+
+/* PLAN_CUENTA_CONTABLE.UNQ_PLAN_CUENTA_CONTABLE_0 */
+ALTER TABLE PLAN_CUENTA_CONTABLE
+	ADD UNIQUE (PAIS, CODIGO_CUENTA_CONTABLE);
+
+/* PRODUCTOS.UNQ_PRODUCTOS_0 */
+ALTER TABLE PRODUCTOS
+	ADD UNIQUE (CODIGO);
+
+/* PRODUCTOS.UNQ_PRODUCTOS_1 */
+ALTER TABLE PRODUCTOS
+	ADD UNIQUE (DESCRIPCION);
+
+/* RECCOUNT.UNQ_RECCOUNT_0 */
+ALTER TABLE RECCOUNT
+	ADD UNIQUE (TABLA);
+
+/* T_ANALISIS.UNQ_T_ANALISIS_0 */
+ALTER TABLE T_ANALISIS
+	ADD UNIQUE (NOMBRE_CORTO_ANALISIS);
+
+/* T_ANALISIS.UNQ_T_ANALISIS_1 */
+ALTER TABLE T_ANALISIS
+	ADD UNIQUE (NOMBRE_ANALISIS);
+
+/* ----- FOREIGN KEYs defining ----- */
+
+/* ANTECEDENTES.FK_ANTECEDENTES_0 */
+ALTER TABLE ANTECEDENTES
+	ADD FOREIGN KEY (ID_CONSULTA) REFERENCES CONSULTAS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* ASEGURADOS.FK_ASEGURADOS_0 */
+ALTER TABLE ASEGURADOS
+	ADD FOREIGN KEY (ID_ARS) REFERENCES ARS (ID) ON UPDATE CASCADE ON DELETE CASCADE;
+
+/* ASEGURADOS.FK_ASEGURADOS_1 */
+ALTER TABLE ASEGURADOS
+	ADD FOREIGN KEY (ID_PERSONA) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE CASCADE;
+
+/* CODIGOS_POSTALES.LOCALIDADES_POSTALES_FK */
+ALTER TABLE CODIGOS_POSTALES
+	ADD FOREIGN KEY (IDPROVINCIA) REFERENCES PROVINCIAS (ID);
+
+/* CONSULTAS.FK_CONSULTAS_0 */
+ALTER TABLE CONSULTAS
+	ADD FOREIGN KEY (ID_PACIENTE) REFERENCES PERSONAS_PACIENTES (ID) ON DELETE NO ACTION;
+
+/* CONSULTAS.FK_CONSULTAS_1 */
+ALTER TABLE CONSULTAS
+	ADD FOREIGN KEY (ID_CONTROL_CONSULTA) REFERENCES CONTROL_CONSULTA (ID) ON DELETE NO ACTION;
+
+/* CONSULTAS_APROBADAS.CONSULTAS_APROBADAS_FK */
+ALTER TABLE CONSULTAS_APROBADAS
+	ADD FOREIGN KEY (ID) REFERENCES CONSULTAS (ID);
+
+/* CONTACTOS_DIRECCIONES.FK_CONTACTOS_DIRECCIONES_0 */
+ALTER TABLE CONTACTOS_DIRECCIONES
+	ADD FOREIGN KEY (ID_PERSONA) REFERENCES PERSONAS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* CONTACTOS_DIRECCIONES.FK_CONTACTOS_DIRECCIONES_1 */
+ALTER TABLE CONTACTOS_DIRECCIONES
+	ADD FOREIGN KEY (ID_PROVINCIA) REFERENCES PROVINCIAS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* CONTACTOS_DIRECCIONES.FK_CONTACTOS_DIRECCIONES_2 */
+ALTER TABLE CONTACTOS_DIRECCIONES
+	ADD FOREIGN KEY (ID_MUNICIPIO) REFERENCES MUNICIPIOS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* CONTACTOS_DIRECCIONES.FK_CONTACTOS_DIRECCIONES_3 */
+ALTER TABLE CONTACTOS_DIRECCIONES
+	ADD FOREIGN KEY (ID_DISTRITO_MUNICIPAL) REFERENCES DISTRITOS_MUNICIPALES (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* CONTACTOS_DIRECCIONES.FK_CONTACTOS_DIRECCIONES_4 */
+ALTER TABLE CONTACTOS_DIRECCIONES
+	ADD FOREIGN KEY (ID_CODIGO_POSTAL) REFERENCES CODIGOS_POSTALES (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* CONTACTOS_EMAIL.FK_CONTACTOS_EMAIL_1 */
+ALTER TABLE CONTACTOS_EMAIL
+	ADD FOREIGN KEY (ID_PERSONA) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE CASCADE;
+
+/* CONTACTOS_TEL.FK_CONTACTOS_TEL_1 */
+ALTER TABLE CONTACTOS_TEL
+	ADD FOREIGN KEY (ID_PERSONA) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE CASCADE;
+
+/* DEUDAS.FK_DEUDAS_1 */
+ALTER TABLE DEUDAS
+	ADD FOREIGN KEY (ID_CLIENTE) REFERENCES PERSONAS_CLIENTES (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* DISTRITOS_MUNICIPALES.IDMUNICIPIO_IDX */
+ALTER TABLE DISTRITOS_MUNICIPALES
+	ADD FOREIGN KEY (IDMUNICIPIO) REFERENCES MUNICIPIOS (ID);
+
+/* D_ANALISIS.FK_D_ANALISIS_0 */
+ALTER TABLE D_ANALISIS
+	ADD FOREIGN KEY (ID_M_ANALISIS) REFERENCES M_ANALISIS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* D_ANALISIS.FK_D_ANALISIS_1 */
+ALTER TABLE D_ANALISIS
+	ADD FOREIGN KEY (ID_T_ANALITICA) REFERENCES T_ANALISIS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* D_DEUDAS_PAGAS.FK_D_DEUDAS_PAGAS_0 */
+ALTER TABLE D_DEUDAS_PAGAS
+	ADD FOREIGN KEY (ID_DEUDAS) REFERENCES DEUDAS (ID) ON UPDATE CASCADE ON DELETE CASCADE;
+
+/* D_ENTRADA_PRODUCTO.FK_D_ENTRADA_PRODUCTO_0 */
+ALTER TABLE D_ENTRADA_PRODUCTO
+	ADD FOREIGN KEY (ID_M_ENTRADA_PRODUCTO) REFERENCES M_ENTRADA_PRODUCTOS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* D_ENTRADA_PRODUCTO.FK_D_ENTRADA_PRODUCTO_1 */
+ALTER TABLE D_ENTRADA_PRODUCTO
+	ADD FOREIGN KEY (ID_PRODUCTO) REFERENCES PRODUCTOS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* D_FACTURAS.FK_D_FACTURAS_0 */
+ALTER TABLE D_FACTURAS
+	ADD FOREIGN KEY (ID_PRODUCTO) REFERENCES PRODUCTOS (ID);
+
+/* D_FACTURAS.FK_D_FACTURAS_1 */
+ALTER TABLE D_FACTURAS
+	ADD FOREIGN KEY (ID_FACTURA) REFERENCES M_FACTURAS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* D_GUIA_VIGILANCIA_DESARROLLO.FK_DETALLE_GUIA_VIG_2 */
+ALTER TABLE D_GUIA_VIGILANCIA_DESARROLLO
+	ADD FOREIGN KEY (ID_GVD) REFERENCES GUIA_VIGILANCIA_DESARROLLO (ID);
+
+/* D_GUIA_VIGILANCIA_DESARROLLO.FK_D_GUIA_VIGILANCIA_DESAR_0 */
+ALTER TABLE D_GUIA_VIGILANCIA_DESARROLLO
+	ADD FOREIGN KEY (ID_PACIENTE) REFERENCES PERSONAS_PACIENTES (ID) ON DELETE NO ACTION;
+
+/* D_MOTIVO_CONSULTA.FK_D_MOTIVO_CONSULTA_1 */
+ALTER TABLE D_MOTIVO_CONSULTA
+	ADD FOREIGN KEY (IDCONSULTA) REFERENCES CONSULTAS (ID) ON DELETE CASCADE;
+
+/* D_MOTIVO_CONSULTA.FK_D_MOTIVO_CONSULTA_2 */
+ALTER TABLE D_MOTIVO_CONSULTA
+	ADD FOREIGN KEY (IDMCONSULTA) REFERENCES MOTIVO_CONSULTA (ID) ON DELETE CASCADE;
+
+/* D_RECETAS.FK_D_RECETAS_0 */
+ALTER TABLE D_RECETAS
+	ADD FOREIGN KEY (ID_MEDICAMENTO) REFERENCES PRODUCTOS (ID) ON UPDATE CASCADE ON DELETE CASCADE;
+
+/* D_RECETAS.FK_D_RECETAS_1 */
+ALTER TABLE D_RECETAS
+	ADD FOREIGN KEY (ID_RECETA) REFERENCES RECETAS (ID) ON UPDATE CASCADE ON DELETE CASCADE;
+
+/* GENERALES.FK_GENERALES_0 */
+ALTER TABLE GENERALES
+	ADD FOREIGN KEY (ID_TIPO_SANGRE) REFERENCES TIPOS_SANGRE (ID);
+
+/* GENERALES.FK_GENERALES_1 */
+ALTER TABLE GENERALES
+	ADD FOREIGN KEY (ID_PERSONA) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* HUELLAS.FK_HUELLAS_0 */
+ALTER TABLE HUELLAS
+	ADD FOREIGN KEY (ID) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE CASCADE;
+
+/* INSCRIPCIONES.FK_INSCRIPCIONES_0 */
+ALTER TABLE INSCRIPCIONES
+	ADD FOREIGN KEY (ID_ESTUDIANTE) REFERENCES PERSONAS_ESTUDIANTES (ID) ON DELETE NO ACTION;
+
+/* INSCRIPCIONES.FK_TANDAS */
+ALTER TABLE INSCRIPCIONES
+	ADD FOREIGN KEY (ID_TANDA) REFERENCES TANDAS (ID);
+
+/* MENSAJES.FK_MENSAJES_0 */
+ALTER TABLE MENSAJES
+	ADD FOREIGN KEY (ID_PACIENTE) REFERENCES PERSONAS_PACIENTES (ID) ON DELETE NO ACTION;
+
+/* METRICAS.FK_METRICAS_1 */
+ALTER TABLE METRICAS
+	ADD FOREIGN KEY (IDCONSULTA) REFERENCES CONSULTAS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* MUNICIPIOS.IDPROVINCIA_IDX */
+ALTER TABLE MUNICIPIOS
+	ADD FOREIGN KEY (IDPROVINCIA) REFERENCES PROVINCIAS (ID);
+
+/* M_ANALISIS.FK_M_ANALISIS_0 */
+ALTER TABLE M_ANALISIS
+	ADD FOREIGN KEY (ID_PACIENTE) REFERENCES PERSONAS_PACIENTES (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* M_ENTRADA_PRODUCTOS.FK_M_ENTRADA_PRODUCTOS_0 */
+ALTER TABLE M_ENTRADA_PRODUCTOS
+	ADD FOREIGN KEY (IDPROVEDOR) REFERENCES PERSONAS_PROVEEDORES (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* M_ENTRADA_PRODUCTOS.FK_M_ENTRADA_PRODUCTOS_1 */
+ALTER TABLE M_ENTRADA_PRODUCTOS
+	ADD FOREIGN KEY (ID_ALMACEN) REFERENCES ALMACENES (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* M_FACTURAS.FK_M_FACTURAS_0 */
+ALTER TABLE M_FACTURAS
+	ADD FOREIGN KEY (ID_CLIENTE) REFERENCES PERSONAS_CLIENTES (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* M_FACTURAS.FK_M_FACTURAS_1 */
+ALTER TABLE M_FACTURAS
+	ADD FOREIGN KEY (ID_CONTACTOS_TEL) REFERENCES CONTACTOS_TEL (ID);
+
+/* M_FACTURAS.FK_M_FACTURAS_3 */
+ALTER TABLE M_FACTURAS
+	ADD FOREIGN KEY (ID_CONTACTOS_EMAIL) REFERENCES CONTACTOS_EMAIL (ID);
+
+/* M_FACTURAS.FK_M_FACTURAS_4 */
+ALTER TABLE M_FACTURAS
+	ADD FOREIGN KEY (ID_TURNO) REFERENCES TURNOS (ID);
+
+/* M_FACTURAS.FK_M_FACTURAS_5 */
+ALTER TABLE M_FACTURAS
+	ADD FOREIGN KEY (ID_CONTACTOS_DIRECCIONES) REFERENCES CONTACTOS_DIRECCIONES (ID);
+
+/* PERSONAS_CLIENTES.FK_PERSONAS_CLIENTES_1 */
+ALTER TABLE PERSONAS_CLIENTES
+	ADD FOREIGN KEY (ID) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* PERSONAS_CLIENTES_ATR.FK_PERSONAS_CLIENTES_ATR_0 */
+ALTER TABLE PERSONAS_CLIENTES_ATR
+	ADD FOREIGN KEY (ID) REFERENCES PERSONAS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* PERSONAS_ESTUDIANTES.FK_PERSONAS_ESTUDIANTES_0 */
+ALTER TABLE PERSONAS_ESTUDIANTES
+	ADD FOREIGN KEY (ID) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* PERSONAS_ESTUDIANTES_ATR.FK_PERSONAS_ESTUDIANTES_ATR_0 */
+ALTER TABLE PERSONAS_ESTUDIANTES_ATR
+	ADD FOREIGN KEY (ID) REFERENCES PERSONAS (ID);
+
+/* PERSONAS_PACIENTES.FK_PERSONAS_PACIENTES_0 */
+ALTER TABLE PERSONAS_PACIENTES
+	ADD FOREIGN KEY (ID) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* PERSONAS_PACIENTES_ATR.FK_PERSONAS_PACIENTES_ATR_0 */
+ALTER TABLE PERSONAS_PACIENTES_ATR
+	ADD FOREIGN KEY (ID_PACIENTE) REFERENCES PERSONAS (ID);
+
+/* PERSONAS_PADRES.FK_PERSONAS_PADRES_0 */
+ALTER TABLE PERSONAS_PADRES
+	ADD FOREIGN KEY (ID) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* PERSONAS_PROVEEDORES.FK_PERSONAS_PROVEEDORES_0 */
+ALTER TABLE PERSONAS_PROVEEDORES
+	ADD FOREIGN KEY (ID) REFERENCES PERSONAS (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* PERSONAS_PROVEEDORES_ATR.FK_PERSONAS_PROVEEDORES_ATR_0 */
+ALTER TABLE PERSONAS_PROVEEDORES_ATR
+	ADD FOREIGN KEY (ID) REFERENCES PERSONAS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* PRODUCTOS.FK_PRODUCTOS_0 */
+ALTER TABLE PRODUCTOS
+	ADD FOREIGN KEY (ID_CATEGORIA) REFERENCES CATEGORIAS (ID);
+
+/* RECETAS.FK_RECETAS_1 */
+ALTER TABLE RECETAS
+	ADD FOREIGN KEY (IDCONSULTA) REFERENCES CONSULTAS (ID) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/* RELACION_PADRE_ESTUDIANTE.FK_RELACION_PADRE_ESTUDIANTE_0 */
+ALTER TABLE RELACION_PADRE_ESTUDIANTE
+	ADD FOREIGN KEY (ID_PADRE_O_MADRE) REFERENCES PERSONAS_PADRES (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* RELACION_PADRE_ESTUDIANTE.FK_RELACION_PADRE_ESTUDIANTE_1 */
+ALTER TABLE RELACION_PADRE_ESTUDIANTE
+	ADD FOREIGN KEY (ID_ESTUDIANTE) REFERENCES PERSONAS_ESTUDIANTES (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* RELACION_PADRE_PACIENTE.FK_RELACION_PADRE_PACIENTE_0 */
+ALTER TABLE RELACION_PADRE_PACIENTE
+	ADD FOREIGN KEY (ID_PADRE_O_MADRE) REFERENCES PERSONAS_PADRES (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* RELACION_PADRE_PACIENTE.FK_RELACION_PADRE_PACIENTE_1 */
+ALTER TABLE RELACION_PADRE_PACIENTE
+	ADD FOREIGN KEY (ID_PACIENTE) REFERENCES PERSONAS_PACIENTES (ID) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+/* SINTOMAS.FK_SINTOMAS_0 */
+ALTER TABLE SINTOMAS
+	ADD FOREIGN KEY (ID_PACIENTE) REFERENCES PERSONAS_PACIENTES (ID) ON DELETE NO ACTION;
+
+/* TURNOS.TURNOS_FK */
+ALTER TABLE TURNOS
+	ADD FOREIGN KEY (ID_ALMACEN) REFERENCES ALMACENES (ID);
+
+/* ----- COMPUTED FIELDs defining ----- */
+
+/* CONSULTAS_APROBADAS.TOTALCOSTO */
+ALTER TABLE CONSULTAS_APROBADAS
+	DROP TOTALCOSTO,
+	ADD TOTALCOSTO COMPUTED BY ( CAST((costo - (costo * (descuento/100))) as D_DINERO));
+
+/* PERSONAS_PACIENTES_ATR.MASA_CEFALICA */
+ALTER TABLE PERSONAS_PACIENTES_ATR
+	DROP MASA_CEFALICA,
+	ADD MASA_CEFALICA COMPUTED BY ( CAST(PESO_NACIMIENTO_KG/(ALTURA*ALTURA) as D_MEDIDA));
